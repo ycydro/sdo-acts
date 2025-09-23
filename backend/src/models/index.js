@@ -4,6 +4,11 @@ import Role from "./users/role.model.js";
 import Permission from "./users/permission.model.js";
 import RolePermission from "./users/role_permission.model.js";
 
+// DEPARTMENT RELATED
+import Department from "./departments/department.model.js";
+import Service from "./departments/service.model.js";
+
+// USER
 User.hasOne(Role, {
   foreignKey: "role_id",
 });
@@ -26,4 +31,23 @@ Permission.belongsToMany(Role, {
   as: "roles",
 });
 
-export { User, Role, Permission, RolePermission };
+// DEPARTMENT
+Department.hasMany(Service, {
+  foreignKey: "department_id",
+});
+
+Service.belongsTo(Department, {
+  foreignKey: "department_id",
+});
+
+export {
+  // USER
+  User,
+  Role,
+  Permission,
+  RolePermission,
+
+  // DEPARTMENT
+  Department,
+  Service,
+};

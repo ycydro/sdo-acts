@@ -5,20 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Lock } from "lucide-react";
+import { User } from "lucide-react";
 
-import InputWithIcon from "../components/custom/InputWithIcon";
+import InputWithIcon from "../../components/custom/InputWithIcon";
 
-import Logo from "../assets/imgs/SDO-LOGO.webp";
-import SDO from "../assets/imgs/SDO.webp";
+import Logo from "../../assets/imgs/SDO-LOGO.webp";
+import SDO from "../../assets/imgs/SDO.webp";
+import SearchGroup from "../../components/custom/SearchGroup";
 
-export default function Login() {
+const Register = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f4f4f4]">
       <Card
         className="
           grid
-          lg:grid-cols-[1.75fr_1fr] 
+          lg:grid-cols-[1fr_1.75fr] 
           w-full h-screen 
           lg:w-[65rem] lg:h-[40rem]
           rounded-none shadow-none
@@ -35,12 +36,9 @@ export default function Login() {
             className="w-full h-full object-cover rounded-l-[2.25rem] object-left"
           />
           <div className="absolute bottom-6 left-6 z-20">
-            <h1 className="font-bold text-5xl lg:text-[4.75rem] leading-none">
+            <h1 className="font-bold text-5xl lg:text-[3.75rem] leading-none">
               SDO-ACTS
             </h1>
-            <p className="text-base lg:text-[1.2rem]">
-              A Centralized Ticketing System for SDO Meycauayan
-            </p>
           </div>
         </div>
 
@@ -62,54 +60,57 @@ export default function Login() {
             </div>
 
             <h2 className="text-center text-xl sm:text-2xl font-semibold">
-              Welcome!
+              SDO-ACTS Registration
             </h2>
 
-            <InputWithIcon icon={Mail}>
-              <Input
-                id="email"
-                name="email"
-                placeholder="Enter Email Address"
-                className="rounded-[1rem] py-4 pl-12"
-              />
-            </InputWithIcon>
+            <Label htmlFor="fname">
+              <User size={20} /> First Name
+            </Label>
+            <Input
+              id="fname"
+              name="fname"
+              placeholder="Enter Email Address"
+              className="rounded-[1rem] py-4 pl-12"
+            />
+            <Input
+              id="email"
+              name="email"
+              placeholder="Enter Email Address"
+              className="rounded-[1rem] py-4 pl-12"
+            />
+            <Input
+              id="email"
+              name="email"
+              placeholder="Enter Email Address"
+              className="rounded-[1rem] py-4 pl-12"
+            />
 
-            <InputWithIcon icon={Lock}>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter Password"
-                className="rounded-[1rem] py-4 pl-12"
-              />
-            </InputWithIcon>
+            <Input
+              id="email"
+              name="email"
+              placeholder="Enter Email Address"
+              className="rounded-[1rem] py-4 pl-12"
+            />
 
-            <div className="w-full flex items-center px-1">
-              <Checkbox id="remember" className="border-1 border-primary" />
-              <Label htmlFor="remember" className="ml-2 text-sm sm:text-base">
-                Remember me
-              </Label>
-            </div>
-
-            <Button
-              onClick={(e) => e.preventDefault()}
-              className="p-4 w-full rounded-full"
-            >
-              Login
-            </Button>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter Password"
+              className="rounded-[1rem] py-4 pl-12"
+            />
           </form>
 
-          <p className="mb-2 text-sm text-center">
-            New here?
-            <span
-              id="register"
-              className="text-primary cursor-pointer hover:underline"
-            >
-              Create an account
-            </span>
-          </p>
+          <div className="w-full max-w-sm flex items-center gap-4">
+            <Button variant="outline" className="p-4 w-50 rounded-full">
+              Cancel
+            </Button>
+            <Button className="p-4 w-50 rounded-full">Login</Button>
+          </div>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default Register;

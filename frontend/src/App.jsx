@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import Test from "./pages/Test";
+import AppRoutes from "./routes/AppRoutes";
 
 const App = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/test" element={<Test />} />
-      </Routes>
+      <AppRoutes />
     </Router>
   );
 };

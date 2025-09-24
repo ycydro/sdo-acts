@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../../configs/sequelize.config.js";
 
 const RolePermission = sequelize.define(
-  "RolePermission", // Model name (PascalCase)
+  "RolePermission",
   {
     id: {
       type: DataTypes.CHAR(36),

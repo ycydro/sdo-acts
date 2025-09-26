@@ -12,7 +12,16 @@ import {
 
 import { useNavigate } from "react-router-dom";
 import Logo from "../../../assets/imgs/SDO-LOGO.webp";
-import { User, Users, Clipboard, Mail, Phone, ShieldCheck } from "lucide-react";
+import {
+  User,
+  Users,
+  Clipboard,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Eye,
+  EyeClosed,
+} from "lucide-react";
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
@@ -121,13 +130,15 @@ const RegistrationForm = () => {
             className="rounded-xl pl-5"
             type={!showPassword ? "password" : "text"}
           />
-          <ShieldCheck
-            onClick={() => setShowPassword(!showPassword)}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer ${
-              showPassword && "text-primary"
-            }`}
-            size={22}
-          />
+          <div
+            className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer`}
+          >
+            {showPassword ? (
+              <Eye onClick={() => setShowPassword(!showPassword)} />
+            ) : (
+              <EyeClosed onClick={() => setShowPassword(!showPassword)} />
+            )}
+          </div>
         </div>
       </div>
 

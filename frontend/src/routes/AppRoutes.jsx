@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -26,7 +26,7 @@ const AppRoutes = () => {
 
       {/* -------- MAIN SYSTEM ROUTES-------- */}
       <Route
-        path="/admin"
+        path="/" // change to /main in the future
         element={
           <ProtectedRoute>
             <PermissionRoute requiredPermission="view_main">
@@ -35,15 +35,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
+        {/* Automatically routes to /test */}
+        <Route index element={<Navigate to="test" />} />
         <Route path="test" element={<Test />} />
-        <Route
-          path="test"
-          element={
-            <PermissionRoute requiredPermission="view_test">
-              <Test />
-            </PermissionRoute>
-          }
-        />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

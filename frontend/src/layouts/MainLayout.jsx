@@ -1,15 +1,11 @@
 import React from "react";
-import { Outlet, Navigate } from "react-router";
+import { Outlet, Navigate, useNavigate } from "react-router";
 
 const MainLayout = () => {
-  const authenticated = false;
-
-  if (!authenticated) {
-    return <Navigate to="/login" />;
-  }
-
   return (
     <div>
+      <div>Sidebar</div>
+      <div>Header</div>
       <Outlet />
     </div>
   );

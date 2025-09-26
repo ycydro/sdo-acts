@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,13 +16,15 @@ import { User, Users, Clipboard, Mail, Phone, ShieldCheck } from "lucide-react";
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <form className="w-full flex flex-col items-center gap-4 px-5">
       <div className="flex justify-center w-full">
         <img src={Logo} alt="logo" className="w-23 h-23 sm:w-25 sm:h-25" />
       </div>
 
-      <h2 className="text-center text-2xl sm:text-3xl font-semibold">
+      <h2 className="text-center text-[1.263rem] sm:text-3xl font-semibold mb-1">
         SDO-ACTS Registration Form
       </h2>
 
@@ -34,8 +36,8 @@ const RegistrationForm = () => {
           <Input
             id="first_name"
             name="first_name"
-            placeholder="Enter Email Address"
-            className="rounded-[1rem] pl-5"
+            placeholder="Enter First Name"
+            className="rounded-xl pl-5"
           />
         </div>
 
@@ -46,8 +48,8 @@ const RegistrationForm = () => {
           <Input
             id="last_name"
             name="last_name"
-            placeholder="Enter Email Address"
-            className="rounded-[1rem] pl-5"
+            placeholder="Enter Last Name"
+            className="rounded-xl pl-5"
           />
         </div>
       </div>
@@ -58,7 +60,7 @@ const RegistrationForm = () => {
             <Users size={20} /> Gender
           </Label>
           <Select>
-            <SelectTrigger className="rounded-[1rem] min-w-full pl-5">
+            <SelectTrigger className="rounded-xl min-w-full pl-5">
               <SelectValue placeholder="Select your Gender" />
             </SelectTrigger>
             <SelectContent>
@@ -74,7 +76,7 @@ const RegistrationForm = () => {
             <Clipboard size={20} /> Client Type
           </Label>
           <Select>
-            <SelectTrigger className="rounded-[1rem] min-w-full pl-5">
+            <SelectTrigger className="rounded-xl min-w-full pl-5">
               <SelectValue placeholder="Select your Type" />
             </SelectTrigger>
             <SelectContent>
@@ -93,7 +95,7 @@ const RegistrationForm = () => {
           id="email"
           name="email"
           placeholder="Enter Email Address"
-          className="rounded-[1rem] pl-5"
+          className="rounded-xl pl-5"
         />
       </div>
       <div className="space-y-1 w-full">
@@ -103,20 +105,30 @@ const RegistrationForm = () => {
         <Input
           id="phone_no"
           name="phone_no"
-          placeholder="Enter Email Address"
-          className="rounded-[1rem] pl-5"
+          placeholder="Enter Phone Number"
+          className="rounded-xl pl-5"
         />
       </div>
       <div className="space-y-1 w-full">
         <Label htmlFor="password" className="flex items-center gap-2">
           <ShieldCheck size={20} /> Password
         </Label>
-        <Input
-          id="password"
-          name="password"
-          placeholder="Enter Email Address"
-          className="rounded-[1rem] pl-5"
-        />
+        <div className="relative w-full">
+          <Input
+            id="password"
+            name="password"
+            placeholder="Enter Password"
+            className="rounded-xl pl-5"
+            type={!showPassword ? "password" : "text"}
+          />
+          <ShieldCheck
+            onClick={() => setShowPassword(!showPassword)}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer ${
+              showPassword && "text-primary"
+            }`}
+            size={22}
+          />
+        </div>
       </div>
 
       <Button type="button" className="p-4 w-full rounded-full">

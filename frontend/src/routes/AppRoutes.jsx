@@ -1,41 +1,49 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Test from "../pages/Test";
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import NotFound from "../pages/NotFound";
+
+import MainLayout from "../layouts/MainLayout";
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
+import NotFoundPage from "../pages/NotFoundPage";
 
 const routes = [
   {
     path: "/",
-    element: <Navigate to="/login" />,
+    element: <MainLayout />,
+    children: [
+      // {
+      //   path: "dashboard",
+      //   element: <Dashboard />,
+      // },
+    ],
   },
   {
     path: "*",
-    element: <NotFound />,
+    element: <NotFoundPage />,
   },
   {
     path: "/login",
-    element: <Login />,
+    element: <LoginPage />,
   },
   {
     path: "/register",
-    element: <Register />,
+    element: <RegisterPage />,
   },
-
   {
     path: "/test",
     element: <Test />,
   },
 ];
 
+const renderRoutes = (routes) =>
+  routes.map(({ path, element, children }) => (
+    <Route key={path} path={path} element={element}>
+      {children && renderRoutes(children)}
+    </Route>
+  ));
+
 const AppRoutes = () => {
-  return (
-    <Routes>
-      {routes.map((route) => (
-        <Route key={route.path} path={route.path} element={route.element} />
-      ))}
-    </Routes>
-  );
+  return <Routes>{renderRoutes(routes)}</Routes>;
 };
 
 export default AppRoutes;

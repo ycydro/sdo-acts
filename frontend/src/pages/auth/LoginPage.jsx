@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import LoginForm from "../../components/custom/auth/LoginForm";
 import SDO from "../../assets/imgs/SDO.webp";
 
-const Login = () => {
+const LoginPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f4f4f4]">
       <Card
@@ -30,7 +30,7 @@ const Login = () => {
             className="w-full h-full object-cover rounded-l-[2.25rem] object-left"
           />
           <div className="absolute bottom-6 left-6 z-20">
-            <h1 className="font-bold text-5xl  leading-none">SDO-ACTS</h1>
+            <h1 className="font-bold text-7xl leading-none">SDO-ACTS</h1>
             <p className="text-base lg:text-[1.2rem]">
               A Centralized Ticketing System for SDO Meycauayan
             </p>
@@ -58,4 +58,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;

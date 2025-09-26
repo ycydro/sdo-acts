@@ -1,49 +1,55 @@
 import { Routes, Route } from "react-router-dom";
-import Test from "../pages/Test";
 
+// Layouts
 import MainLayout from "../layouts/MainLayout";
+
+// Auth Pages
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
+
+// Public Pages
 import NotFoundPage from "../pages/NotFoundPage";
 
-const routes = [
-  {
-    path: "/",
-    element: <MainLayout />,
-    children: [
-      // {
-      //   path: "dashboard",
-      //   element: <Dashboard />,
-      // },
-    ],
-  },
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/register",
-    element: <RegisterPage />,
-  },
-  {
-    path: "/test",
-    element: <Test />,
-  },
-];
+// Admin/Staff Pages
+import Test from "../pages/Test";
+import ProtectedRoute from "./guards/ProtectedRoute";
+import PermissionRoute from "./guards/PermissionRoute";
 
-const renderRoutes = (routes) =>
-  routes.map(({ path, element, children }) => (
-    <Route key={path} path={path} element={element}>
-      {children && renderRoutes(children)}
-    </Route>
-  ));
+// Client Pages
 
 const AppRoutes = () => {
-  return <Routes>{renderRoutes(routes)}</Routes>;
+  return (
+    <Routes>
+      {/* -------- PUBLIC ROUTES -------- */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* -------- MAIN SYSTEM ROUTES-------- */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <PermissionRoute requiredPermission="view_main">
+              <MainLayout />
+            </PermissionRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route path="test" element={<Test />} />
+        <Route
+          path="test"
+          element={
+            <PermissionRoute requiredPermission="view_test">
+              <Test />
+            </PermissionRoute>
+          }
+        />
+      </Route>
+
+      {/* -------- CATCH-ALL -------- */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
 };
 
 export default AppRoutes;

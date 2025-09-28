@@ -1,5 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+
+import Logo from "../../../assets/imgs/SDO-LOGO.webp";
+
 import {
   Sidebar,
   SidebarContent,
@@ -12,46 +15,23 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Home, Inbox, Calendar, Search, Settings } from "lucide-react";
-import Logo from "../../../assets/imgs/SDO-LOGO.webp";
 
-const items = [
-  {
-    title: "Home",
-    url: "/login",
-    icon: Home,
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
+import {
+  overviewItems,
+  ticketingItems,
+  userManagementItems,
+} from "../../../lib/sidebarItems";
 
 const AppSidebar = () => {
   return (
     <Sidebar>
       <SidebarContent>
+        {/* OVERVIEW */}
         <SidebarGroup>
           <SidebarGroupLabel>Overview</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {overviewItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link to={item.url} className="flex items-center gap-2">
@@ -64,17 +44,36 @@ const AppSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {/* TICKETING */}
         <SidebarGroup>
           <SidebarGroupLabel>Ticketing</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {ticketingItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-2">
+                    <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        {/* USER MANAGEMENT */}
+        <SidebarGroup>
+          <SidebarGroupLabel>User Management</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {userManagementItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.url} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

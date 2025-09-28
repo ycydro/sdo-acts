@@ -19,11 +19,9 @@ const MainLayout = () => {
             <SidebarTrigger className="hover:text-primary" />
             <span className="ml-2 font-bold">Header</span>
           </div>
-          <Card className="flex-1 m-3 p-4 overflow-auto">
-            <CardContent className="p-0">
-              <Outlet />
-            </CardContent>
-          </Card>
+          <div className="flex-1 m-3 p-4 overflow-auto">
+            <Outlet />
+          </div>
         </SidebarInset>
       </div>
     </SidebarProvider>

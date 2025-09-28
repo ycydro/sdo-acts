@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -7,16 +8,17 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu, // <-- add this
-  SidebarMenuItem, // <-- add this
-  SidebarMenuButton, // <-- add this
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { Home, Inbox, Calendar, Search, Settings } from "lucide-react";
+import Logo from "../../../assets/imgs/SDO-LOGO.webp";
 
 const items = [
   {
     title: "Home",
-    url: "#",
+    url: "/login",
     icon: Home,
   },
   {
@@ -46,7 +48,24 @@ const AppSidebar = () => {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>Overview</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.url} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Ticketing</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -63,6 +82,12 @@ const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="border border-t-1 py-3 px-4">
+        <div className="flex items-center justify-center gap-1">
+          <img src={Logo} alt="Logo" className="w-17 h-17" />
+          <span className="font-semibold text-2xl md:text-xl">SDO-ACTS</span>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };

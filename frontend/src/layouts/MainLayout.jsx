@@ -6,7 +6,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import AppSidebar from "../components/custom/AppSidebar";
+import AppSidebar from "../components/custom/layout/AppSidebar";
 
 const MainLayout = () => {
   return (
@@ -15,8 +15,8 @@ const MainLayout = () => {
         <AppSidebar />
         <SidebarInset className="flex flex-col min-w-0">
           {/* Top bar with trigger */}
-          <div className="flex items-center p-2 border-b">
-            <SidebarTrigger />
+          <div className="flex items-center py-4 px-2 border-b bg-white">
+            <SidebarTrigger className="hover:text-primary" />
             <span className="ml-2 font-bold">Header</span>
           </div>
           <Card className="flex-1 m-3 p-4 overflow-auto">

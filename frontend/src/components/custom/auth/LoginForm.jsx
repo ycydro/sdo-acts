@@ -47,7 +47,11 @@ const LoginForm = () => {
         </Label>
       </div>
 
-      <Button type="button" className="p-4 w-full rounded-full">
+      <Button
+        type="button"
+        className="p-4 w-full rounded-full"
+        onClick={() => navigate("/")}
+      >
         Login
       </Button>
     </form>

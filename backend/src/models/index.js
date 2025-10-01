@@ -10,11 +10,13 @@ import Service from "./departments/service.model.js";
 
 // USER
 User.belongsTo(Role, {
-  foreignKey: "role_id", // column in User table
+  foreignKey: "role_id",
+  as: "role",
 });
 
 Role.hasMany(User, {
-  foreignKey: "role_id", // column in User table
+  foreignKey: "role_id",
+  as: "users",
 });
 
 Role.belongsToMany(Permission, {

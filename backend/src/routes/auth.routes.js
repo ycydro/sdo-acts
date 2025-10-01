@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import env from "./env.js";
+import env from "../configs/env.js";
 
 import { User, Role, Permission } from "../models/index.js";
 
@@ -42,7 +42,13 @@ router.post("/login", async (req, res) => {
       include: [
         {
           model: Role,
-          include: [Permission],
+          as: "role",
+          include: [
+            {
+              model: Permission,
+              as: "permissions",
+            },
+          ],
         },
       ],
     });

@@ -7,6 +7,9 @@ import "./src/models/index.js";
 
 import env from "./src/configs/env.js";
 
+// ROUTES
+import authRoutes from "./src/routes/auth.routes.js";
+
 const PORT = env.PORT;
 const app = express();
 
@@ -24,6 +27,8 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 // ROUTES
+app.use("/api/auth", authRoutes);
+
 app.get("/", async (req, res) => {
   res.send("<h1>Hello, World! (from server)</h1>");
 });

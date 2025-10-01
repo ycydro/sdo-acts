@@ -9,12 +9,12 @@ import Department from "./departments/department.model.js";
 import Service from "./departments/service.model.js";
 
 // USER
-User.hasOne(Role, {
-  foreignKey: "role_id",
+User.belongsTo(Role, {
+  foreignKey: "role_id", // column in User table
 });
 
-Role.belongsTo(User, {
-  foreignKey: "po_id",
+Role.hasMany(User, {
+  foreignKey: "role_id", // column in User table
 });
 
 Role.belongsToMany(Permission, {

@@ -11,7 +11,8 @@ const env = {
   DB_PASS: process.env.DB_PASSWORD,
 
   //NODE_ENV: process.env.NODE_ENV || "development",
-  //JWT_SECRET: process.env.JWT_SECRET || "defaultsecret",
+  JWT_SECRET: process.env.JWT_SECRET || "defaultsecret",
+  SALT_ROUNDS: process.env.SALT_ROUNDS || 10,
   //API_KEY: process.env.API_KEY || "",
 };
 

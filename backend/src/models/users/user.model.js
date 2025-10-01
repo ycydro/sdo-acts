@@ -8,16 +8,20 @@ const User = sequelize.define("user", {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
+  email: {
+    type: DataTypes.STRING,
+  },
+  password: {
+    type: DataTypes.STRING(255), // 60 chars needed for bcrypt, 255 for flexibility
+    allowNull: false,
+  },
   first_name: {
     type: DataTypes.STRING,
   },
   last_name: {
     type: DataTypes.STRING,
   },
-  email: {
-    type: DataTypes.STRING,
-    unique: true,
-  },
+
   mobile_number: {
     type: DataTypes.BIGINT,
   },

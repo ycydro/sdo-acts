@@ -14,6 +14,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import Test from "../pages/Test";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import PermissionRoute from "./guards/PermissionRoute";
+import MainDashboardPage from "../pages/MainDashboard/MainDashboardPage";
 
 // Client Pages
 
@@ -37,7 +38,15 @@ const AppRoutes = () => {
       >
         {/* Automatically routes to /test */}
         <Route index element={<Navigate to="test" />} />
-        <Route path="test" element={<Test />} />
+        <Route
+          path="test"
+          element={
+            <PermissionRoute requiredPermission="view_test">
+              <Test />
+            </PermissionRoute>
+          }
+        />
+        <Route path="dashboard" element={<MainDashboardPage />} />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

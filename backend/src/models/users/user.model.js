@@ -12,7 +12,7 @@ const User = sequelize.define("user", {
     type: DataTypes.STRING,
   },
   password: {
-    type: DataTypes.STRING(255), // 60 chars needed for bcrypt, 255 for flexibility
+    type: DataTypes.STRING(255),
     allowNull: false,
   },
   first_name: {

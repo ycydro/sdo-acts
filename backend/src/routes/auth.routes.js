@@ -10,8 +10,15 @@ const router = express.Router();
 // Register
 router.post("/register", async (req, res) => {
   try {
-    const { first_name, last_name, mobile_number, sex, email, password } =
-      req.body;
+    const {
+      first_name,
+      last_name,
+      mobile_number,
+      sex,
+      email,
+      password,
+      role_id,
+    } = req.body;
 
     // hash then salt
     const saltRounds = parseInt(env.SALT_ROUNDS);
@@ -24,6 +31,7 @@ router.post("/register", async (req, res) => {
       sex,
       email,
       password: hashedPassword,
+      role_id,
     });
 
     res.json({ message: "User registered successfully", user });
@@ -39,14 +47,17 @@ router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({
       where: { email },
+      attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
           model: Role,
           as: "role",
+          attributes: { exclude: ["createdAt", "updatedAt"] },
           include: [
             {
               model: Permission,
               as: "permissions",
+              attributes: { exclude: ["createdAt", "updatedAt"] },
             },
           ],
         },

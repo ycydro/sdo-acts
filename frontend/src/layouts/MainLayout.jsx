@@ -11,7 +11,6 @@ const MainLayout = () => {
       <div className="flex h-screen w-screen overflow-hidden">
         <AppSidebar />
         <SidebarInset className="flex flex-col min-w-0">
-          {/* Top bar with trigger */}
           <AppHeader />
           <div className="flex-1 m-3 p-4 overflow-auto">
             <Outlet />

@@ -41,7 +41,7 @@ const AppRoutes = () => {
         <Route
           path="test"
           element={
-            <PermissionRoute requiredPermission="view_test">
+            <PermissionRoute requiredPermission="view_main">
               <Test />
             </PermissionRoute>
           }

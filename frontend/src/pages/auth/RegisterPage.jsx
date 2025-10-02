@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router";
 
 import SDO from "../../assets/imgs/SDO.webp";
-import RegistrationForm from "../../components/custom/auth/RegistrationForm";
+import RegistrationForm from "../../components/custom/forms/RegistrationForm";
 
 const RegisterPage = () => {
   return (

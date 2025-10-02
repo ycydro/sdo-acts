@@ -1,13 +1,17 @@
 // src/pages/Login.jsx
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import LoginForm from "../../components/custom/auth/LoginForm";
+import LoginForm from "../../components/custom/forms/LoginForm";
 import SDO from "../../assets/imgs/SDO.webp";
+import { useAuth } from "../../context/AuthContext";
 
 const LoginPage = () => {
+  const { user } = useAuth();
+  if (user) return <Navigate to="/" replace={true} />;
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f4f4f4]">
       <Card

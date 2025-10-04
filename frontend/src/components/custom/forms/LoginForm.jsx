@@ -17,13 +17,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, Eye, EyeClosed } from "lucide-react";
 import Logo from "../../../assets/imgs/SDO-LOGO.webp";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 const LoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const form = useForm({
@@ -102,10 +104,21 @@ const LoginForm = () => {
                   />
                   <Input
                     {...field}
-                    type="password"
                     placeholder="Enter Password"
                     className="rounded-[1rem] py-4 pl-12"
+                    type={!showPassword ? "password" : "text"}
                   />
+                  <div
+                    className={`absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black cursor-pointer`}
+                  >
+                    {showPassword ? (
+                      <Eye onClick={() => setShowPassword(!showPassword)} />
+                    ) : (
+                      <EyeClosed
+                        onClick={() => setShowPassword(!showPassword)}
+                      />
+                    )}
+                  </div>
                 </div>
               </FormControl>
               <FormMessage className="ml-3 text-sm text-red-500" />

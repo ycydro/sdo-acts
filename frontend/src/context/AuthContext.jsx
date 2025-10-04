@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginService } from "../services/authService";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -15,12 +16,22 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const savedToken =
       localStorage.getItem("token") || sessionStorage.getItem("token");
-    const savedUser =
-      localStorage.getItem("user") || sessionStorage.getItem("user");
 
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+    if (savedToken) {
+      try {
+        const decoded = jwtDecode(savedToken);
+
+        if (decoded.exp && decoded.exp * 1000 < Date.now()) {
+          handleLogout();
+          return;
+        }
+
+        setToken(savedToken);
+        setUser(decoded);
+      } catch (err) {
+        console.error("Invalid token:", err);
+        handleLogout();
+      }
     }
 
     setLoading(false);
@@ -28,23 +39,24 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials, rememberMe) => {
     try {
-      const { user: userData, token: jwtToken } = await loginService(
-        credentials
-      );
+      const { token: jwtToken } = await loginService(credentials);
 
-      setUser(userData);
+      // decode token
+      const decoded = jwtDecode(jwtToken);
+      console.log("Decoded", decoded);
+      setUser(decoded);
       setToken(jwtToken);
 
-      // save session
+      // save token
       if (rememberMe) {
         localStorage.setItem("token", jwtToken);
-        localStorage.setItem("user", JSON.stringify(userData));
       } else {
         sessionStorage.setItem("token", jwtToken);
-        sessionStorage.setItem("user", JSON.stringify(userData));
       }
 
-      navigate("/main/dashboard");
+      // redirect based on role
+      const redirectPath = decoded.role === "client" ? "/" : "/main/dashboard";
+      navigate(redirectPath);
     } catch (error) {
       const message =
         error.response?.data?.message ||
@@ -53,18 +65,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const handleLogout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
     sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user, // decoded JWT
+        token, // actual JWT
+        loading,
+        login,
+        logout: handleLogout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

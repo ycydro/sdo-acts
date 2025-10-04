@@ -10,7 +10,11 @@ import { useAuth } from "../../context/AuthContext";
 
 const LoginPage = () => {
   const { user } = useAuth();
-  if (user) return <Navigate to="/main" replace />;
+
+  if (user?.role) {
+    const redirectPath = user.role === "client" ? "/" : "/main";
+    return <Navigate to={redirectPath} replace />;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f4f4f4]">

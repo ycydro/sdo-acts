@@ -80,7 +80,7 @@ router.post("/login", async (req, res) => {
         permissions,
       },
       env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "15d" }
     );
 
     res.status(200).json({

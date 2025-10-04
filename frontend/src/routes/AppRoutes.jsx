@@ -22,12 +22,13 @@ const AppRoutes = () => {
   return (
     <Routes>
       {/* -------- PUBLIC ROUTES -------- */}
+      <Route index element={<Navigate to="login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
       {/* -------- MAIN SYSTEM ROUTES-------- */}
       <Route
-        path="/" // change to /main in the future
+        path="/main"
         element={
           <ProtectedRoute>
             <PermissionRoute requiredPermission="view_main">
@@ -37,7 +38,7 @@ const AppRoutes = () => {
         }
       >
         {/* Automatically routes to /test */}
-        <Route index element={<Navigate to="test" />} />
+        <Route path="" element={<Navigate to="test" replace />} />
         <Route
           path="test"
           element={

@@ -10,14 +10,20 @@ export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
+    const savedToken =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+    const savedUser =
+      localStorage.getItem("user") || sessionStorage.getItem("user");
+
     if (savedToken && savedUser) {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
     }
+
+    setLoading(false);
   }, []);
 
   const login = async (credentials, rememberMe) => {
@@ -29,6 +35,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       setToken(jwtToken);
 
+      // save session
       if (rememberMe) {
         localStorage.setItem("token", jwtToken);
         localStorage.setItem("user", JSON.stringify(userData));
@@ -37,12 +44,12 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem("user", JSON.stringify(userData));
       }
 
-      navigate("/");
+      navigate("/main/dashboard");
     } catch (error) {
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-      throw new Error("Something went wrong. Please try again.");
+      const message =
+        error.response?.data?.message ||
+        "Something went wrong. Please try again.";
+      throw new Error(message);
     }
   };
 
@@ -51,11 +58,13 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

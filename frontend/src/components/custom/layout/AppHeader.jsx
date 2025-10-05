@@ -32,7 +32,7 @@ const AppHeader = () => {
     <div className="flex justify-between items-center py-4 px-2 border-b bg-white">
       <SidebarTrigger className="hover:text-primary" />
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger className="mr-3" asChild>
           <Avatar className="h-9 w-9 cursor-pointer">
             <AvatarFallback>ADM</AvatarFallback>
             <span className="sr-only">Toggle user menu</span>

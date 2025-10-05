@@ -38,11 +38,11 @@ const AppRoutes = () => {
         }
       >
         {/* Automatically routes to /test */}
-        <Route path="" element={<Navigate to="test" replace />} />
+        <Route path="" element={<Navigate to="dashboard" replace />} />
         <Route
           path="test"
           element={
-            <PermissionRoute requiredPermission="view_main">
+            <PermissionRoute requiredPermission="view_lol">
               <Test />
             </PermissionRoute>
           }

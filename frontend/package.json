@@ -33,9 +33,13 @@
     "react-hook-form": "^7.63.0",
     "react-router": "^7.9.1",
     "react-router-dom": "^7.9.1",
+    "recharts": "^2.15.4",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
     "zod": "^4.1.11"
+  },
+  "overrides": {
+    "react-is": "^19.0.0-rc-69d4b800-20241021"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

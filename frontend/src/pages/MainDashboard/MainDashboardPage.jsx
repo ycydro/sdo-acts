@@ -1,5 +1,8 @@
 import React from "react";
 import TicketQuantityCard from "../../components/custom/TicketQuantityCard";
+import BackgroundWrapper from "../../components/custom/BackgroundWrapper";
+import OverallSatisfactionPieChart from "../../components/custom/charts/OverallSatisfactionPieChart";
+import TicketsByPriorityLineChart from "../../components/custom/charts/TicketsByPriorityLineChart";
 
 const MainDashboardPage = () => {
   const ticketCards = [
@@ -22,8 +25,8 @@ const MainDashboardPage = () => {
   ];
 
   return (
-    <section className="w-full">
-      <div className="flex justify-center gap-5">
+    <section className="w-full space-y-5">
+      <div className="flex justify-between gap-5">
         {ticketCards.map((card) => (
           <TicketQuantityCard
             key={card.title}
@@ -31,6 +34,10 @@ const MainDashboardPage = () => {
             quantity={card.quantity}
           />
         ))}
+      </div>
+      <div className="flex gap-5 w-full justify-between">
+        <OverallSatisfactionPieChart />
+        <TicketsByPriorityLineChart />
       </div>
     </section>
   );

@@ -53,5 +53,5 @@
 6. **Start**:
    ```
    cd backend
-   npm start
+   npm run dev
    ```

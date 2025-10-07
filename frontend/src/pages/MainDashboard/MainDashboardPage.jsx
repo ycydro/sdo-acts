@@ -25,7 +25,7 @@ const MainDashboardPage = () => {
   ];
 
   return (
-    <section className="w-full space-y-5">
+    <section className="w-screen space-y-5">
       <div className="flex justify-between gap-5">
         {ticketCards.map((card) => (
           <TicketQuantityCard

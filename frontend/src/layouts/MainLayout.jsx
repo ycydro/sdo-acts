@@ -8,7 +8,7 @@ import AppHeader from "../components/custom/layout/AppHeader";
 const MainLayout = () => {
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-screen overflow-hidden">
+      <div className="flex h-screen min-w-screen overflow-hidden">
         <AppSidebar />
         <SidebarInset className="flex flex-col min-w-0">
           <AppHeader />

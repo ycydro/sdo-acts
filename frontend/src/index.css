@@ -76,6 +76,9 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.82 0 0);
   --ring: oklch(0.708 0 0);
+  --medium: oklch(0.85 0.17 95);
+
+  --ticket-request: oklch(0.972 0.003 264.389);
 
   --chart-low: oklch(66.72% 0.21098 140.04);
   --chart-medium: oklch(0.85 0.17 95);

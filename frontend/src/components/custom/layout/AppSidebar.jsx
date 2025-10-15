@@ -20,7 +20,7 @@ import {
   overviewItems,
   ticketingItems,
   userManagementItems,
-} from "../../../lib/sidebarItems";
+} from "../../../lib/constants/sidebarItems";
 
 const AppSidebar = () => {
   return (

@@ -187,6 +187,25 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+
+    ::-webkit-scrollbar {
+      width: 2.75px;
+      height: 2.75px;
+    }
+
+    ::-webkit-scrollbar-track {
+      border-radius: 100vh;
+      background: #f7f4ed;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #8b8b8b;
+      border-radius: 100vh;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgb(110, 110, 110);
+    }
   }
 
   body {

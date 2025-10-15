@@ -49,7 +49,14 @@ const AppRoutes = () => {
           }
         />
         <Route path="dashboard" element={<MainDashboardPage />} />
-        <Route path="departments" element={<DepartmentsPage />} />
+        <Route
+          path="departments"
+          element={
+            <PermissionRoute requiredPermission="view_departments">
+              <DepartmentsPage />
+            </PermissionRoute>
+          }
+        />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

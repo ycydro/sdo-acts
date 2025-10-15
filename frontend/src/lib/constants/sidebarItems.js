@@ -33,4 +33,9 @@ export const userManagementItems = [
     url: "/access-control",
     icon: LockKeyhole,
   },
+  {
+    title: "Departments",
+    url: "/departments",
+    icon: Building2,
+  },
 ];

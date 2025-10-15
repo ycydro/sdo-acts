@@ -15,6 +15,7 @@ import Test from "../pages/Test";
 import ProtectedRoute from "./guards/ProtectedRoute";
 import PermissionRoute from "./guards/PermissionRoute";
 import MainDashboardPage from "../pages/MainDashboard/MainDashboardPage";
+import DepartmentsPage from "../pages/Departments/DepartmentsPage";
 
 // Client Pages
 
@@ -48,6 +49,7 @@ const AppRoutes = () => {
           }
         />
         <Route path="dashboard" element={<MainDashboardPage />} />
+        <Route path="departments" element={<DepartmentsPage />} />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

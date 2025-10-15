@@ -12,7 +12,7 @@ const MainLayout = () => {
         <AppSidebar />
         <SidebarInset className="flex flex-col min-w-0">
           <AppHeader />
-          <div className="flex-1 m-3 p-4 overflow-auto">
+          <div className="flex-1 m-3 p-4 overflow-auto scrollbar">
             <Outlet />
           </div>
         </SidebarInset>

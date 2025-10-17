@@ -11,7 +11,7 @@ import {
 
 const BackgroundWrapper = ({ children }) => {
   return (
-    <Card className="p-4 overflow-auto w-fit">
+    <Card className="p-7 overflow-auto w-full h-full bg-[#fcfcfc]">
       <CardContent className="p-0">{children}</CardContent>
     </Card>
   );

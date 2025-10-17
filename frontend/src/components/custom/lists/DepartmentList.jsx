@@ -15,7 +15,10 @@ export function DepartmentList({ departments }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {departments.map((department) => (
-        <Card key={department.id} className="cursor-pointer">
+        <Card
+          key={department.id}
+          className="cursor-pointer border border-primary/50"
+        >
           <div className="p-6">
             <div className="flex items-start justify-between gap-3 mb-4">
               <div className="flex gap-3">
@@ -32,7 +35,7 @@ export function DepartmentList({ departments }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 -mt-1"
+                    className="h-8 w-8 p-0 -mt-1 hover:text-primary"
                   >
                     <span className="sr-only">Open menu</span>
                     <EllipsisVertical />

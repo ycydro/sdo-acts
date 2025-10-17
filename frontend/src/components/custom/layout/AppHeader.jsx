@@ -31,7 +31,7 @@ const AppHeader = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <LogoutModal open={showLogoutDialog} openChange={setShowLogoutDialog} />
+      <LogoutModal open={showLogoutDialog} onOpenChange={setShowLogoutDialog} />
     </div>
   );
 };

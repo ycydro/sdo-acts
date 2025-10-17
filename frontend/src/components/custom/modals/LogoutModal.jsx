@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "../../../context/AuthContext";
 
-const LogoutModal = ({ open, openChange }) => {
+const LogoutModal = ({ open, onOpenChange }) => {
   const { logout: handleLogout } = useAuth();
 
   return (
-    <AlertDialog open={open} onOpenChange={openChange}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>

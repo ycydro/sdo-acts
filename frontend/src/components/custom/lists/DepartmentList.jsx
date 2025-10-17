@@ -23,7 +23,7 @@ export function DepartmentList({ departments }) {
                   {department.name}
                 </h3>
                 <Badge variant="active" className="py-0">
-                  Medium
+                  Active
                 </Badge>
               </div>
 

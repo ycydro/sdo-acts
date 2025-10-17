@@ -1,31 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-
-import { useAuth } from "../../../context/AuthContext";
+import LogoutModal from "../modals/LogoutModal";
 
 const AppHeader = () => {
-  const { logout: handleLogout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   return (
@@ -46,23 +31,7 @@ const AppHeader = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Are you sure you want to logout?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will sign you out of your account.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <LogoutModal open={showLogoutDialog} openChange={setShowLogoutDialog} />
     </div>
   );
 };

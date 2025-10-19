@@ -28,7 +28,7 @@ router.get("/", async (req, res) => {
 // create
 router.post("/", async (req, res) => {
   try {
-    const { name, description, status } = req.body;
+    const { name, description, status, department_code } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -40,8 +40,8 @@ router.post("/", async (req, res) => {
     const department = await Department.create({
       name,
       description,
-
       status: status || "active",
+      department_code,
     });
 
     res.status(201).json({

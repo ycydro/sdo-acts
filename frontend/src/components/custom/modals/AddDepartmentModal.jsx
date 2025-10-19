@@ -29,6 +29,7 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
     defaultValues: {
       name: "",
       description: "",
+      department_code: "",
     },
   });
 
@@ -59,7 +60,7 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-[40rem]">
         <DialogHeader>
-          <DialogTitle className="text-lg">Add New Department</DialogTitle>
+          <DialogTitle className="text-lg">Add Department</DialogTitle>
           <DialogDescription>
             Create a new department for your SDO-Meycauayan. Fill in all the
             required information below.
@@ -68,7 +69,7 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="space-y-5 py-2">
+            <div className="space-y-4 py-2">
               {/* Department Name */}
               <FormField
                 control={form.control}
@@ -87,7 +88,6 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
                   </FormItem>
                 )}
               />
-
               {/* Description */}
               <FormField
                 control={form.control}
@@ -106,10 +106,24 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
                     <FormMessage />
                   </FormItem>
                 )}
+              />{" "}
+              <FormField
+                control={form.control}
+                name="department_code"
+                rules={{ required: "Acronym is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. ICT, HR" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
 
-            <DialogFooter className="mt-3">
+            <DialogFooter className="mt-5">
               <Button
                 type="button"
                 variant="outline"

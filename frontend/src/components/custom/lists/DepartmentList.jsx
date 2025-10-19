@@ -18,19 +18,16 @@ export function DepartmentList({ departments }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {departments.map((department) => (
-        <Card
-          key={department.id}
-          className="cursor-pointer border border-primary/50"
-        >
+        <Card key={department.id} className="border border-primary/50">
           <div className="p-6">
-            <div className="flex items-start justify-between gap-3 mb-4">
-              <div className="flex gap-3">
-                <h3 className="text-lg font-semibold text-card-foreground flex-1">
+            <div className="flex items-start justify-between gap-3 mb-3 max-w-full">
+              <div className="flex gap-2 items-center flex-1 min-w-0">
+                <Badge variant="default" className="py-1 text-xs">
+                  {department.department_code}
+                </Badge>
+                <h3 className="text-md font-semibold text-card-foreground truncate">
                   {department.name}
                 </h3>
-                <Badge variant="active" className="py-0">
-                  Active
-                </Badge>
               </div>
 
               <DropdownMenu>

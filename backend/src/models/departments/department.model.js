@@ -8,6 +8,9 @@ const Department = sequelize.define("department", {
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
+  department_code: {
+    type: DataTypes.CHAR(10),
+  },
   name: {
     type: DataTypes.CHAR,
   },

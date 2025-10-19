@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginService } from "../services/authService";
+import { authService } from "../api/services/authService";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials, rememberMe) => {
     try {
-      const { token: jwtToken } = await loginService(credentials);
+      const { token: jwtToken } = await authService.login(credentials);
 
       // decode token
       const decoded = jwtDecode(jwtToken);

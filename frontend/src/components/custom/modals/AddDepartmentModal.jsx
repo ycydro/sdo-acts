@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,6 +30,12 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
       description: "",
     },
   });
+
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
+  }, [open, form]);
 
   const { createDepartment } = useDepartmentMutations();
 

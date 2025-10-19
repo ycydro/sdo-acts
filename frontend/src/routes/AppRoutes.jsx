@@ -16,6 +16,7 @@ import ProtectedRoute from "./guards/ProtectedRoute";
 import PermissionRoute from "./guards/PermissionRoute";
 import MainDashboardPage from "../pages/MainDashboard/MainDashboardPage";
 import DepartmentsPage from "../pages/Departments/DepartmentsPage";
+import TicketsPage from "../pages/Tickets/TicketsPage";
 
 // Client Pages
 
@@ -54,6 +55,14 @@ const AppRoutes = () => {
           element={
             <PermissionRoute requiredPermission="view_departments">
               <DepartmentsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="tickets"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <TicketsPage />
             </PermissionRoute>
           }
         />

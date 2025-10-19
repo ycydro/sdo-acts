@@ -9,9 +9,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const BackgroundWrapper = ({ children }) => {
+import clsx from "clsx";
+
+const BackgroundWrapper = ({ children, className }) => {
   return (
-    <Card className="p-7 overflow-auto w-full h-full bg-[#fcfcfc]">
+    <Card
+      className={clsx(
+        "p-7 overflow-auto w-full h-full bg-[#fcfcfc]",
+        className
+      )}
+    >
       <CardContent className="p-0">{children}</CardContent>
     </Card>
   );

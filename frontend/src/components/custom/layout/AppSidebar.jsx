@@ -23,83 +23,32 @@ import {
 } from "../../../lib/constants/sidebarItems";
 
 import { useAuth } from "@/context/AuthContext";
+
 const AppSidebar = () => {
   const { user } = useAuth();
   return (
     <Sidebar>
       <SidebarContent>
-        {/* OVERVIEW */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Overview</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {overviewItems.map(
-                (item) =>
-                  user?.permissions?.includes(item.permission) && (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link
-                          to={`/main${item.url}`}
-                          className="flex items-center gap-2"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        {/* TICKETING */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Ticketing</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {ticketingItems.map(
-                (item) =>
-                  user?.permissions?.includes(item.permission) && (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link
-                          to={`/main${item.url}`}
-                          className="flex items-center gap-2"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        {/* USER MANAGEMENT */}
-        <SidebarGroup>
-          <SidebarGroupLabel>User Management</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {userManagementItems.map(
-                (item) =>
-                  user?.permissions?.includes(item.permission) && (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link
-                          to={`/main${item.url}`}
-                          className="flex items-center gap-2"
-                        >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <SidebarContent>
+          <SidebarSection
+            label="Overview"
+            items={overviewItems}
+            permissions={user?.permissions}
+            basePath={"main"}
+          />
+          <SidebarSection
+            label="Ticketing"
+            items={ticketingItems}
+            permissions={user?.permissions}
+            basePath={"main"}
+          />
+          <SidebarSection
+            label="User Management"
+            items={userManagementItems}
+            permissions={user?.permissions}
+            basePath={"main"}
+          />
+        </SidebarContent>
       </SidebarContent>
       <SidebarFooter className="border border-t-1 py-3 px-4">
         <div className="flex items-center justify-center gap-1">
@@ -110,5 +59,31 @@ const AppSidebar = () => {
     </Sidebar>
   );
 };
+
+const SidebarSection = ({ label, items, permissions, basePath }) => (
+  <SidebarGroup>
+    <SidebarGroupLabel>{label}</SidebarGroupLabel>
+    <SidebarGroupContent>
+      <SidebarMenu>
+        {items.map(
+          (item) =>
+            permissions?.includes(item.permission) && (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <Link
+                    to={`/${basePath}${item.url}`}
+                    className="flex items-center gap-2"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+        )}
+      </SidebarMenu>
+    </SidebarGroupContent>
+  </SidebarGroup>
+);
 
 export default AppSidebar;

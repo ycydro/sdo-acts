@@ -22,7 +22,9 @@ import {
   userManagementItems,
 } from "../../../lib/constants/sidebarItems";
 
+import { useAuth } from "@/context/AuthContext";
 const AppSidebar = () => {
+  const { user } = useAuth();
   return (
     <Sidebar>
       <SidebarContent>
@@ -31,19 +33,22 @@ const AppSidebar = () => {
           <SidebarGroupLabel>Overview</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {overviewItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      to={`/main${item.url}`}
-                      className="flex items-center gap-2"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {overviewItems.map(
+                (item) =>
+                  user?.permissions?.includes(item.permission) && (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={`/main${item.url}`}
+                          className="flex items-center gap-2"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -52,19 +57,22 @@ const AppSidebar = () => {
           <SidebarGroupLabel>Ticketing</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {ticketingItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      to={`/main${item.url}`}
-                      className="flex items-center gap-2"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {ticketingItems.map(
+                (item) =>
+                  user?.permissions?.includes(item.permission) && (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={`/main${item.url}`}
+                          className="flex items-center gap-2"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -73,19 +81,22 @@ const AppSidebar = () => {
           <SidebarGroupLabel>User Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {userManagementItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      to={`/main${item.url}`}
-                      className="flex items-center gap-2"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {userManagementItems.map(
+                (item) =>
+                  user?.permissions?.includes(item.permission) && (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={`/main${item.url}`}
+                          className="flex items-center gap-2"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

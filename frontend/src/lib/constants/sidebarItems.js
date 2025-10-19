@@ -11,19 +11,28 @@ export const overviewItems = [
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
+    permission: "view_departments",
   },
 ];
 
 export const ticketingItems = [
   {
+    title: "Departments",
+    url: "/departments",
+    icon: Building2,
+    permission: "view_departments",
+  },
+  {
     title: "Tickets",
     url: "/tickets",
     icon: Ticket,
+    permission: "view_main",
   },
   {
     title: "Services",
     url: "/services",
     icon: Hammer,
+    permission: "view_main",
   },
 ];
 
@@ -32,10 +41,6 @@ export const userManagementItems = [
     title: "Access Control",
     url: "/access-control",
     icon: LockKeyhole,
-  },
-  {
-    title: "Departments",
-    url: "/departments",
-    icon: Building2,
+    permission: "view_main",
   },
 ];

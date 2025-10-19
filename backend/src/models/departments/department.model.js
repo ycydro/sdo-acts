@@ -11,6 +11,12 @@ const Department = sequelize.define("department", {
   name: {
     type: DataTypes.CHAR,
   },
+  description: {
+    type: DataTypes.STRING,
+  },
+  department_head: {
+    type: DataTypes.CHAR,
+  },
   status: {
     type: DataTypes.CHAR,
   },

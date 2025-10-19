@@ -10,8 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
+import { useDepartmentMutations } from "../../../hooks/queries/useDepartmentMutations";
 
 export function DepartmentList({ departments }) {
+  const { deleteDepartment } = useDepartmentMutations();
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {departments.map((department) => (
@@ -44,7 +47,10 @@ export function DepartmentList({ departments }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem>View Details</DropdownMenuItem>
                   <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => deleteDepartment.mutate(department.id)}
+                  >
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -60,7 +66,7 @@ export function DepartmentList({ departments }) {
                 Department Head
               </div>
               <div className="text-sm font-medium text-card-foreground">
-                {department.manager}
+                {department.department_head ?? "No one"}
               </div>
             </div>
           </div>

@@ -1,34 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DepartmentList } from "../../components/custom/lists/DepartmentList";
 import { Plus } from "lucide-react";
 import AddDepartmentModal from "../../components/custom/modals/AddDepartmentModal";
 import BackgroundWrapper from "../../components/custom/BackgroundWrapper";
-const initialDepartments = [
-  {
-    id: "1",
-    name: "ICT",
-    description: "Tech shi and shenanigans na kailangan gawin",
-    manager: "Sir Albert",
-  },
-  {
-    id: "2",
-    name: "HR",
-    description: "Hawak ko ang sweldo at buhay niyo, kaya ako ang boss",
-    manager: "Si Carl",
-  },
-  {
-    id: "3",
-    name: "Records",
-    description: "Victor Magtagbantay ng inyong dokumentong pagtanggol",
-    manager: "John Fred",
-  },
-];
+import { useDepartments } from "../../hooks/queries/useDepartments";
 
 const DepartmentsPage = () => {
-  const [departments, setDepartments] = useState(initialDepartments);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const { data, isLoading } = useDepartments();
+  const departments = data?.data ?? [];
+
+  if (isLoading) return <div>Still Loading</div>;
 
   return (
     <BackgroundWrapper>

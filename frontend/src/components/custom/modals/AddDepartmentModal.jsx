@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,15 +8,40 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+import { useForm } from "react-hook-form";
+import { useDepartmentMutations } from "../../../hooks/queries/useDepartmentMutations";
 
 const AddDepartmentModal = ({ open, onOpenChange }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const { createDepartment } = useDepartmentMutations();
+
+  const onSubmit = async (data) => {
+    console.log("Submitted:", data);
+    try {
+      await createDepartment.mutateAsync(data);
+      alert("Department created successfully!");
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to create department.");
+    } finally {
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -30,41 +54,62 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
             required information below.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-5 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="name">Department Name</Label>
-              <Input
-                id="name"
-                placeholder="The name of the new department"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-5 py-2">
+              {/* Department Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                rules={{ required: "Department name is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="The name of the new department"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                rules={{ required: "Description is required" }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Brief description of the department's responsibilities"
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Brief description of the department's responsibilities"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-                required
-              />
-            </div>
-          </div>
-          <DialogFooter className="mt-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Add Department</Button>
-          </DialogFooter>
-        </form>
+
+            <DialogFooter className="mt-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Add Department</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

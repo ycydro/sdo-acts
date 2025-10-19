@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,10 +44,12 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
     console.log("Submitted:", data);
     try {
       await createDepartment.mutateAsync(data);
-      alert("Department created successfully!");
+      toast.success("Department created successfully!");
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Failed to create department.");
+      toast.error(
+        error.response?.data?.message || "Failed to create department."
+      );
     } finally {
       onOpenChange(false);
     }

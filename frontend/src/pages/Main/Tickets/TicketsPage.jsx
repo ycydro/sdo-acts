@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 
-import TicketQuantityCard from "../../components/custom/cards/TicketQuantityCard";
-import BackgroundWrapper from "../../components/custom/BackgroundWrapper";
-import TicketsTable from "../../components/custom/tables/TicketsTable";
+import TicketQuantityCard from "../../../components/custom/cards/TicketQuantityCard";
+import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
 const ticketCards = [
   {
     title: "Unapproved Tickets",
@@ -37,9 +36,7 @@ const TicketsPage = () => {
           />
         ))}
       </div>
-      <BackgroundWrapper className="mt-5">
-        <TicketsTable />
-      </BackgroundWrapper>
+      <BackgroundWrapper className="mt-5"></BackgroundWrapper>
     </main>
   );
 };

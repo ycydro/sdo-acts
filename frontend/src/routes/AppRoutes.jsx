@@ -7,16 +7,18 @@ import MainLayout from "../layouts/MainLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 
-// Public Pages
-import NotFoundPage from "../pages/NotFoundPage";
-
-// Admin/Staff Pages
-import Test from "../pages/Test";
+// Guard Routes
 import ProtectedRoute from "./guards/ProtectedRoute";
 import PermissionRoute from "./guards/PermissionRoute";
-import MainDashboardPage from "../pages/MainDashboard/MainDashboardPage";
-import DepartmentsPage from "../pages/Departments/DepartmentsPage";
-import TicketsPage from "../pages/Tickets/TicketsPage";
+
+// Public Pages
+import NotFoundPage from "../pages/NotFoundPage";
+import Test from "../pages/Test";
+
+// Admin/Staff Pages
+import MainDashboardPage from "../pages/Main/MainDashboard/MainDashboardPage";
+import DepartmentsPage from "../pages/Main/Departments/DepartmentsPage";
+import TicketsPage from "../pages/Main/Tickets/TicketsPage";
 
 // Client Pages
 
@@ -60,6 +62,15 @@ const AppRoutes = () => {
         />
         <Route
           path="tickets"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <TicketsPage />
+            </PermissionRoute>
+          }
+        />
+        {/* SPECIFIC DEPARTMENT TICKETS (e.g. tickets for HR dept) */}
+        <Route
+          path="tickets/:department_id"
           element={
             <PermissionRoute requiredPermission="view_main">
               <TicketsPage />

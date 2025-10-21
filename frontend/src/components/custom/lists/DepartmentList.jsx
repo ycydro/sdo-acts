@@ -12,7 +12,10 @@ import {
 import { EllipsisVertical } from "lucide-react";
 import { useDepartmentMutations } from "../../../hooks/queries/useDepartmentMutations";
 
+import { useNavigate } from "react-router-dom";
+
 export function DepartmentList({ departments }) {
+  const navigate = useNavigate();
   const { deleteDepartment } = useDepartmentMutations();
 
   return (
@@ -21,6 +24,7 @@ export function DepartmentList({ departments }) {
         <Card
           key={department.id}
           className="border border-primary/50 cursor-pointer hover:shadow-xl"
+          onClick={() => navigate(`/main/tickets/${department.id}`)}
         >
           <div className="p-6">
             <div className="flex items-start justify-between gap-3 mb-3 max-w-full">

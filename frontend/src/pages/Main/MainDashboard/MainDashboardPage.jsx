@@ -2,10 +2,10 @@ import React from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import TicketQuantityCard from "../../components/custom/cards/TicketQuantityCard";
-import OverallSatisfactionPieChart from "../../components/custom/charts/OverallSatisfactionPieChart";
-import TicketsByPriorityLineChart from "../../components/custom/charts/TicketsByPriorityLineChart";
-import { TicketRequestList } from "../../components/custom/lists/TicketRequestList";
+import TicketQuantityCard from "../../../components/custom/cards/TicketQuantityCard";
+import OverallSatisfactionPieChart from "../../../components/custom/charts/OverallSatisfactionPieChart";
+import TicketsByPriorityLineChart from "../../../components/custom/charts/TicketsByPriorityLineChart";
+import { TicketRequestList } from "../../../components/custom/lists/TicketRequestList";
 
 export const initialTicketRequests = [
   {

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
+import ClientLayout from "../layouts/ClientLayout";
 
 // Auth Pages
 import LoginPage from "../pages/auth/LoginPage";
@@ -21,6 +22,7 @@ import DepartmentsPage from "../pages/Main/Departments/DepartmentsPage";
 import TicketsPage from "../pages/Main/Tickets/TicketsPage";
 
 // Client Pages
+import ClientDashboardPage from "../pages/Client/ClientDashboard/ClientDashboardPage";
 
 const AppRoutes = () => {
   return (
@@ -77,6 +79,21 @@ const AppRoutes = () => {
             </PermissionRoute>
           }
         />
+      </Route>
+
+      {/* CLIENT ROUTES */}
+      <Route
+        path="/client"
+        element={
+          <ProtectedRoute>
+            <ClientLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Automatically routes to /test */}
+        <Route path="" element={<Navigate to="dashboard" replace />} />
+
+        <Route path="dashboard" element={<ClientDashboardPage />} />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

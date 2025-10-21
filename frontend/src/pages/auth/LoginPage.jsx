@@ -12,7 +12,8 @@ const LoginPage = () => {
   const { user } = useAuth();
 
   if (user?.role) {
-    const redirectPath = user.role === "client" ? "/" : "/main";
+    const redirectPath =
+      user.role.toLowerCase() === "client" ? "/dashboard" : "/main";
     return <Navigate to={redirectPath} replace />;
   }
 

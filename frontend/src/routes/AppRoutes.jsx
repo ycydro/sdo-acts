@@ -83,7 +83,7 @@ const AppRoutes = () => {
 
       {/* CLIENT ROUTES */}
       <Route
-        path="/client"
+        path="/"
         element={
           <ProtectedRoute>
             <ClientLayout />

@@ -55,7 +55,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       // redirect based on role
-      const redirectPath = decoded.role === "client" ? "/" : "/main/dashboard";
+      const redirectPath =
+        decoded.role === "client" ? "/dashboard" : "/main/dashboard";
       navigate(redirectPath);
     } catch (error) {
       const message =

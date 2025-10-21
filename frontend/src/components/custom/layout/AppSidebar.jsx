@@ -69,7 +69,8 @@ const SidebarSection = ({ label, items, permissions, basePath }) => (
       <SidebarMenu>
         {items.map((item) => {
           if (permissions?.includes(item.permission)) {
-            const isActive = `/${basePath}${item.url}` === location.pathname;
+            const path = `/${basePath}${item.url}`;
+            const isActive = location.pathname.startsWith(path);
             return (
               <SidebarMenuItem
                 key={item.title}

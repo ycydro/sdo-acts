@@ -9,7 +9,7 @@ const ClientDashboardPage = () => {
     <main className="w-full space-y-5">
       <h2 className="hidden text-3xl font-semibold lg:block">Quick Actions</h2>
       {/* CTA */}
-      <div className="flex lg:grid lg:grid-cols-2 gap-6 overflow-x-auto md:overflow-visible px-1 md:px-0">
+      <div className="flex md:grid md:grid-cols-2 gap-6 overflow-x-auto md:overflow-visible px-1 md:px-0">
         <Card className="min-w-full flex-shrink-0 md:flex-shrink md:min-w-0 text-center shadow-lg border border-gray-200 flex flex-col justify-center p-6">
           <CardContent className="flex flex-col justify-center items-center gap-4">
             <div className="bg-green-100 p-3 rounded-full">

@@ -18,7 +18,10 @@ export function DepartmentList({ departments }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
       {departments.map((department) => (
-        <Card key={department.id} className="border border-primary/50">
+        <Card
+          key={department.id}
+          className="border border-primary/50 cursor-pointer hover:shadow-xl"
+        >
           <div className="p-6">
             <div className="flex items-start justify-between gap-3 mb-3 max-w-full">
               <div className="flex gap-2 items-center flex-1 min-w-0">

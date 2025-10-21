@@ -1,6 +1,4 @@
 import express from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import env from "../configs/env.js";
 
 import { Department } from "../models/index.js";

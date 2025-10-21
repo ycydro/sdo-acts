@@ -1,5 +1,6 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import clsx from "clsx";
 
 import Logo from "../../../assets/imgs/SDO-LOGO.webp";
 
@@ -25,6 +26,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 const AppSidebar = () => {
+  const location = useLocation();
   const { user } = useAuth();
   return (
     <Sidebar>
@@ -65,10 +67,20 @@ const SidebarSection = ({ label, items, permissions, basePath }) => (
     <SidebarGroupLabel>{label}</SidebarGroupLabel>
     <SidebarGroupContent>
       <SidebarMenu>
-        {items.map(
-          (item) =>
-            permissions?.includes(item.permission) && (
-              <SidebarMenuItem key={item.title}>
+        {items.map((item) => {
+          if (permissions?.includes(item.permission)) {
+            const isActive = `/${basePath}${item.url}` === location.pathname;
+            return (
+              <SidebarMenuItem
+                key={item.title}
+                className={clsx(
+                  "py-0.5 rounded-md transition-[border] duration-150 hover:bg-sidebar-accent",
+                  {
+                    "bg-primary-100 text-primary font-bold border-l-7 border-primary":
+                      isActive,
+                  }
+                )}
+              >
                 <SidebarMenuButton asChild>
                   <Link
                     to={`/${basePath}${item.url}`}
@@ -79,8 +91,11 @@ const SidebarSection = ({ label, items, permissions, basePath }) => (
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            )
-        )}
+            );
+          } else {
+            return null;
+          }
+        })}
       </SidebarMenu>
     </SidebarGroupContent>
   </SidebarGroup>

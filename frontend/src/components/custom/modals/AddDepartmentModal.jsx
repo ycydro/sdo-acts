@@ -115,7 +115,11 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
                   <FormItem>
                     <FormLabel>Department Code</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. ICT, HR" {...field} />
+                      <Input
+                        maxLength={10}
+                        placeholder="e.g. ICT, HR"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

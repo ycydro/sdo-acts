@@ -35,11 +35,13 @@ router.post("/", async (req, res) => {
       });
     }
 
+    const upperCasedDeptCode = department_code.toUpperCase();
+
     const department = await Department.create({
       name,
       description,
       status: status || "active",
-      department_code,
+      department_code: upperCasedDeptCode,
     });
 
     res.status(201).json({

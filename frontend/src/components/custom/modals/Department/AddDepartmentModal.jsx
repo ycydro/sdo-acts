@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useDepartmentMutations } from "../../../hooks/queries/useDepartmentMutations";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,7 +21,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const EditDepartmentModal = ({ open, onOpenChange, department }) => {
+import { useForm } from "react-hook-form";
+import { useDepartmentMutations } from "../../../../hooks/queries/useDepartmentMutations";
+
+const AddDepartmentModal = ({ open, onOpenChange }) => {
   const form = useForm({
     defaultValues: {
       name: "",
@@ -35,31 +37,22 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
     if (!open) {
       form.reset();
     }
-    if (department) {
-      form.reset({
-        name: department.name || "",
-        description: department.description || "",
-        department_code: department.department_code || "",
-      });
-    }
-  }, [open, department, form]);
+  }, [open, form]);
 
-  const { updateDepartment } = useDepartmentMutations();
+  const { createDepartment } = useDepartmentMutations();
 
-  const onSubmit = async (formData) => {
+  const onSubmit = async (data) => {
+    console.log("Submitted:", data);
     try {
-      await updateDepartment.mutateAsync({
-        id: department.id,
-        department: formData,
-      });
-
-      toast.success("Department updated successfully!");
-      onOpenChange(false);
+      await createDepartment.mutateAsync(data);
+      toast.success("Department created successfully!");
     } catch (error) {
       console.error(error);
       toast.error(
-        error.response?.data?.message || "Failed to update department."
+        error.response?.data?.message || "Failed to create department."
       );
+    } finally {
+      onOpenChange(false);
     }
   };
 
@@ -67,9 +60,10 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-[40rem]">
         <DialogHeader>
-          <DialogTitle className="text-lg">Edit Department</DialogTitle>
+          <DialogTitle className="text-lg">Add Department</DialogTitle>
           <DialogDescription>
-            Modify the department information below.
+            Create a new department for your SDO-Meycauayan. Fill in all the
+            required information below.
           </DialogDescription>
         </DialogHeader>
 
@@ -86,15 +80,14 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
                     <FormLabel>Department Name</FormLabel>
                     <FormControl>
                       <Input
+                        placeholder="The name of the new department"
                         {...field}
-                        placeholder="The name of the department"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               {/* Description */}
               <FormField
                 control={form.control}
@@ -105,29 +98,27 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
+                        placeholder="Brief description of the department's responsibilities"
                         rows={3}
                         {...field}
-                        placeholder="Brief description of the department's responsibilities"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
-              />
-
-              {/* Department Code */}
+              />{" "}
               <FormField
                 control={form.control}
                 name="department_code"
-                rules={{ required: "Code is required" }}
+                rules={{ required: "Acronym is required" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Department Code</FormLabel>
                     <FormControl>
                       <Input
                         maxLength={10}
-                        {...field}
                         placeholder="e.g. ICT, HR"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -144,7 +135,7 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
               >
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit">Add Department</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -153,4 +144,4 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
   );
 };
 
-export default EditDepartmentModal;
+export default AddDepartmentModal;

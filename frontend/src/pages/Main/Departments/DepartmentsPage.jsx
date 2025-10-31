@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DepartmentList } from "../../../components/custom/lists/DepartmentList";
 import { Plus } from "lucide-react";
-import AddDepartmentModal from "../../../components/custom/modals/AddDepartmentModal";
+import AddDepartmentModal from "../../../components/custom/modals/Department/AddDepartmentModal";
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
 import { useDepartments } from "../../../hooks/queries/useDepartments";
 

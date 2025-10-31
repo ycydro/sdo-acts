@@ -11,6 +11,11 @@ export const departmentsService = {
     return response.data;
   },
 
+  update: async (id, department) => {
+    const response = await axios.put(`/department/${id}`, department);
+    return response.data;
+  },
+
   delete: async (id) => {
     const response = await axios.delete(`/department/${id}`);
     return response.data;

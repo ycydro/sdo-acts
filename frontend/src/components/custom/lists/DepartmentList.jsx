@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +12,18 @@ import { EllipsisVertical } from "lucide-react";
 import { useDepartmentMutations } from "../../../hooks/queries/useDepartmentMutations";
 
 import { useNavigate } from "react-router-dom";
+import EditDepartmentModal from "../modals/EditDepartmentModal";
 
 export function DepartmentList({ departments }) {
   const navigate = useNavigate();
   const { deleteDepartment } = useDepartmentMutations();
+  const [selectedDept, setSelectedDept] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleEdit = (department) => {
+    setSelectedDept(department);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -51,7 +60,9 @@ export function DepartmentList({ departments }) {
                   >
                     View Details
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleEdit(department)}>
+                    Edit
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive"
                     onClick={() => deleteDepartment.mutate(department.id)}
@@ -77,6 +88,11 @@ export function DepartmentList({ departments }) {
           </div>
         </Card>
       ))}
+      <EditDepartmentModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        department={selectedDept}
+      />
     </div>
   );
 }

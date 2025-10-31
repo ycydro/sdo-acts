@@ -59,6 +59,38 @@ router.post("/", async (req, res) => {
   }
 });
 
+// update
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, department_code, status } = req.body;
+
+    const upperCasedDeptCode = department_code.toUpperCase();
+
+    await Department.update(
+      {
+        name,
+        description,
+        status: status || "active",
+        department_code: upperCasedDeptCode,
+      },
+      { where: { id } }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Department updated successfully!",
+    });
+  } catch (err) {
+    console.error("Error updating department:", err);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the department.",
+      error: err.message,
+    });
+  }
+});
+
 // delete
 router.delete("/:id", async (req, res) => {
   try {
@@ -78,7 +110,7 @@ router.delete("/:id", async (req, res) => {
     console.error("Error deleting department:", err);
     res.status(500).json({
       success: false,
-      message: "An error occurred while creating the department.",
+      message: "An error occurred while deleting the department.",
       error: err.message,
     });
   }

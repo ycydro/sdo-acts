@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,6 +24,20 @@ export function DepartmentList({ departments }) {
   const handleEdit = (department) => {
     setSelectedDept(department);
     setIsModalOpen(true);
+  };
+
+  const handleDelete = async (departmentID, departmentName) => {
+    try {
+      await deleteDepartment.mutateAsync(departmentID);
+      toast.success(
+        `${departmentName} department has been deleted successfully!`
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete department."
+      );
+    }
   };
 
   return (
@@ -65,7 +80,7 @@ export function DepartmentList({ departments }) {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive"
-                    onClick={() => deleteDepartment.mutate(department.id)}
+                    onClick={() => handleDelete(department.id, department.name)}
                   >
                     Delete
                   </DropdownMenuItem>

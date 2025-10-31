@@ -84,7 +84,7 @@ const AddServiceModal = ({ open, onOpenChange }) => {
         <DialogHeader>
           <DialogTitle className="text-lg">Add Service</DialogTitle>
           <DialogDescription>
-            Create a new service for your specific department. Fill in all the
+            Create a new service for a specific department. Fill in all the
             required information below.
           </DialogDescription>
         </DialogHeader>

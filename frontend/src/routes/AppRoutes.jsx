@@ -23,6 +23,7 @@ import TicketsPage from "../pages/Main/Tickets/TicketsPage";
 
 // Client Pages
 import ClientDashboardPage from "../pages/Client/ClientDashboard/ClientDashboardPage";
+import ServicesPage from "../pages/Main/Services/ServicesPage";
 
 const AppRoutes = () => {
   return (
@@ -59,6 +60,14 @@ const AppRoutes = () => {
           element={
             <PermissionRoute requiredPermission="view_departments">
               <DepartmentsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="services"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <ServicesPage />
             </PermissionRoute>
           }
         />

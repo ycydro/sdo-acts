@@ -20,7 +20,7 @@ const DepartmentsPage = () => {
       <main className="min-w-full flex flex-col">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-semibold">Departments</h2>
-          <Button onClick={() => setShowAddModal(true)}>
+          <Button variant="sdo-secondary" onClick={() => setShowAddModal(true)}>
             <Plus />
             Add Department
           </Button>

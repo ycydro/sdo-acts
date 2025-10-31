@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +22,6 @@ export function DepartmentList({ departments }) {
         <Card
           key={department.id}
           className="border border-primary/50 cursor-pointer hover:shadow-xl"
-          onClick={() => navigate(`/main/tickets/${department.id}`)}
         >
           <div className="p-6">
             <div className="flex items-start justify-between gap-3 mb-3 max-w-full">
@@ -49,7 +46,11 @@ export function DepartmentList({ departments }) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>View Details</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => navigate(`/main/tickets/${department.id}`)}
+                  >
+                    View Details
+                  </DropdownMenuItem>
                   <DropdownMenuItem>Edit</DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive"

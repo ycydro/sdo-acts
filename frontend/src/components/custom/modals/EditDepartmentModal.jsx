@@ -32,6 +32,9 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
   });
 
   useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
     if (department) {
       form.reset({
         name: department.name || "",
@@ -39,7 +42,7 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
         department_code: department.department_code || "",
       });
     }
-  }, [department, form]);
+  }, [open, department, form]);
 
   const { updateDepartment } = useDepartmentMutations();
 

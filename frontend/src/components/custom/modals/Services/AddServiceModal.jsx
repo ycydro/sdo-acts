@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,8 +30,12 @@ import { serviceSchema } from "../../../../validations/serviceSchema";
 import { useForm, Controller } from "react-hook-form";
 
 import { convertToMinutes } from "../../../../lib/timeUtils";
+import { useDepartments } from "../../../../hooks/queries/useDepartments";
 
 const AddServiceModal = ({ open, onOpenChange }) => {
+  const { data: departments, isLoading: isDepartmentsLoading } =
+    useDepartments();
+
   const form = useForm({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
@@ -157,7 +161,21 @@ const AddServiceModal = ({ open, onOpenChange }) => {
                         <SelectValue placeholder="Select what department will offer this service" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ICT">ICT</SelectItem>
+                        {isDepartmentsLoading ? (
+                          <SelectItem value="loading" disabled>
+                            Loading departments...
+                          </SelectItem>
+                        ) : departments?.data ? (
+                          departments.data.map((dept) => (
+                            <SelectItem key={dept.id} value={dept.id}>
+                              {dept.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="error" disabled>
+                            No departments available
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     {error && <FieldError>{error.message}</FieldError>}

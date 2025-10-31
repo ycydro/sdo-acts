@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useForm, Controller } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,16 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "@/components/ui/form";
 
-import { useForm } from "react-hook-form";
+import {
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldDescription,
+} from "@/components/ui/field";
+
 import { useDepartmentMutations } from "../../../../hooks/queries/useDepartmentMutations";
 
 const AddDepartmentModal = ({ open, onOpenChange }) => {
@@ -67,78 +66,67 @@ const AddDepartmentModal = ({ open, onOpenChange }) => {
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="space-y-4 py-2">
-              {/* Department Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                rules={{ required: "Department name is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Department Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="The name of the new department"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Description */}
-              <FormField
-                control={form.control}
-                name="description"
-                rules={{ required: "Description is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Brief description of the department's responsibilities"
-                        rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />{" "}
-              <FormField
-                control={form.control}
-                name="department_code"
-                rules={{ required: "Acronym is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Department Code</FormLabel>
-                    <FormControl>
-                      <Input
-                        maxLength={10}
-                        placeholder="e.g. ICT, HR"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-4 py-2">
+            {/* Department Name */}
+            <Controller
+              control={form.control}
+              name="name"
+              rules={{ required: "Department name is required" }}
+              render={({ field, fieldState: { error } }) => (
+                <Field>
+                  <FieldLabel>Department Name</FieldLabel>
+                  <Input
+                    placeholder="The name of the new department"
+                    {...field}
+                  />
+                  {error && <FieldError>{error.message}</FieldError>}
+                </Field>
+              )}
+            />
+            {/* Description */}
+            <Controller
+              control={form.control}
+              name="description"
+              rules={{ required: "Description is required" }}
+              render={({ field, fieldState: { error } }) => (
+                <Field>
+                  <FieldLabel>Description</FieldLabel>
+                  <Textarea
+                    placeholder="Brief description of the department's responsibilities"
+                    rows={3}
+                    {...field}
+                  />
+                  {error && <FieldError>{error.message}</FieldError>}
+                </Field>
+              )}
+            />
+            {/* Department Code */}
+            <Controller
+              control={form.control}
+              name="department_code"
+              rules={{ required: "Acronym is required" }}
+              render={({ field, fieldState: { error } }) => (
+                <Field>
+                  <FieldLabel>Department Code</FieldLabel>
+                  <Input maxLength={10} placeholder="e.g. ICT, HR" {...field} />
+                  {error && <FieldError>{error.message}</FieldError>}
+                </Field>
+              )}
+            />
+          </div>
 
-            <DialogFooter className="mt-5">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Add Department</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          <DialogFooter className="mt-5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit">Add Department</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

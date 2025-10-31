@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
+import AddServiceModal from "../../../components/custom/modals/Services/AddServiceModal";
 
 const ServicesPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -27,6 +28,7 @@ const ServicesPage = () => {
           </div>
         </div>
       </main>
+      <AddServiceModal open={showAddModal} onOpenChange={setShowAddModal} />
     </BackgroundWrapper>
   );
 };

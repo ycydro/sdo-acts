@@ -14,12 +14,16 @@ const Service = sequelize.define("service", {
   description: {
     type: DataTypes.TEXT,
   },
-  status: {
+  processing_time_in_minutes: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  classification: {
     type: DataTypes.CHAR,
   },
-  average_time_consumed: {
-    type: DataTypes.TIME,
-    allowNull: false,
+
+  status: {
+    type: DataTypes.CHAR,
   },
   department_id: {
     type: DataTypes.CHAR(36), // CHAR(36) for UUID

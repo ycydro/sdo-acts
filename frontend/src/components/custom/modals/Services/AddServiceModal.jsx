@@ -1,0 +1,252 @@
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { serviceSchema } from "../../../../validations/serviceSchema";
+import { useForm, Controller } from "react-hook-form";
+
+import { convertToMinutes } from "../../../../lib/timeUtils";
+
+const AddServiceModal = ({ open, onOpenChange }) => {
+  const form = useForm({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: {
+      service_name: "",
+      description: "",
+      classification: "",
+      department: "",
+      time_days: 0,
+      time_hours: 0,
+      time_minutes: 0,
+    },
+  });
+
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
+  }, [open, form]);
+
+  const onSubmit = (data) => {
+    // convert time inputs to minutes
+    const totalMinutes = convertToMinutes(
+      data.time_days,
+      data.time_hours,
+      data.time_minutes
+    );
+
+    // add bagong property for total minutes
+    const submitData = {
+      ...data,
+      processing_time_in_minutes: totalMinutes,
+    };
+
+    // di na kailangan kasi naka total na
+    delete submitData.time_days;
+    delete submitData.time_hours;
+    delete submitData.time_minutes;
+
+    console.log("Submitting:", submitData);
+    // TODO: API for submitting service data
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="min-w-[40rem]">
+        <DialogHeader>
+          <DialogTitle className="text-lg">Add Service</DialogTitle>
+          <DialogDescription>
+            Create a new service for your specific department. Fill in all the
+            required information below.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <FieldGroup>
+            {/* Service name */}
+            <Controller
+              control={form.control}
+              name="service_name"
+              render={({ field, fieldState: { error } }) => (
+                <Field>
+                  <FieldLabel>Service Name</FieldLabel>
+                  <Input placeholder="The name of the new service" {...field} />
+                  {error && <FieldError>{error.message}</FieldError>}
+                </Field>
+              )}
+            />
+
+            {/* Description */}
+            <Controller
+              control={form.control}
+              name="description"
+              render={({ field, fieldState: { error } }) => (
+                <Field>
+                  <FieldLabel>Description</FieldLabel>
+                  <Textarea
+                    placeholder="Brief description of the service"
+                    rows={3}
+                    {...field}
+                  />
+                  {error && <FieldError>{error.message}</FieldError>}
+                </Field>
+              )}
+            />
+
+            <div className="flex gap-3">
+              {/* Classification */}
+              <Controller
+                control={form.control}
+                name="classification"
+                render={({ field, fieldState: { error } }) => (
+                  <Field className="space-y-1 w-full flex-1">
+                    <FieldLabel>Classification</FieldLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="min-w-full">
+                        <SelectValue placeholder="Select classification type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="simple">Simple</SelectItem>
+                        <SelectItem value="complex">Complex</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {error && <FieldError>{error.message}</FieldError>}
+                  </Field>
+                )}
+              />
+
+              {/* Department */}
+              <Controller
+                control={form.control}
+                name="department"
+                render={({ field, fieldState: { error } }) => (
+                  <Field className="space-y-1 w-full flex-2">
+                    <FieldLabel>Department</FieldLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="min-w-full">
+                        <SelectValue placeholder="Select what department will offer this service" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ICT">ICT</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {error && <FieldError>{error.message}</FieldError>}
+                  </Field>
+                )}
+              />
+            </div>
+
+            {/* Processing Time */}
+            <Field>
+              <FieldLabel>Total Processing Time</FieldLabel>
+              <FieldDescription className="m-0 p-0">
+                Estimated average time to complete this service
+              </FieldDescription>
+              <div className="grid grid-cols-3 gap-3 mt-1 px-0.5">
+                <Controller
+                  control={form.control}
+                  name="time_days"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel className="text-sm">Days</FieldLabel>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="time_hours"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel className="text-sm">Hours</FieldLabel>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="23"
+                        placeholder="0"
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
+                    </Field>
+                  )}
+                />
+
+                <Controller
+                  control={form.control}
+                  name="time_minutes"
+                  render={({ field, fieldState: { error } }) => (
+                    <Field>
+                      <FieldLabel className="text-sm">Minutes</FieldLabel>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="59"
+                        placeholder="0"
+                        value={field.value}
+                        onChange={(e) =>
+                          field.onChange(parseInt(e.target.value) || 0)
+                        }
+                      />
+                    </Field>
+                  )}
+                />
+              </div>
+              {form.formState.errors.processing_time && (
+                <FieldError>
+                  {form.formState.errors.processing_time.message}
+                </FieldError>
+              )}
+            </Field>
+          </FieldGroup>
+
+          <DialogFooter className="mt-5">
+            <Button type="submit">Add Service</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddServiceModal;

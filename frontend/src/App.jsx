@@ -15,7 +15,7 @@ const App = () => {
         <AuthProvider>
           <AppRoutes />
         </AuthProvider>
-        <Toaster duration={3000} />
+        <Toaster duration={3000} richColors />
       </Router>
     </QueryClientProvider>
   );

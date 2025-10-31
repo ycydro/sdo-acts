@@ -7,7 +7,9 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const departments = await Department.findAll();
+    const departments = await Department.findAll({
+      order: [["createdAt", "DESC"]],
+    });
 
     return res.status(200).json({
       success: true,

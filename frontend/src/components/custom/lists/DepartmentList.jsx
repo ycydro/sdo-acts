@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical } from "lucide-react";
-import { useDepartmentMutations } from "../../../hooks/queries/useDepartmentMutations";
+import { useDepartmentMutations } from "../../../hooks/queries/department/useDepartmentMutations";
 
 import { useNavigate } from "react-router-dom";
 import EditDepartmentModal from "../modals/Department/EditDepartmentModal";

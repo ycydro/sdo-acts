@@ -21,7 +21,7 @@ import {
   FieldDescription,
 } from "@/components/ui/field";
 
-import { useDepartmentMutations } from "../../../../hooks/queries/useDepartmentMutations";
+import { useDepartmentMutations } from "../../../../hooks/queries/department/useDepartmentMutations";
 
 const AddDepartmentModal = ({ open, onOpenChange }) => {
   const form = useForm({

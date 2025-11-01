@@ -5,7 +5,7 @@ import { DepartmentList } from "../../../components/custom/lists/DepartmentList"
 import { Plus } from "lucide-react";
 import AddDepartmentModal from "../../../components/custom/modals/Department/AddDepartmentModal";
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
-import { useDepartments } from "../../../hooks/queries/useDepartments";
+import { useDepartments } from "../../../hooks/queries/department/useDepartments";
 
 const DepartmentsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);

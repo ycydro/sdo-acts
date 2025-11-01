@@ -10,6 +10,7 @@ import env from "./src/configs/env.js";
 // ROUTES
 import authRoutes from "./src/routes/auth.routes.js";
 import departmentRoutes from "./src/routes/department.routes.js";
+import serviceRoutes from "./src/routes/service.routes.js";
 
 const PORT = env.PORT;
 const app = express();
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ limit: "500mb", extended: true }));
 // ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/department", departmentRoutes);
+app.use("/api/service", serviceRoutes);
 
 app.get("/", async (req, res) => {
   res.send("<h1>Hello, World! (from server)</h1>");

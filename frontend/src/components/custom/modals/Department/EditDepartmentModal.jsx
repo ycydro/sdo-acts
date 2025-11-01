@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "sonner";
-import { useDepartmentMutations } from "../../../../hooks/queries/useDepartmentMutations";
+import { useDepartmentMutations } from "../../../../hooks/queries/department/useDepartmentMutations";
 import {
   Dialog,
   DialogContent,

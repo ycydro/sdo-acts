@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
 import {
   Dialog,
   DialogContent,
@@ -30,19 +32,22 @@ import { serviceSchema } from "../../../../validations/serviceSchema";
 import { useForm, Controller } from "react-hook-form";
 
 import { convertToMinutes } from "../../../../lib/timeUtils";
-import { useDepartments } from "../../../../hooks/queries/useDepartments";
+import { useDepartments } from "../../../../hooks/queries/department/useDepartments";
+import { useServiceMutations } from "../../../../hooks/queries/service/useServiceMutations";
 
 const AddServiceModal = ({ open, onOpenChange }) => {
   const { data: departments, isLoading: isDepartmentsLoading } =
     useDepartments();
 
+  const { createService } = useServiceMutations();
+
   const form = useForm({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
-      service_name: "",
+      name: "",
       description: "",
       classification: "",
-      department: "",
+      department_id: "",
       time_days: 0,
       time_hours: 0,
       time_minutes: 0,
@@ -55,27 +60,36 @@ const AddServiceModal = ({ open, onOpenChange }) => {
     }
   }, [open, form]);
 
-  const onSubmit = (data) => {
-    // convert time inputs to minutes
-    const totalMinutes = convertToMinutes(
-      data.time_days,
-      data.time_hours,
-      data.time_minutes
-    );
+  const onSubmit = async (data) => {
+    console.log("hi");
+    try {
+      // convert time inputs to minutes
+      const totalMinutes = convertToMinutes(
+        data.time_days,
+        data.time_hours,
+        data.time_minutes
+      );
 
-    // add bagong property for total minutes
-    const submitData = {
-      ...data,
-      processing_time_in_minutes: totalMinutes,
-    };
+      // add bagong property for total minutes
+      const submitData = {
+        ...data,
+        processing_time_in_minutes: totalMinutes,
+      };
 
-    // di na kailangan kasi naka total na
-    delete submitData.time_days;
-    delete submitData.time_hours;
-    delete submitData.time_minutes;
+      // di na kailangan kasi naka total na
+      delete submitData.time_days;
+      delete submitData.time_hours;
+      delete submitData.time_minutes;
 
-    console.log("Submitting:", submitData);
-    // TODO: API for submitting service data
+      console.log("Submitting:", submitData);
+      await createService.mutateAsync(submitData);
+      toast.success("Service created successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to create service.");
+    } finally {
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -94,7 +108,7 @@ const AddServiceModal = ({ open, onOpenChange }) => {
             {/* Service name */}
             <Controller
               control={form.control}
-              name="service_name"
+              name="name"
               render={({ field, fieldState: { error } }) => (
                 <Field>
                   <FieldLabel>Service Name</FieldLabel>
@@ -149,7 +163,7 @@ const AddServiceModal = ({ open, onOpenChange }) => {
               {/* Department */}
               <Controller
                 control={form.control}
-                name="department"
+                name="department_id"
                 render={({ field, fieldState: { error } }) => (
                   <Field className="space-y-1 w-full flex-2">
                     <FieldLabel>Department</FieldLabel>

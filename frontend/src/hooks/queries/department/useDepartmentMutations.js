@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { departmentsService } from "../../api/services/departmentsService";
+import { departmentsService } from "../../../api/services/departmentsService";
 
 export const useDepartmentMutations = () => {
   const queryClient = useQueryClient();

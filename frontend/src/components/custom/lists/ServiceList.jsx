@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import clsx from "clsx";
 import {
   formatTimeDisplay,
   convertMinutesToTimeParts,
@@ -64,13 +65,29 @@ export const ServiceList = ({ services }) => {
 
 const ServiceCard = ({ service, onEdit, onDelete }) => {
   const navigate = useNavigate();
+  const CLASSIFICATION_STYLES = {
+    Simple: {
+      border: "border-primary/50",
+      classification_text: "text-primary",
+    },
+    Complex: {
+      border: "border-[var(--high)]/50",
+      classification_text: "text-[var(--high)]",
+    },
+  };
 
   const processing_time = convertMinutesToTimeParts(
     service.processing_time_in_minutes
   );
 
+  // style base sa classification
+  const styles = CLASSIFICATION_STYLES[service.classification] || {};
+
   return (
-    <Card key={service.id} className="border border-primary/50 hover:shadow-lg">
+    <Card
+      key={service.id}
+      className={clsx("border-2 shadow-md", styles.border)}
+    >
       <div className="px-6 py-7 space-y-1.5">
         <div className="flex items-start max-w-full">
           <h3 className="text-md text-card-foreground truncate">
@@ -87,7 +104,14 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
             )}
           </p>
 
-          <p className="text-md line-clamp-3">{service.classification}</p>
+          <p
+            className={clsx(
+              "text-md line-clamp-3 font-semibold",
+              styles.classification_text
+            )}
+          >
+            {service.classification}
+          </p>
         </div>
       </div>
     </Card>

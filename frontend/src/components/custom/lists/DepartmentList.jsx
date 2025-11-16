@@ -90,7 +90,7 @@ const DepartmentCard = ({ department, onEdit, onDelete }) => {
                 <EllipsisVertical />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="right">
               <DropdownMenuItem
                 onClick={() => navigate(`/main/tickets/${department.id}`)}
               >

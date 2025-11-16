@@ -61,7 +61,6 @@ const AddServiceModal = ({ open, onOpenChange }) => {
   }, [open, form]);
 
   const onSubmit = async (data) => {
-    console.log("hi");
     try {
       // convert time inputs to minutes
       const totalMinutes = convertToMinutes(
@@ -151,8 +150,8 @@ const AddServiceModal = ({ open, onOpenChange }) => {
                         <SelectValue placeholder="Select classification type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="simple">Simple</SelectItem>
-                        <SelectItem value="complex">Complex</SelectItem>
+                        <SelectItem value="Simple">Simple</SelectItem>
+                        <SelectItem value="Complex">Complex</SelectItem>
                       </SelectContent>
                     </Select>
                     {error && <FieldError>{error.message}</FieldError>}

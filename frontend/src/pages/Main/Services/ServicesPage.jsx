@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
+import clsx from "clsx";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
 import AddServiceModal from "../../../components/custom/modals/Services/AddServiceModal";
+import { ServiceList } from "../../../components/custom/lists/ServiceList";
+import { useServices } from "../../../hooks/queries/service/useServices";
 
 const ServicesPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const { data, isLoading } = useServices();
+  const services = data?.data ?? [];
 
   return (
     <BackgroundWrapper>
@@ -28,6 +34,9 @@ const ServicesPage = () => {
           </div>
         </div>
       </main>
+      {/* Service Modal */}
+      <ServiceList services={services} />
+
       <AddServiceModal open={showAddModal} onOpenChange={setShowAddModal} />
     </BackgroundWrapper>
   );

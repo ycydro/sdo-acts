@@ -1,4 +1,5 @@
 import express from "express";
+import { Sequelize } from "sequelize";
 import env from "../configs/env.js";
 
 import { Service } from "../models/index.js";
@@ -8,13 +9,25 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const services = await Service.findAll({
-      order: [["createdAt", "DESC"]],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN classification = 'Simple' THEN 1
+              WHEN classification = 'Complex' THEN 2
+              ELSE 3
+            END
+          `),
+          "ASC",
+        ],
+        ["createdAt", "DESC"],
+      ],
     });
 
     return res.status(200).json({
       success: true,
       data: services,
-      message: "Services fetched successfuly!",
+      message: "Services fetched successfully!",
     });
   } catch (error) {
     console.error(error);

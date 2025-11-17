@@ -24,6 +24,7 @@ import TicketsPage from "../pages/Main/Tickets/TicketsPage";
 // Client Pages
 import ClientDashboardPage from "../pages/Client/ClientDashboard/ClientDashboardPage";
 import ServicesPage from "../pages/Main/Services/ServicesPage";
+import RequestTicketPage from "../pages/Client/Tickets/RequestTicketPage";
 
 const AppRoutes = () => {
   return (
@@ -103,6 +104,7 @@ const AppRoutes = () => {
         <Route path="" element={<Navigate to="dashboard" replace />} />
 
         <Route path="dashboard" element={<ClientDashboardPage />} />
+        <Route path="request-ticket" element={<RequestTicketPage />} />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

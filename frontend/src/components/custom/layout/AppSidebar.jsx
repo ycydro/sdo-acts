@@ -52,10 +52,10 @@ const AppSidebar = () => {
           />
         </SidebarContent>
       </SidebarContent>
-      <SidebarFooter className="border border-t-1 py-3 px-4">
-        <div className="flex items-center justify-center gap-1">
+      <SidebarFooter className="py-3 px-4">
+        <div className="flex items-center gap-1">
           <img src={Logo} alt="Logo" className="w-17 h-17" />
-          <span className="font-semibold text-2xl md:text-xl">SDO-ACTS</span>
+          <span className="font-semibold text-xl">SDO-ACTS</span>
         </div>
       </SidebarFooter>
     </Sidebar>
@@ -75,9 +75,9 @@ const SidebarSection = ({ label, items, permissions, basePath }) => (
               <SidebarMenuItem
                 key={item.title}
                 className={clsx(
-                  "py-0.5 rounded-md transition-[border] duration-150 hover:bg-sidebar-accent",
+                  "py-0.5 rounded-md transition-[border] duration-150",
                   {
-                    "bg-primary-100 text-primary font-bold border-l-7 border-primary":
+                    "bg-white text-primary font-bold border-l-7 border-[var(--sdo-secondary)]":
                       isActive,
                   }
                 )}

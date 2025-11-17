@@ -33,16 +33,39 @@ export const getAllServices = async (req, res) => {
   }
 };
 
+export const getServicesByDepartment = async (req, res) => {
+  try {
+    const { departmentId } = req.params;
+
+    if (!departmentId) {
+      return res.status(400).json({
+        success: false,
+        message: "Department ID is required",
+      });
+    }
+
+    const services = await Service.findAll({
+      where: { department_id: departmentId },
+      order: [["name", "ASC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: services,
+      message: "Services fetched successfully!",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Services failed to fetch.",
+    });
+  }
+};
+
 export const createService = async (req, res) => {
   try {
     const service = req.body;
-
-    // if (!name) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Name is required.",
-    //   });
-    // }
 
     const createdService = await Service.create({
       ...service,

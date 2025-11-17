@@ -14,26 +14,26 @@ export const useServiceMutations = () => {
     },
   });
 
-  const updateDepartment = useMutation({
-    mutationFn: ({ id, department }) =>
-      departmentsService.update(id, department),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["departments"]);
-    },
-    onError: (error) => {
-      console.error("Update Department Error:", error);
-    },
-  });
+  // const updateDepartment = useMutation({
+  //   mutationFn: ({ id, department }) =>
+  //     departmentsService.update(id, department),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries(["departments"]);
+  //   },
+  //   onError: (error) => {
+  //     console.error("Update Department Error:", error);
+  //   },
+  // });
 
-  const deleteDepartment = useMutation({
-    mutationFn: (id) => departmentsService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["departments"]);
-    },
-    onError: (error) => {
-      console.error("Delete Department Error:", error);
-    },
-  });
+  // const deleteDepartment = useMutation({
+  //   mutationFn: (id) => departmentsService.delete(id),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries(["departments"]);
+  //   },
+  //   onError: (error) => {
+  //     console.error("Delete  Error:", error);
+  //   },
+  // });
 
-  return { createService, deleteDepartment, updateDepartment };
+  return { createService };
 };

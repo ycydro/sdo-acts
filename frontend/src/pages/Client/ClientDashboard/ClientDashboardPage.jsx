@@ -1,10 +1,13 @@
 import React from "react";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Plus, History, Ticket } from "lucide-react";
 
 const ClientDashboardPage = () => {
+  const navigate = useNavigate();
+
   return (
     <main className="w-full space-y-5">
       <h2 className="hidden text-3xl font-semibold lg:block">Quick Actions</h2>
@@ -20,7 +23,10 @@ const ClientDashboardPage = () => {
               <p className="text-gray-600 text-sm">Submit service request</p>
             </div>
 
-            <Button className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full">
+            <Button
+              onClick={() => navigate("/request-ticket")}
+              className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full"
+            >
               Create Ticket
             </Button>
           </CardContent>

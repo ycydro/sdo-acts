@@ -6,6 +6,11 @@ export const servicesService = {
     return response.data;
   },
 
+  getByDepartment: async (departmentId) => {
+    const response = await axios.get(`/service/department/${departmentId}`);
+    return response.data;
+  },
+
   create: async (data) => {
     const response = await axios.post("/service", data);
     return response.data;

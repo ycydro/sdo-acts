@@ -89,7 +89,11 @@ const RequestTicketForm = () => {
   }, [selectedDepartmentID, form]);
 
   const onSubmit = (data) => {
-    console.log("Form submitted:", data);
+    const submitData = {
+      ...data,
+      date: data.date ? format(data.date, "yyyy-MM-dd") : null,
+    };
+    console.log("Form submitted:", submitData);
   };
 
   return (
@@ -245,9 +249,7 @@ const RequestTicketForm = () => {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date() || date < new Date("2000-01-01")
-                    }
+                    disabled={(date) => date <= new Date()}
                     initialFocus
                   />
                 </PopoverContent>

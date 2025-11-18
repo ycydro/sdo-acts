@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { requestTicketSchema } from "../../../validations/requestTicketSchema";
 import clsx from "clsx";
 import { format } from "date-fns";
 
@@ -28,6 +29,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -48,10 +50,11 @@ const RequestTicketForm = () => {
     useDepartments();
 
   const form = useForm({
+    resolver: zodResolver(requestTicketSchema),
     defaultValues: {
       department_id: "",
       service_id: "",
-      subject: "",
+      details: "",
       classification: "",
       date: "",
     },
@@ -192,15 +195,15 @@ const RequestTicketForm = () => {
             </Field>
           )}
         />
-        {/* Subject */}
+        {/* Details */}
         <Controller
           control={form.control}
-          name="subject"
+          name="details"
           render={({ field, fieldState: { error } }) => (
             <Field className="col-span-2">
               <FieldLabel className="flex items-center gap-2">
                 <BookText className="w-4 h-4 text-gray-700" />
-                Subject
+                Details
               </FieldLabel>
               <Textarea
                 placeholder="Brief description of your issue"

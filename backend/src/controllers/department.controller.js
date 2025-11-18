@@ -51,12 +51,15 @@ export const createDepartment = async (req, res) => {
       });
     }
 
-    const department = await Department.create({
-      name,
-      description,
-      status: status || "active",
-      department_code: upperCasedDeptCode,
-    });
+    const department = await Department.create(
+      {
+        name,
+        description,
+        status: status || "active",
+        department_code: upperCasedDeptCode,
+      },
+      { transaction }
+    );
 
     await transaction.commit();
     res.status(201).json({
@@ -90,7 +93,7 @@ export const updateDepartment = async (req, res) => {
         status: status || "active",
         department_code: upperCasedDeptCode,
       },
-      { where: { id } }
+      { where: { id }, transaction }
     );
 
     await transaction.commit();
@@ -118,9 +121,10 @@ export const deleteDepartment = async (req, res) => {
       where: {
         id,
       },
+      transaction,
     });
     await transaction.commit();
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Department deleted successfully!",
     });

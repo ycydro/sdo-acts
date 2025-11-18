@@ -1,9 +1,9 @@
 export function formatTimeDisplay(days, hours, minutes) {
   const parts = [];
   if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
-  if (hours > 0) parts.push(`${hours} hour${hours > 1 ? "s" : ""}`);
-  if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? "s" : ""}`);
-  return parts.join(" and ") || "0 minutes";
+  if (hours > 0) parts.push(`${hours} hr${hours > 1 ? "s" : ""}`);
+  if (minutes > 0) parts.push(`${minutes} min${minutes > 1 ? "s" : ""}`);
+  return parts.join(" ") || "0 minutes";
 }
 
 export function convertToMinutes(days, hours, minutes) {

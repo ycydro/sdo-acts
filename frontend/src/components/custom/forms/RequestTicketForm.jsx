@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import clsx from "clsx";
+import { format } from "date-fns";
 
 import {
+  CalendarIcon,
   Building2,
   ClipboardList,
   BookText,
@@ -12,9 +15,12 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 import { Textarea } from "@/components/ui/textarea";
-
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Field,
   FieldDescription,
@@ -23,6 +29,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+
 import {
   Select,
   SelectContent,
@@ -45,6 +53,7 @@ const RequestTicketForm = () => {
       service_id: "",
       subject: "",
       classification: "",
+      date: "",
     },
   });
 
@@ -209,6 +218,40 @@ const RequestTicketForm = () => {
                 Priority Level
               </FieldLabel>
               <Input readOnly className="bg-gray-100" {...field} />
+              {error && <FieldError>{error.message}</FieldError>}
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={form.control}
+          name="date"
+          render={({ field, fieldState: { error } }) => (
+            <Field>
+              <FieldLabel className="flex items-center gap-2">Date</FieldLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="input">
+                    {field.value ? (
+                      format(field.value, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("2000-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               {error && <FieldError>{error.message}</FieldError>}
             </Field>
           )}

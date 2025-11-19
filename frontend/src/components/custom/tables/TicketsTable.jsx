@@ -4,6 +4,7 @@ import DataTable from "./DataTable";
 import { usePagination } from "../../../hooks/usePagination";
 import { Badge } from "@/components/ui/badge";
 import { ticketsService } from "@/api/services/ticketsService";
+import { useDepartments } from "@/hooks/queries/department/useDepartments";
 
 const TicketsTable = () => {
   const { pagination, setPagination } = usePagination();
@@ -39,6 +40,9 @@ const TicketsTable = () => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
 
+  const { data: departments, isLoading: isDepartmentsLoading } =
+    useDepartments();
+
   const filterConfig = useMemo(() => {
     return [
       {
@@ -49,8 +53,18 @@ const TicketsTable = () => {
           { value: "Closed", label: "Closed" },
         ],
       },
+      {
+        key: "department_id",
+        label: "Departments",
+        options:
+          departments?.data?.map((department) => ({
+            value: department.id,
+            label: department.name,
+          })) || [],
+        disabled: isDepartmentsLoading,
+      },
     ];
-  }, []);
+  }, [departments, isDepartmentsLoading]);
 
   const columns = useMemo(
     () => [
@@ -96,16 +110,7 @@ const TicketsTable = () => {
           const details = info.getValue();
           const displayText = details ? details : "No Details.";
           return (
-            <div
-              className="truncate"
-              title={details}
-              style={{
-                maxWidth: "300px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <div className="truncate" title={details}>
               {displayText}
             </div>
           );

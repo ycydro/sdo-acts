@@ -165,13 +165,17 @@ const DataTable = ({
                 value={filters[filter.key] || "all"}
                 onValueChange={(value) => handleFilterChange(filter.key, value)}
               >
-                <SelectTrigger className="w-[130px] h-8">
+                <SelectTrigger className="max-w-[220px] h-8">
                   <SelectValue placeholder={`All ${filter.label}`} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All {filter.label}</SelectItem>
                   {filter.options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem
+                      className="truncate"
+                      key={option.value}
+                      value={option.value}
+                    >
                       {option.label}
                     </SelectItem>
                   ))}

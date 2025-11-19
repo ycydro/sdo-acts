@@ -10,6 +10,7 @@ export const getAllTickets = async (req, res) => {
       limit = 10,
       search = "",
       status = "", // galing buildqueryparams
+      department_id = "", // galing buildqueryparams
     } = req.query;
 
     const pageNum = parseInt(page);
@@ -34,6 +35,11 @@ export const getAllTickets = async (req, res) => {
     // status filter
     if (status) {
       whereConditions.status = status;
+    }
+
+    // department_id filter
+    if (department_id) {
+      whereConditions["$service.department_id$"] = department_id;
     }
 
     console.log("🔍 Sequelize where conditions:", whereConditions);
@@ -75,6 +81,7 @@ export const getAllTickets = async (req, res) => {
       order: [["createdAt", "DESC"]],
       offset: offset,
       limit: limitNum,
+      distinct: true,
     });
 
     return res.status(200).json({

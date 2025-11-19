@@ -90,10 +90,25 @@ const TicketsTable = () => {
         accessorKey: "details",
         header: "Details",
         size: 100,
+        minSize: 100,
+        maxSize: 100,
         cell: (info) => {
           const details = info.getValue();
           const displayText = details ? details : "No Details.";
-          return <div className="truncate">{displayText}</div>;
+          return (
+            <div
+              className="truncate"
+              title={details}
+              style={{
+                maxWidth: "300px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {displayText}
+            </div>
+          );
         },
       },
       {

@@ -6,7 +6,7 @@ const env = {
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000/",
 
   DB_HOST: process.env.DB_HOST,
-  DB_NAME: process.env.DB_NAME,
+  DB_NAME: process.env.DB,
   DB_USER: process.env.DB_USERNAME,
   DB_PASS: process.env.DB_PASSWORD,
 

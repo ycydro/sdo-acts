@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../configs/sequelize.config.js";
 
-const TicketCounter = sequelize.define("Ticket_Counter", {
+const TicketCounter = sequelize.define("ticket_counter", {
   id: {
     type: DataTypes.CHAR(36),
     allowNull: true,

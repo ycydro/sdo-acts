@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { requestTicketSchema } from "../../../validations/requestTicketSchema";
 import clsx from "clsx";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 import {
   CalendarIcon,
@@ -41,10 +42,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDepartments } from "../../../hooks/queries/department/useDepartments";
-import { useServicesByDepartment } from "../../../hooks/queries/service/useServicesByDepartment";
+import { useServicesByDepartment } from "@/hooks/queries/service/useServicesByDepartment";
+
+import { useAuth } from "@/context/AuthContext";
+import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
 
 const RequestTicketForm = () => {
   const navigate = useNavigate();
+
+  const { user } = useAuth();
 
   const { data: departments, isLoading: isDepartmentsLoading } =
     useDepartments();
@@ -91,12 +97,25 @@ const RequestTicketForm = () => {
     }
   }, [selectedDepartmentID, form]);
 
-  const onSubmit = (data) => {
+  const { createTicket } = useTicketMutations();
+
+  const onSubmit = async (data) => {
     const submitData = {
       ...data,
-      date: data.date ? format(data.date, "yyyy-MM-dd") : null,
+      scheduled_date: data.date ? format(data.date, "yyyy-MM-dd") : null,
+      client_id: user.id,
+      is_online: true,
     };
     console.log("Form submitted:", submitData);
+    try {
+      await createTicket.mutateAsync(submitData);
+      toast.success("Ticket created successfully!");
+      form.reset();
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to create ticket.");
+    }
   };
 
   return (

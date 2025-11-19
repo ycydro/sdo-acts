@@ -63,7 +63,7 @@ Ticket.beforeCreate(async (ticket, options) => {
   }
 
   const deptId = service.department.id;
-  const deptCode = service.department.code; // e.g. "IT"
+  const deptCode = service.department.department_code; // e.g. "IT"
 
   // Lock the counter row for this department
   let counter = await TicketCounter.findOne({

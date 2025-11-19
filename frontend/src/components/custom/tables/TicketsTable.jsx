@@ -5,28 +5,12 @@ import { usePagination } from "../../../hooks/usePagination";
 import { Badge } from "@/components/ui/badge";
 import { ticketsService } from "@/api/services/ticketsService";
 import { useDepartments } from "@/hooks/queries/department/useDepartments";
+import { useTickets } from "@/hooks/queries/ticket/useTickets";
 
 const TicketsTable = () => {
   const { pagination, setPagination } = usePagination();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
-
-  const {
-    data: ticketsData,
-    isLoading: loading,
-    error,
-  } = useQuery({
-    queryKey: ["tickets", pagination, searchQuery, filters],
-    queryFn: () =>
-      ticketsService.getAll({
-        search: searchQuery,
-        filters: filters,
-        page: pagination.pageIndex,
-        limit: pagination.pageSize,
-      }),
-    keepPreviousData: true,
-    staleTime: 5000,
-  });
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -153,6 +137,12 @@ const TicketsTable = () => {
     ],
     []
   );
+
+  const {
+    data: ticketsData,
+    isLoading: loading,
+    error,
+  } = useTickets(pagination, searchQuery, filters);
 
   // Extract data from response
   const tickets = ticketsData?.data || [];

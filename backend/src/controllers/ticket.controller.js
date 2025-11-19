@@ -19,8 +19,6 @@ export const getAllTickets = async (req, res) => {
 
     const whereConditions = {};
 
-    console.log(search, status);
-
     // search
     if (search && search.trim() != "") {
       const searchText = search.trim();

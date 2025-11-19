@@ -4,7 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { requestTicketSchema } from "../../../validations/requestTicketSchema";
 import clsx from "clsx";
-import { format } from "date-fns";
+import { format, isSunday, isSaturday } from "date-fns";
 import { toast } from "sonner";
 
 import {
@@ -271,7 +271,7 @@ const RequestTicketForm = () => {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) => date <= new Date()}
+                    disabled={(date) => date <= new Date()|| isSunday(date) || isSaturday(date)}
                     initialFocus
                   />
                 </PopoverContent>

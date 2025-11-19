@@ -222,9 +222,17 @@ const DataTable = ({
         <Table>
           <TableHeader className="bg-primary">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow c className="hover:bg-transparent" key={headerGroup.id}>
+              <TableRow className="hover:bg-transparent" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead className="text-white text-center" key={header.id}>
+                  <TableHead
+                    className="text-white text-center"
+                    key={header.id}
+                    style={{
+                      width: header.getSize(),
+                      minWidth: header.column.columnDef.minSize,
+                      maxWidth: header.column.columnDef.maxSize,
+                    }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -256,7 +264,15 @@ const DataTable = ({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell className="text-center" key={cell.id}>
+                    <TableCell
+                      className="text-center"
+                      key={cell.id}
+                      style={{
+                        width: cell.column.getSize(),
+                        minWidth: cell.column.columnDef.minSize,
+                        maxWidth: cell.column.columnDef.maxSize,
+                      }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

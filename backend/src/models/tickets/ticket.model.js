@@ -1,10 +1,11 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../../configs/sequelize.config.js";
+import { Service, TicketCounter, Department } from "../index.js";
 
 const Ticket = sequelize.define("ticket", {
   id: {
     type: DataTypes.CHAR(36),
-    allowNull: true,
+    allowNull: false,
     primaryKey: true,
     defaultValue: DataTypes.UUIDV4,
   },
@@ -15,19 +16,31 @@ const Ticket = sequelize.define("ticket", {
   status: {
     type: DataTypes.CHAR,
   },
-  title: {
-    type: DataTypes.STRING,
-  },
-  description: {
+  // title: {
+  //   type: DataTypes.STRING,
+  // },
+  details: {
     type: DataTypes.TEXT,
   },
   start_date: {
     type: DataTypes.DATE,
-    allowNull: false,
   },
   end_date: {
     type: DataTypes.DATE,
+  },
+  scheduled_date: {
+    type: DataTypes.DATE,
+  },
+  is_online: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
+  },
+  client_id: {
+    type: DataTypes.CHAR(36), // CHAR(36) for UUID
+    allowNull: false,
+  },
+  assignee_id: {
+    type: DataTypes.CHAR(36), // CHAR(36) for UUID
   },
   service_id: {
     type: DataTypes.CHAR(36), // CHAR(36) for UUID
@@ -36,44 +49,43 @@ const Ticket = sequelize.define("ticket", {
 });
 
 // hook for generating ticket_code
-// Ticket.beforeCreate(async (ticket, options) => {
-//   const transaction = options.transaction;
+Ticket.beforeCreate(async (ticket, options) => {
+  const transaction = options.transaction;
 
-//   Get service + department
-//   const service = await Service.findByPk(ticket.service_id, {
-//     include: [{ model: Department }],
-//     transaction,
-//   });
+  // Get service + department
+  const service = await Service.findByPk(ticket.service_id, {
+    include: [{ model: Department }],
+    transaction,
+  });
 
-//   if (!service || !service.department) {
-//     throw new Error("Invalid service_id – department not found.");
-//   }
+  if (!service || !service.department) {
+    throw new Error("Invalid service_id – department not found.");
+  }
 
-//   const deptId = service.department.id;
-//   const deptCode = service.department.code; // e.g. "IT"
+  const deptId = service.department.id;
+  const deptCode = service.department.code; // e.g. "IT"
 
-//   Lock the counter row for this department
-//   let counter = await TicketCounter.findOne({
-//     where: { department_id: deptId },
-//     transaction,
-//     lock: transaction.LOCK.UPDATE, // prevents race conditions
-//   });
+  // Lock the counter row for this department
+  let counter = await TicketCounter.findOne({
+    where: { department_id: deptId },
+    transaction,
+    lock: transaction.LOCK.UPDATE, // prevents race conditions
+  });
 
-//
-//   if (!counter) {
-//     counter = await TicketCounter.create(
-//       { department_id: deptId, next_number: 1 },
-//       { transaction }
-//     );
-//   }
+  if (!counter) {
+    counter = await TicketCounter.create(
+      { department_id: deptId, next_number: 1 },
+      { transaction }
+    );
+  }
 
-//   Generate ticket_code using the current counter
-//   const ticketNumber = counter.next_number;
-//   ticket.ticket_code = `${deptCode}-${String(ticketNumber).padStart(5, "0")}`;
+  // Generate ticket_code using the current counter
+  const ticketNumber = counter.next_number;
+  ticket.ticket_code = `${deptCode}-${String(ticketNumber).padStart(5, "0")}`;
 
-//   Increment counter for next time
-//   counter.next_number += 1;
-//   await counter.save({ transaction });
-// });
+  // Increment counter for next time
+  counter.next_number += 1;
+  await counter.save({ transaction });
+});
 
 export default Ticket;

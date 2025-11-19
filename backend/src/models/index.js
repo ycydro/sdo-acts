@@ -8,6 +8,9 @@ import RolePermission from "./users/role_permission.model.js";
 import Department from "./departments/department.model.js";
 import Service from "./departments/service.model.js";
 
+// TICKET RELATED
+import Ticket from "./tickets/ticket.model.js";
+import TicketCounter from "./tickets/ticket-counter.model.js";
 // USER
 User.belongsTo(Role, {
   foreignKey: "role_id",
@@ -42,6 +45,47 @@ Service.belongsTo(Department, {
   foreignKey: "department_id",
 });
 
+// TICKET RELATED
+Department.hasOne(TicketCounter, {
+  foreignKey: "department_id",
+  as: "ticketCounter",
+});
+
+TicketCounter.belongsTo(Department, {
+  foreignKey: "department_id",
+  as: "department",
+});
+
+Service.hasMany(Ticket, {
+  foreignKey: "service_id",
+  as: "tickets",
+});
+
+Ticket.belongsTo(Service, {
+  foreignKey: "service_id",
+  as: "service",
+});
+
+User.hasMany(Ticket, {
+  foreignKey: "client_id",
+  as: "clientTickets",
+});
+
+Ticket.belongsTo(User, {
+  foreignKey: "client_id",
+  as: "client",
+});
+
+User.hasMany(Ticket, {
+  foreignKey: "assignee_id",
+  as: "assignedTickets",
+});
+
+Ticket.belongsTo(User, {
+  foreignKey: "assignee_id",
+  as: "assignee",
+});
+
 export {
   // USER
   User,
@@ -52,4 +96,8 @@ export {
   // DEPARTMENT
   Department,
   Service,
+
+  // TICKET
+  Ticket,
+  TicketCounter,
 };

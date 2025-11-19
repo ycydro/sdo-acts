@@ -1,26 +1,61 @@
 import sequelize from "../configs/sequelize.config.js";
 
-import { Ticket } from "../models/index.js";
+import { Ticket, Service, Department, User } from "../models/index.js";
 
-// export const getAllDepartments = async (req, res) => {
-//   try {
-//     const departments = await Department.findAll({
-//       order: [["createdAt", "DESC"]],
-//     });
+export const getAllTickets = async (req, res) => {
+  try {
+    const { count, rows: tickets } = await Ticket.findAndCountAll({
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: {
+            exclude: [
+              "createdAt",
+              "updatedAt",
+              "description",
+              "status",
+              "department_id",
+            ],
+          },
+          include: [
+            {
+              model: Department,
+              attributes: ["id", "name", "department_code"],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: "assignee",
+          attributes: ["id", "first_name", "last_name"],
+        },
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+      offset: 0,
+      // limit: 0,
+    });
 
-//     return res.status(200).json({
-//       success: true,
-//       data: departments,
-//       message: "Departments fetched successfuly!",
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({
-//       success: false,
-//       message: "Department failed to fetch.",
-//     });
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      count,
+      data: tickets,
+      message: "Tickets fetched successfuly!",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Department failed to fetch.",
+    });
+  }
+};
 
 export const createTicket = async (req, res) => {
   const transaction = await sequelize.transaction();

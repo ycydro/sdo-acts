@@ -1,23 +1,16 @@
+import { buildQueryParams } from "@/lib/buildQueryParams";
 import axios from "../axios";
 
 export const ticketsService = {
-  //   getAll: async () => {
-  //     const response = await axios.get("/service");
-  //     return response.data;
-  //   },
+  getAll: async ({ search, filters, page, limit }) => {
+    const params = buildQueryParams({ search, filters, page, limit });
+    const response = await axios.get("/ticket", { params });
+
+    return response.data;
+  },
 
   create: async (data) => {
     const response = await axios.post("/ticket", data);
     return response.data;
   },
-
-  //   update: async (id, service) => {
-  //     const response = await axios.put(`/service/${id}`, service);
-  //     return response.data;
-  //   },
-
-  //   delete: async (id) => {
-  //     const response = await axios.delete(`/service/${id}`);
-  //     return response.data;
-  //   },
 };

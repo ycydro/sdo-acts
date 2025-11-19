@@ -1,10 +1,45 @@
 import sequelize from "../configs/sequelize.config.js";
 
 import { Ticket, Service, Department, User } from "../models/index.js";
+import { Op, Sequelize } from "sequelize";
 
 export const getAllTickets = async (req, res) => {
   try {
+    const {
+      page = 0,
+      limit = 10,
+      search = "",
+      status = "", // galing buildqueryparams
+    } = req.query;
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = pageNum * limitNum;
+
+    const whereConditions = {};
+
+    console.log(search, status);
+
+    // search
+    if (search && search.trim() != "") {
+      const searchText = search.trim();
+      whereConditions[Op.or] = [
+        { ticket_code: { [Op.like]: `%${searchText}%` } },
+        { "$service.name$": { [Op.like]: `%${searchText}%` } },
+        { "$client.first_name$": { [Op.like]: `%${searchText}%` } },
+        { "$client.last_name$": { [Op.like]: `%${searchText}%` } },
+      ];
+    }
+
+    // status filter
+    if (status) {
+      whereConditions.status = status;
+    }
+
+    console.log("🔍 Sequelize where conditions:", whereConditions);
+
     const { count, rows: tickets } = await Ticket.findAndCountAll({
+      where: whereConditions,
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
@@ -38,25 +73,27 @@ export const getAllTickets = async (req, res) => {
         },
       ],
       order: [["createdAt", "DESC"]],
-      offset: 0,
-      // limit: 0,
+      offset: offset,
+      limit: limitNum,
     });
 
     return res.status(200).json({
       success: true,
       count,
       data: tickets,
-      message: "Tickets fetched successfuly!",
+      totalPages: Math.ceil(count / limitNum),
+      currentPage: pageNum,
+      message: "Tickets fetched successfully!",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Internal ServerError:", error);
     return res.status(500).json({
       success: false,
-      message: "Department failed to fetch.",
+      message: "Tickets failed to fetch.",
+      error: error.message,
     });
   }
 };
-
 export const createTicket = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {

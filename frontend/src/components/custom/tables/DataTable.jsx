@@ -59,6 +59,7 @@ const DataTable = ({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    enableColumnResizing: true,
   });
 
   const handleSearch = (value) => {
@@ -142,7 +143,7 @@ const DataTable = ({
   return (
     <div className="space-y-4">
       {/* Search and Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         {/* Search Input */}
         {onSearch && (
           <Input
@@ -219,11 +220,11 @@ const DataTable = ({
       {/* Table */}
       <div className="rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-primary">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow c className="hover:bg-transparent" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead className="text-white text-center" key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -255,7 +256,7 @@ const DataTable = ({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell className="text-center" key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -300,7 +301,7 @@ const DataTable = ({
                 />
               </SelectTrigger>
               <SelectContent side="top">
-                {[10, 20, 50, 100].map((pageSize) => (
+                {[5, 10, 20, 50, 100].map((pageSize) => (
                   <SelectItem key={pageSize} value={pageSize.toString()}>
                     {pageSize}
                   </SelectItem>

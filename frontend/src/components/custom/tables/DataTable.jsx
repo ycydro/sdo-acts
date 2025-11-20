@@ -189,13 +189,13 @@ const DataTable = ({
         </div>
         {/* Search Input */}
         {onSearch && (
-          <div className="relative flex items-center">
+          <div className="relative flex items-center w-sm max-w-md">
             <Search className="absolute left-3 h-4 w-4 text-gray-400" />
             <Input
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="max-w-md pl-10 pr-13"
+              className="pl-10 pr-13"
             />
           </div>
         )}
@@ -324,7 +324,7 @@ const DataTable = ({
                 table.setPageSize(Number(value));
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-fit">
                 <SelectValue
                   placeholder={table.getState().pagination.pageSize}
                 />

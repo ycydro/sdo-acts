@@ -37,7 +37,7 @@ export const getAllTickets = async (req, res) => {
       whereConditions.status = status;
     }
 
-    if (user.role === "Staff") {
+    if (user.department_id) {
       whereConditions["$service.department_id$"] = user.department_id;
     } else if (department_id) {
       whereConditions["$service.department_id$"] = department_id;

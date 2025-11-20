@@ -1,13 +1,38 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
 import DataTable from "./DataTable";
 import { usePagination } from "../../../hooks/usePagination";
 import { Badge } from "@/components/ui/badge";
-import { ticketsService } from "@/api/services/ticketsService";
 import { useDepartments } from "@/hooks/queries/department/useDepartments";
 import { useTickets } from "@/hooks/queries/ticket/useTickets";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Ellipsis, Eye } from "lucide-react";
+import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
 
 const TicketsTable = () => {
+  const [activeModal, setActiveModal] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+
+  const handleOpenModal = (ticket, modalType) => {
+    setSelectedTicket(ticket);
+    setActiveModal(modalType);
+  };
+
+  const handleCloseModal = () => {
+    setActiveModal(null);
+  };
+
+  const { user } = useAuth();
+
+  const isAdmin = user?.role === "Superadmin";
+
   const { pagination, setPagination } = usePagination();
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
@@ -28,16 +53,19 @@ const TicketsTable = () => {
     useDepartments();
 
   const filterConfig = useMemo(() => {
-    return [
+    const filters = [
       {
         key: "status",
         label: "Status",
         options: [
           { value: "Open", label: "Open" },
-          { value: "Closed", label: "Closed" },
+          { value: "Resolved", label: "Resolved" },
         ],
       },
-      {
+    ];
+
+    if (isAdmin) {
+      filters.push({
         key: "department_id",
         label: "Departments",
         options:
@@ -46,9 +74,11 @@ const TicketsTable = () => {
             label: department.name,
           })) || [],
         disabled: isDepartmentsLoading,
-      },
-    ];
-  }, [departments, isDepartmentsLoading]);
+      });
+    }
+
+    return filters;
+  }, [departments, isDepartmentsLoading, user?.role]);
 
   const columns = useMemo(
     () => [
@@ -130,7 +160,7 @@ const TicketsTable = () => {
           const status = info.getValue();
           const statusColors = {
             Open: "bg-blue-100 text-blue-800",
-            Closed: "bg-red-100 text-red-800",
+            Resolved: "bg-yellow-100 text-yellow-800",
           };
 
           return (
@@ -141,6 +171,38 @@ const TicketsTable = () => {
             >
               {status}
             </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: "id",
+        header: "Action",
+        size: 300,
+        cell: (info) => {
+          const ticket = info.row.original;
+          const id = info.getValue();
+
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 -mt-1 hover:text-primary"
+                >
+                  <span className="sr-only">Open menu</span>
+                  <Ellipsis />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="left">
+                <DropdownMenuItem
+                  onClick={() => handleOpenModal(ticket, "view-details")}
+                >
+                  <Eye className="h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           );
         },
       },
@@ -180,11 +242,19 @@ const TicketsTable = () => {
         pagination={pagination}
         onPaginationChange={setPagination}
         onSearch={handleSearch}
-        searchPlaceholder="Search by ticket code..."
+        searchPlaceholder="Search by ticket code, service, or status..."
         filters={filters}
         onFiltersChange={handleFiltersChange}
         filterConfig={filterConfig}
         loading={loading}
+      />
+      <ViewTicketDetailsModal
+        ticket={selectedTicket}
+        open={activeModal === "view-details"}
+        onOpenChange={(open) => {
+          if (!open) handleCloseModal();
+        }}
+        onClose={() => setSelectedTicket(null)}
       />
     </div>
   );

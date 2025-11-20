@@ -102,6 +102,67 @@ export const getAllTickets = async (req, res) => {
     });
   }
 };
+
+export const getTicketStatusCount = async (req, res) => {
+  try {
+    const user = req.user;
+
+    const whereConditions = {};
+
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    if (user.department_id) {
+      whereConditions["$service.department_id$"] = user.department_id;
+    }
+
+    const result = await Ticket.findAll({
+      attributes: [
+        [Sequelize.col("Ticket.status"), "status"],
+        [Sequelize.fn("COUNT", Sequelize.col("Ticket.status")), "count"],
+      ],
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: [],
+        },
+      ],
+      where: whereConditions,
+      group: ["Ticket.status"],
+    });
+
+    const counts = {
+      "Unapproved Tickets": 0,
+      "Pending Tickets": 0,
+      "Open Tickets": 0,
+      "Resolved Tickets": 0,
+    };
+
+    result.forEach((row) => {
+      const status = row.getDataValue("status");
+      const count = Number(row.getDataValue("count"));
+
+      if (status === "Unapproved") counts["Unapproved Tickets"] = count;
+      else if (status === "Pending") counts["Pending Tickets"] = count;
+      else if (status === "Open") counts["Open Tickets"] = count;
+      else if (status === "Resolved") counts["Resolved Tickets"] = count;
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: counts,
+      message: "Ticket status count fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Internal ServerError:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Ticket status count failed to fetch.",
+      error: error.message,
+    });
+  }
+};
+
 export const createTicket = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {

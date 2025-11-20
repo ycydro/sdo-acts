@@ -9,6 +9,11 @@ export const ticketsService = {
     return response.data;
   },
 
+  getTicketStatusCount: async () => {
+    const response = await axios.get("/ticket/ticket-status-count");
+    return response.data;
+  },
+
   create: async (data) => {
     const response = await axios.post("/ticket", data);
     return response.data;

@@ -1,4 +1,6 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTicketStatusCount } from "@/hooks/queries/ticket/useTicketStatusCount";
+
 import { Ticket } from "lucide-react";
 import { LoaderIcon } from "lucide-react";
 
@@ -6,17 +8,15 @@ export const TicketStatusCountList = () => {
   const { data: statusCounts, isLoading: isStatusCountLoading } =
     useTicketStatusCount();
   return (
-    <div className="w-full">
+    <div className="w-full flex justify-between gap-5">
       {isStatusCountLoading ? (
-        <div className="flex justify-center items-center w-full">
-          <LoaderIcon className="animate-spin w-10 h-10 text-primary" />
-        </div>
+        Array.from({ length: 4 }).map((_, idx) => (
+          <Skeleton key={idx} className="p-5 h-[90px] flex-1" />
+        ))
       ) : statusCounts?.data && Object.keys(statusCounts.data).length > 0 ? (
-        <div className="flex justify-between gap-5">
-          {Object.entries(statusCounts.data).map(([status, count]) => (
-            <TicketStatusCount key={status} status={status} count={count} />
-          ))}
-        </div>
+        Object.entries(statusCounts.data).map(([status, count]) => (
+          <TicketStatusCount key={status} status={status} count={count} />
+        ))
       ) : (
         <div>No data available</div>
       )}

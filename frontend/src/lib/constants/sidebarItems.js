@@ -11,7 +11,7 @@ export const overviewItems = [
     title: "Dashboard",
     url: "/dashboard",
     icon: LayoutDashboard,
-    permission: "view_departments",
+    permission: "view_main",
   },
 ];
 
@@ -32,7 +32,7 @@ export const ticketingItems = [
     title: "Services",
     url: "/services",
     icon: Hammer,
-    permission: "view_main",
+    permission: "view_departments",
   },
 ];
 

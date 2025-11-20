@@ -30,6 +30,8 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Trash2,
+  Search,
 } from "lucide-react";
 
 const DataTable = ({
@@ -143,17 +145,7 @@ const DataTable = ({
   return (
     <div className="space-y-4">
       {/* Search and Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        {/* Search Input */}
-        {onSearch && (
-          <Input
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="max-w-sm"
-          />
-        )}
-
+      <div className="flex flex-col sm:flex-row gap-4 items-start justify-between sm:items-center">
         {/* Filters */}
         <div className="flex flex-wrap gap-2 items-center">
           {filterConfig.map((filter) => (
@@ -183,7 +175,6 @@ const DataTable = ({
               </Select>
             </div>
           ))}
-
           {hasActiveFilters && (
             <Button
               variant="outline"
@@ -191,10 +182,23 @@ const DataTable = ({
               onClick={clearAllFilters}
               className="h-8"
             >
+              <Trash2 />
               Clear Filters
             </Button>
           )}
         </div>
+        {/* Search Input */}
+        {onSearch && (
+          <div className="relative flex items-center">
+            <Search className="absolute left-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="max-w-md pl-10 pr-13"
+            />
+          </div>
+        )}
       </div>
 
       {/* Active Filters Display */}
@@ -207,11 +211,16 @@ const DataTable = ({
               (opt) => opt.value === value
             );
             return (
-              <Badge key={key} variant="secondary" className="px-2 py-1">
+              <Badge
+                key={key}
+                variant="secondary"
+                className="cursor-pointer px-2 py-1"
+                onClick={() => removeFilter(key)}
+              >
                 {filterConfigItem?.label}: {option?.label || value}
                 <button
                   onClick={() => removeFilter(key)}
-                  className="ml-1 hover:text-destructive"
+                  className="cursor-pointer ml-1 hover:text-destructive"
                 >
                   <X className="h-3 w-3" />
                 </button>

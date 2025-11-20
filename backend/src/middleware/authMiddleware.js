@@ -1,11 +1,10 @@
-// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
 import { User, Role, Permission } from "../models/index.js";
 import env from "../configs/env.js";
 
 const authenticate = async (req, res, next) => {
   try {
-    // 1. Get token from header
+    // get token from header
     const token = req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
@@ -14,12 +13,12 @@ const authenticate = async (req, res, next) => {
         .json({ message: "No token, authorization denied" });
     }
 
-    // 2. Verify token
+    // verify token
     const decoded = jwt.verify(token, env.JWT_SECRET);
 
-    // 3. Find user in database
+    // find user in database
     const user = await User.findByPk(decoded.id, {
-      attributes: { exclude: ["password", "createdAt", "updatedAt"] }, // Don't send password
+      attributes: { exclude: ["password", "createdAt", "updatedAt"] },
       include: [
         {
           model: Role,
@@ -39,13 +38,13 @@ const authenticate = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: "Token is not valid" });
     }
+
     // extract role and permissions
     const roleName = user.role.name;
     const permissions = user.role.permissions.map((p) => p.name);
 
     const authenticatedUser = {
       id: user.id,
-      email: user.email,
       role: roleName,
       department_id: user.department_id,
       permissions,
@@ -53,10 +52,9 @@ const authenticate = async (req, res, next) => {
 
     console.log(authenticatedUser, "USER FROM AUTH MIDDLEWARE");
 
-    // 4. Attach user to request object
     req.user = authenticatedUser;
 
-    next(); // Continue to the next middleware/route
+    next();
   } catch (error) {
     console.error("Auth middleware error:", error);
     res.status(401).json({ message: "Token is not valid" });

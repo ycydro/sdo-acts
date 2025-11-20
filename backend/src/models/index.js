@@ -36,6 +36,16 @@ Permission.belongsToMany(Role, {
   as: "roles",
 });
 
+User.belongsTo(Department, {
+  foreignKey: "department_id",
+  as: "department",
+});
+
+Department.hasMany(User, {
+  foreignKey: "department_id",
+  as: "users",
+});
+
 // DEPARTMENT
 Department.hasMany(Service, {
   foreignKey: "department_id",

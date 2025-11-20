@@ -32,6 +32,12 @@ const User = sequelize.define("user", {
     type: DataTypes.CHAR(36), // CHAR(36) for UUID
     allowNull: false,
   },
+
+  // FOR CLIENT AND ADMINS, NULLABLE DEPT ID
+  department_id: {
+    type: DataTypes.CHAR(36), // CHAR(36) for UUID
+    allowNull: true,
+  },
 });
 
 export default User;

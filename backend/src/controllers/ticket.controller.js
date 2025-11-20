@@ -13,6 +13,8 @@ export const getAllTickets = async (req, res) => {
       department_id = "", // galing buildqueryparams
     } = req.query;
 
+    const user = req.user;
+
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const offset = pageNum * limitNum;
@@ -35,8 +37,9 @@ export const getAllTickets = async (req, res) => {
       whereConditions.status = status;
     }
 
-    // department_id filter
-    if (department_id) {
+    if (user.role === "Staff") {
+      whereConditions["$service.department_id$"] = user.department_id;
+    } else if (department_id) {
       whereConditions["$service.department_id$"] = department_id;
     }
 

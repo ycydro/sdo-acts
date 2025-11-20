@@ -65,7 +65,7 @@ const TicketsTable = () => {
       {
         accessorKey: "client",
         header: "Client",
-        size: 150,
+        size: 100,
         cell: (info) => {
           const client = info.getValue();
           const clientName = client
@@ -77,7 +77,7 @@ const TicketsTable = () => {
       {
         accessorKey: "service",
         header: "Service",
-        size: 200,
+        maxSize: 400,
         cell: (info) => {
           const service = info.getValue();
           const serviceName = service?.name || "N/A";
@@ -85,11 +85,21 @@ const TicketsTable = () => {
         },
       },
       {
+        accessorKey: "service.department",
+        header: "Department",
+        maxSize: 125,
+        cell: (info) => {
+          const department = info.getValue();
+          const departmentCode = department?.department_code || "N/A";
+          return <div className="truncate">{departmentCode}</div>;
+        },
+      },
+      {
         accessorKey: "details",
         header: "Details",
         size: 100,
         minSize: 100,
-        maxSize: 100,
+        maxSize: 250,
         cell: (info) => {
           const details = info.getValue();
           const displayText = details ? details : "No Details.";

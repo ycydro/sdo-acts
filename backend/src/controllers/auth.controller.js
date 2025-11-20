@@ -41,6 +41,7 @@ export const login = async (req, res) => {
         id: user.id,
         role: roleName,
         permissions,
+        department_id: user.department_id,
       },
       env.JWT_SECRET,
       { expiresIn: "15d" }
@@ -54,6 +55,7 @@ export const login = async (req, res) => {
         email: user.email,
         role: roleName,
         permissions,
+        department_id: user.department_id,
       },
     });
   } catch (err) {

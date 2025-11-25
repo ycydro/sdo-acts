@@ -58,7 +58,8 @@ const TicketsTable = () => {
         key: "status",
         label: "Status",
         options: [
-          { value: "Open", label: "Open" },
+          { value: "Unapproved", label: "Unapproved" },
+          { value: "Ongoing", label: "Ongoing" },
           { value: "Resolved", label: "Resolved" },
         ],
       },
@@ -159,7 +160,8 @@ const TicketsTable = () => {
         cell: (info) => {
           const status = info.getValue();
           const statusColors = {
-            Open: "bg-blue-100 text-blue-800",
+            Unapproved: "bg-red-100 text-red-800",
+            Ongoing: "bg-blue-100 text-blue-800",
             Resolved: "bg-yellow-100 text-yellow-800",
           };
 

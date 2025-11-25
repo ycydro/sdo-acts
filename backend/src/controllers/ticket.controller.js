@@ -134,7 +134,7 @@ export const getTicketStatusCount = async (req, res) => {
     const counts = {
       "Unapproved Tickets": 0,
       "Pending Tickets": 0,
-      "Open Tickets": 0,
+      "Ongoing Tickets": 0,
       "Resolved Tickets": 0,
     };
 
@@ -144,7 +144,7 @@ export const getTicketStatusCount = async (req, res) => {
 
       if (status === "Unapproved") counts["Unapproved Tickets"] = count;
       else if (status === "Pending") counts["Pending Tickets"] = count;
-      else if (status === "Open") counts["Open Tickets"] = count;
+      else if (status === "Ongoing") counts["Ongoing Tickets"] = count;
       else if (status === "Resolved") counts["Resolved Tickets"] = count;
     });
 

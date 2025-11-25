@@ -14,6 +14,16 @@ export const useTicketMutations = () => {
     },
   });
 
+  const updateTicketStatus = useMutation({
+    mutationFn: (data) => ticketsService.changeTicketStatus(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["tickets"]);
+    },
+    onError: (error) => {
+      console.error("Update Ticket Error:", error);
+    },
+  });
+
   // const updateDepartment = useMutation({
   //   mutationFn: ({ id, department }) =>
   //     departmentsService.update(id, department),
@@ -35,5 +45,5 @@ export const useTicketMutations = () => {
   //   },
   // });
 
-  return { createTicket };
+  return { createTicket, updateTicketStatus };
 };

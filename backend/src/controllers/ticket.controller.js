@@ -198,6 +198,38 @@ export const createTicket = async (req, res) => {
   }
 };
 
+export const updateTicketStatus = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { ticketID, status } = req.body;
+
+    await Ticket.update(
+      {
+        status,
+      },
+      {
+        where: {
+          id: ticketID,
+        },
+        transaction,
+      }
+    );
+    await transaction.commit();
+    res.status(200).json({
+      success: true,
+      message: "Ticket status updated successfully!",
+    });
+  } catch (err) {
+    await transaction.rollback();
+    console.error("Error updating ticket:", err);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the ticket status.",
+      error: err.message,
+    });
+  }
+};
+
 // export const updateDepartment = async (req, res) => {
 //   const transaction = await sequelize.transaction();
 //   try {

@@ -18,4 +18,9 @@ export const ticketsService = {
     const response = await axios.post("/ticket", data);
     return response.data;
   },
+
+  changeTicketStatus: async (data) => {
+    const response = await axios.put("/ticket/update-ticket-status", data);
+    return response.data;
+  },
 };

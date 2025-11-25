@@ -15,6 +15,7 @@ import {
 
 import { Ellipsis, Eye } from "lucide-react";
 import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
+import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
 
 const TicketsTable = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -162,7 +163,8 @@ const TicketsTable = () => {
           const statusColors = {
             Unapproved: "bg-red-100 text-red-800",
             Ongoing: "bg-blue-100 text-blue-800",
-            Resolved: "bg-yellow-100 text-yellow-800",
+            Resolved: "bg-green-100 text-green-800",
+            "On-hold": "bg-orange-100 text-orange-800",
           };
 
           return (
@@ -202,6 +204,12 @@ const TicketsTable = () => {
                 >
                   <Eye className="h-4 w-4" />
                   View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleOpenModal(ticket, "change-status")}
+                >
+                  <Eye className="h-4 w-4" />
+                  Change Status
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -253,6 +261,14 @@ const TicketsTable = () => {
       <ViewTicketDetailsModal
         ticket={selectedTicket}
         open={activeModal === "view-details"}
+        onOpenChange={(open) => {
+          if (!open) handleCloseModal();
+        }}
+        onClose={() => setSelectedTicket(null)}
+      />
+      <ChangeTicketStatusModal
+        ticket={selectedTicket}
+        open={activeModal === "change-status"}
         onOpenChange={(open) => {
           if (!open) handleCloseModal();
         }}

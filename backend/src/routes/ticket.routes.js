@@ -3,6 +3,7 @@ import {
   createTicket,
   getAllTickets,
   getTicketStatusCount,
+  updateTicketStatus,
 } from "../controllers/ticket.controller.js";
 
 const router = express.Router();
@@ -12,5 +13,7 @@ router.get("/", getAllTickets);
 router.get("/ticket-status-count", getTicketStatusCount);
 
 router.post("/", createTicket);
+
+router.put("/update-ticket-status", updateTicketStatus);
 
 export default router;

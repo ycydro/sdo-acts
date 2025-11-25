@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Ellipsis, Eye } from "lucide-react";
+import { ArrowLeftRight, Ellipsis, Eye } from "lucide-react";
 import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
 import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
 
@@ -208,7 +208,7 @@ const TicketsTable = () => {
                 <DropdownMenuItem
                   onClick={() => handleOpenModal(ticket, "change-status")}
                 >
-                  <Eye className="h-4 w-4" />
+                  <ArrowLeftRight className="h-4 w-4" />
                   Change Status
                 </DropdownMenuItem>
               </DropdownMenuContent>

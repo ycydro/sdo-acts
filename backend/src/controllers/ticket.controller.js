@@ -133,7 +133,7 @@ export const getTicketStatusCount = async (req, res) => {
 
     const counts = {
       "Unapproved Tickets": 0,
-      "Pending Tickets": 0,
+      "On-hold Tickets": 0,
       "Ongoing Tickets": 0,
       "Resolved Tickets": 0,
     };
@@ -143,7 +143,7 @@ export const getTicketStatusCount = async (req, res) => {
       const count = Number(row.getDataValue("count"));
 
       if (status === "Unapproved") counts["Unapproved Tickets"] = count;
-      else if (status === "Pending") counts["Pending Tickets"] = count;
+      else if (status === "On-hold") counts["On-hold Tickets"] = count;
       else if (status === "Ongoing") counts["Ongoing Tickets"] = count;
       else if (status === "Resolved") counts["Resolved Tickets"] = count;
     });

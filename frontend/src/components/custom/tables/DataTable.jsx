@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   X,
   ChevronLeft,
@@ -46,6 +47,9 @@ const DataTable = ({
   filters = {}, // Current active filters
   onFiltersChange, // Function to update filters
   filterConfig = [], // Configuration for available filters
+  enableRowSelection = false, // New prop to enable checkboxes
+  rowSelection = {}, // Current selected rows state
+  onRowSelectionChange, // Function to update selected rows
 }) => {
   const [searchValue, setSearchValue] = useState("");
 
@@ -55,12 +59,62 @@ const DataTable = ({
     rowCount,
     state: {
       pagination,
+      rowSelection: enableRowSelection ? rowSelection : {}, // Only enable if checkbox feature is enabled
     },
     onPaginationChange,
+    onRowSelectionChange: enableRowSelection ? onRowSelectionChange : undefined,
     manualPagination: true,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    enableRowSelection: enableRowSelection, // Enable row selection feature
+    enableColumnResizing: true,
+  });
+
+  // Add selection column if enabled
+  const tableColumns = enableRowSelection
+    ? [
+        {
+          id: "select",
+          header: ({ table }) => (
+            <Checkbox
+              checked={table.getIsAllPageRowsSelected()}
+              onCheckedChange={(value) =>
+                table.toggleAllPageRowsSelected(!!value)
+              }
+              aria-label="Select all"
+            />
+          ),
+          cell: ({ row }) => (
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              aria-label="Select row"
+            />
+          ),
+          size: 40,
+          minSize: 40,
+          maxSize: 40,
+        },
+        ...columns,
+      ]
+    : columns;
+
+  const tableInstance = useReactTable({
+    data,
+    columns: tableColumns,
+    rowCount,
+    state: {
+      pagination,
+      rowSelection: enableRowSelection ? rowSelection : {},
+    },
+    onPaginationChange,
+    onRowSelectionChange: enableRowSelection ? onRowSelectionChange : undefined,
+    manualPagination: true,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    enableRowSelection: enableRowSelection,
     enableColumnResizing: true,
   });
 
@@ -68,7 +122,7 @@ const DataTable = ({
     setSearchValue(value);
     if (onSearch) {
       onSearch(value);
-      table.setPageIndex(0);
+      tableInstance.setPageIndex(0);
     }
   };
 
@@ -88,7 +142,7 @@ const DataTable = ({
 
     if (onFiltersChange) {
       onFiltersChange(newFilters);
-      table.setPageIndex(0);
+      tableInstance.setPageIndex(0);
     }
   };
 
@@ -97,14 +151,14 @@ const DataTable = ({
     delete newFilters[filterKey];
     if (onFiltersChange) {
       onFiltersChange(newFilters);
-      table.setPageIndex(0);
+      tableInstance.setPageIndex(0);
     }
   };
 
   const clearAllFilters = () => {
     if (onFiltersChange) {
       onFiltersChange({});
-      table.setPageIndex(0);
+      tableInstance.setPageIndex(0);
     }
   };
 
@@ -112,8 +166,8 @@ const DataTable = ({
 
   // Generate page numbers for pagination
   const generatePageNumbers = () => {
-    const currentPage = table.getState().pagination.pageIndex;
-    const pageCount = table.getPageCount();
+    const currentPage = tableInstance.getState().pagination.pageIndex;
+    const pageCount = tableInstance.getPageCount();
     const delta = 1; // Number of pages to show on each side of current page
     const range = [];
     const rangeWithDots = [];
@@ -234,7 +288,7 @@ const DataTable = ({
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-primary">
-            {table.getHeaderGroups().map((headerGroup) => (
+            {tableInstance.getHeaderGroups().map((headerGroup) => (
               <TableRow className="hover:bg-transparent" key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
@@ -261,7 +315,7 @@ const DataTable = ({
             {loading ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
                   <div className="flex items-center justify-center">
@@ -270,8 +324,8 @@ const DataTable = ({
                   </div>
                 </TableCell>
               </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+            ) : tableInstance.getRowModel().rows?.length ? (
+              tableInstance.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -297,7 +351,7 @@ const DataTable = ({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
                   No results found.
@@ -308,25 +362,42 @@ const DataTable = ({
         </Table>
       </div>
 
+      {/* Selected rows info - only show if selection is enabled */}
+      {/* {enableRowSelection && Object.keys(rowSelection || {}).length > 0 && (
+        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md">
+          <span className="text-sm text-blue-700">
+            {Object.keys(rowSelection).length} row(s) selected
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onRowSelectionChange?.({})}
+            className="h-8 text-blue-700 hover:text-blue-800"
+          >
+            Clear selection
+          </Button>
+        </div>
+      )} */}
+
       {/* Pagination Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2">
         {/* Page Info and Page Size */}
         <div className="flex items-center space-x-4">
           <p className="text-sm text-muted-foreground">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
+            Page {tableInstance.getState().pagination.pageIndex + 1} of{" "}
+            {tableInstance.getPageCount()}
           </p>
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Show:</span>
             <Select
-              value={table.getState().pagination.pageSize.toString()}
+              value={tableInstance.getState().pagination.pageSize.toString()}
               onValueChange={(value) => {
-                table.setPageSize(Number(value));
+                tableInstance.setPageSize(Number(value));
               }}
             >
               <SelectTrigger className="h-8 w-fit">
                 <SelectValue
-                  placeholder={table.getState().pagination.pageSize}
+                  placeholder={tableInstance.getState().pagination.pageSize}
                 />
               </SelectTrigger>
               <SelectContent side="top">
@@ -346,8 +417,8 @@ const DataTable = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.firstPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => tableInstance.firstPage()}
+            disabled={!tableInstance.getCanPreviousPage()}
             className="h-8 w-8 p-0"
           >
             <ChevronsLeft className="h-4 w-4" />
@@ -357,8 +428,8 @@ const DataTable = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => tableInstance.previousPage()}
+            disabled={!tableInstance.getCanPreviousPage()}
             className="h-8 w-8 p-0"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -377,12 +448,12 @@ const DataTable = ({
               <Button
                 key={pageNumber}
                 variant={
-                  table.getState().pagination.pageIndex === pageNumber
+                  tableInstance.getState().pagination.pageIndex === pageNumber
                     ? "default"
                     : "outline"
                 }
                 size="sm"
-                onClick={() => table.setPageIndex(pageNumber)}
+                onClick={() => tableInstance.setPageIndex(pageNumber)}
                 className="h-8 w-8 p-0"
               >
                 {pageNumber + 1}
@@ -394,8 +465,8 @@ const DataTable = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => tableInstance.nextPage()}
+            disabled={!tableInstance.getCanNextPage()}
             className="h-8 w-8 p-0"
           >
             <ChevronRight className="h-4 w-4" />
@@ -405,8 +476,8 @@ const DataTable = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.lastPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => tableInstance.lastPage()}
+            disabled={!tableInstance.getCanNextPage()}
             className="h-8 w-8 p-0"
           >
             <ChevronsRight className="h-4 w-4" />

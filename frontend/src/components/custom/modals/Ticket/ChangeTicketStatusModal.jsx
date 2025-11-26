@@ -25,6 +25,11 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
     },
   });
 
+  const handleClose = () => {
+    onOpenChange(false);
+    setSelectedStatus(null);
+  };
+
   useEffect(() => {
     if (!open) {
       form.reset();
@@ -95,7 +100,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
     }
   }, [ticket?.status]);
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="min-w-xl">
         <DialogHeader>
           <DialogTitle>Change Status of {ticket?.ticket_code}</DialogTitle>
@@ -140,7 +145,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
         <DialogFooter className="mt-5">
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={handleClose}
             className="flex-1 bg-transparent"
           >
             Cancel
@@ -149,8 +154,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
             onClick={async () => {
               if (selectedStatus) {
                 await handleStatusChange(ticket?.id, selectedStatus);
-                setSelectedStatus(null);
-                onOpenChange(false);
+                handleClose();
               }
             }}
             disabled={!selectedStatus}

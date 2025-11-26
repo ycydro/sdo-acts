@@ -20,7 +20,7 @@ import Test from "../pages/Test";
 import MainDashboardPage from "../pages/Main/MainDashboard/MainDashboardPage";
 import DepartmentsPage from "../pages/Main/Departments/DepartmentsPage";
 import TicketsPage from "../pages/Main/Tickets/TicketsPage";
-
+import AccessControlPage from "@/pages/Main/AccessControl/AccessControlPage";
 // Client Pages
 import ClientDashboardPage from "../pages/Client/ClientDashboard/ClientDashboardPage";
 import ServicesPage from "../pages/Main/Services/ServicesPage";
@@ -86,6 +86,14 @@ const AppRoutes = () => {
           element={
             <PermissionRoute requiredPermission="view_main">
               <TicketsPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="access-control"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <AccessControlPage />
             </PermissionRoute>
           }
         />

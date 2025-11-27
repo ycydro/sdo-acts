@@ -1,12 +1,16 @@
 import React, { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const PermissionsTable = () => {
+const PermissionsTable = ({
+  isModifiable,
+  permissions,
+  onPermissionChange,
+}) => {
   const MODULE_GROUPS = {
     OVERVIEW: [
       {
         module: "Dashboard",
-        key: "main_dashboard",
+        key: "main",
       },
     ],
     TICKETING: [
@@ -17,6 +21,10 @@ const PermissionsTable = () => {
       {
         module: "Services",
         key: "services",
+      },
+      {
+        module: "Departments",
+        key: "departments",
       },
     ],
   };
@@ -66,27 +74,27 @@ const PermissionsTable = () => {
                       </p>
                     </div>
                   </td>
-                  {ACTIONS.map((action) => (
-                    <td key={action.key} className="px-4 py-4 text-center">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          // disabled={true}
-                          id={`${moduleItem.key}-${action.key}`}
-                          // checked={
-                          //   permissions[moduleItem.key]?.[action.key] ?? false
-                          // }
-                          // onCheckedChange={(checked) =>
-                          //   onPermissionChange(
-                          //     moduleItem.key,
-                          //     action.key,
-                          //     checked
-                          //   )
-                          // }
-                          className="h-5 w-5 border-3 border-primary/50 hover:border-primary"
-                        />
-                      </div>
-                    </td>
-                  ))}
+                  {ACTIONS.map((action) => {
+                    const permissionKey = `${action.key}_${moduleItem.key}`;
+
+                    return (
+                      <td key={action.key} className="px-4 py-4 text-center">
+                        <div className="flex justify-center">
+                          <Checkbox
+                            disabled={!isModifiable}
+                            id={permissionKey}
+                            checked={
+                              permissions.includes(permissionKey) ?? false
+                            }
+                            onCheckedChange={(checked) =>
+                              onPermissionChange(permissionKey, checked)
+                            }
+                            className="h-5 w-5 border-3 border-primary/50 hover:border-primary"
+                          />
+                        </div>
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </React.Fragment>

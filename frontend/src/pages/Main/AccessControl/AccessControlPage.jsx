@@ -24,9 +24,12 @@ const AccessControlPage = () => {
         <section className="grid gap-5 grid-cols-3 my-2.5">
           <div className="col-span-2">
             {selectedRole ? (
-              <RoleForm role={selectedRole} />
+              <RoleForm
+                role={selectedRole}
+                handleClose={() => setSelectedRole(null)}
+              />
             ) : (
-              <div className="rounded-lg border border-primary bg-card p-8 text-center">
+              <div className="rounded-lg border border-primary bg-card p-3 text-center">
                 <p className="text-muted-foreground">
                   Select a role to view details
                 </p>

@@ -27,9 +27,6 @@ const PermissionsTable = () => {
     { key: "delete", label: "Delete" },
   ];
 
-  useEffect(() => {
-    console.log(Object.entries(MODULE_GROUPS));
-  }, []);
   return (
     <div className="overflow-x-auto rounded-lg border border-border mt-2">
       <table className="w-full">
@@ -73,6 +70,7 @@ const PermissionsTable = () => {
                     <td key={action.key} className="px-4 py-4 text-center">
                       <div className="flex justify-center">
                         <Checkbox
+                          // disabled={true}
                           id={`${moduleItem.key}-${action.key}`}
                           // checked={
                           //   permissions[moduleItem.key]?.[action.key] ?? false

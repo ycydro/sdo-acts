@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
-import { useDepartments } from "../../../hooks/queries/department/useDepartments";
 import PermissionsTable from "@/components/custom/tables/PermissionsTable";
 import { RolesList } from "@/components/custom/lists/RolesList";
+import { useRoles } from "@/hooks/queries/role/useRoles";
 
 const AccessControlPage = () => {
+  const { data: roles, isLoading } = useRoles();
+
   return (
     <BackgroundWrapper>
       <main className="min-w-full">
@@ -22,7 +24,7 @@ const AccessControlPage = () => {
             <PermissionsTable />
           </div>
           <div className="col-span-1">
-            <RolesList />
+            <RolesList roles={roles?.data ?? []} />
           </div>
         </section>
       </main>

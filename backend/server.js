@@ -12,6 +12,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import departmentRoutes from "./src/routes/department.routes.js";
 import serviceRoutes from "./src/routes/service.routes.js";
 import ticketRoutes from "./src/routes/ticket.routes.js";
+import roleRoutes from "./src/routes/role.routes.js";
 
 // MIDDLEWARE IMPORTS
 import authenticate from "./src/middleware/authMiddleware.js";
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/department", departmentRoutes);
 app.use("/api/service", serviceRoutes);
 app.use("/api/ticket", authenticate, ticketRoutes);
+app.use("/api/role", roleRoutes);
 
 app.get("/", async (req, res) => {
   res.send("<h1>Hello, World! (from server)</h1>");

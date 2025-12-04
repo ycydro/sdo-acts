@@ -14,6 +14,11 @@ export const ticketsService = {
     return response.data;
   },
 
+  getActiveTicket: async () => {
+    const response = await axios.get("/ticket/active-ticket");
+    return response.data.data;
+  },
+
   create: async (data) => {
     const response = await axios.post("/ticket", data);
     return response.data;

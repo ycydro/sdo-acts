@@ -154,10 +154,46 @@ export const getTicketStatusCount = async (req, res) => {
       message: "Ticket status count fetched successfully!",
     });
   } catch (error) {
-    console.error("Internal ServerError:", error);
+    console.error("Internal Server Error:", error);
     return res.status(500).json({
       success: false,
       message: "Ticket status count failed to fetch.",
+      error: error.message,
+    });
+  }
+};
+
+export const getUsersCurrentActiveTicket = async (req, res) => {
+  try {
+    const user = req.user;
+
+    const ticket = await Ticket.findOne({
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["name"],
+        },
+      ],
+      where: {
+        client_id: user.id,
+        status: {
+          [Op.ne]: "Resolved",
+        },
+      },
+      order: [["updatedAt", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: ticket,
+      message: "Active Ticket fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Active Ticket failed to fetch.",
       error: error.message,
     });
   }
@@ -172,7 +208,7 @@ export const createTicket = async (req, res) => {
     const department = await Ticket.create(
       {
         service_id,
-        status: "Open",
+        status: "Unapproved",
         details,
         client_id,
         scheduled_date: scheduled_date || null,

@@ -16,6 +16,7 @@ import {
 import { ArrowLeftRight, Ellipsis, Eye } from "lucide-react";
 import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
 import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
+import { statusColors } from "@/lib/constants/statusColors";
 
 const TicketsTable = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -160,13 +161,6 @@ const TicketsTable = () => {
         size: 100,
         cell: (info) => {
           const status = info.getValue();
-          const statusColors = {
-            Unapproved: "bg-red-100 text-red-800",
-            Ongoing: "bg-blue-100 text-blue-800",
-            Resolved: "bg-green-100 text-green-800",
-            "On-hold": "bg-orange-100 text-orange-800",
-          };
-
           return (
             <Badge
               className={`px-2 py-1 rounded-full text-xs font-medium truncate ${

@@ -233,7 +233,7 @@ const RequestTicketForm = () => {
           )}
         />
 
-        {/* Priority Level */}
+        {/* Classification */}
         <Controller
           control={form.control}
           name="classification"
@@ -241,7 +241,7 @@ const RequestTicketForm = () => {
             <Field>
               <FieldLabel className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-gray-700" />
-                Priority Level
+                Classification
               </FieldLabel>
               <Input readOnly className="bg-gray-100" {...field} />
               {error && <FieldError>{error.message}</FieldError>}
@@ -271,7 +271,9 @@ const RequestTicketForm = () => {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) => date <= new Date()|| isSunday(date) || isSaturday(date)}
+                    disabled={(date) =>
+                      date <= new Date() || isSunday(date) || isSaturday(date)
+                    }
                     initialFocus
                   />
                 </PopoverContent>

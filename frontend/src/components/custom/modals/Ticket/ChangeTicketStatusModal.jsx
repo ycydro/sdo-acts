@@ -53,7 +53,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
   };
 
   const statusOptions =
-    ticket?.status === "Unapproved"
+    ticket?.status === "New"
       ? [
           {
             value: "Ongoing",

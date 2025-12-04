@@ -132,7 +132,7 @@ export const getTicketStatusCount = async (req, res) => {
     });
 
     const counts = {
-      "Unapproved Tickets": 0,
+      "New Tickets": 0,
       "On-hold Tickets": 0,
       "Ongoing Tickets": 0,
       "Resolved Tickets": 0,
@@ -142,7 +142,7 @@ export const getTicketStatusCount = async (req, res) => {
       const status = row.getDataValue("status");
       const count = Number(row.getDataValue("count"));
 
-      if (status === "Unapproved") counts["Unapproved Tickets"] = count;
+      if (status === "New") counts["New Tickets"] = count;
       else if (status === "On-hold") counts["On-hold Tickets"] = count;
       else if (status === "Ongoing") counts["Ongoing Tickets"] = count;
       else if (status === "Resolved") counts["Resolved Tickets"] = count;
@@ -208,7 +208,7 @@ export const createTicket = async (req, res) => {
     const department = await Ticket.create(
       {
         service_id,
-        status: "Unapproved",
+        status: "New",
         details,
         client_id,
         scheduled_date: scheduled_date || null,

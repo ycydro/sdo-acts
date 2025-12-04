@@ -27,7 +27,6 @@ const ClientDashboardPage = () => {
 
   return (
     <main className="w-full space-y-5">
-      <h2 className="hidden text-3xl font-semibold lg:block">Quick Actions</h2>
       {/* CTA */}
       <div className="relative">
         <div className="hidden md:grid md:grid-cols-2 gap-6 px-1 md:px-0">

@@ -140,7 +140,9 @@ const ClientDashboardPage = () => {
               <div className="bg-green-100 p-2 sm:p-3 rounded-full">
                 <Ticket className="text-green-800 w-6 h-6 sm:w-7 sm:h-7" />
               </div>
-              <p className="text-xl sm:text-2xl font-semibold">Active Ticket</p>
+              <p className="text-xl sm:text-2xl font-semibold">
+                Your Active Ticket
+              </p>
             </div>
           </CardHeader>
 
@@ -153,10 +155,17 @@ const ClientDashboardPage = () => {
               <>
                 <div className="w-full space-y-2 sm:space-y-1">
                   <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                      {ticket.ticket_code || "N/A"}
-                    </h3>
+                    <div className="w-full space-y-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                          Ticket Code
+                        </p>
+                      </div>
 
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                        {ticket.ticket_code || "N/A"}
+                      </h3>
+                    </div>
                     <Badge
                       className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium w-fit ${
                         statusColors[ticket.status] ||
@@ -167,8 +176,15 @@ const ClientDashboardPage = () => {
                     </Badge>
                   </div>
                 </div>
-                <div className="self-start">
-                  <p className="text-base sm:text-lg text-gray-600">
+
+                <div className="self-start w-full space-y-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Service
+                    </p>
+                  </div>
+
+                  <p className="text-sm sm:text-lg text-gray-600">
                     {ticket.service?.name || "N/A"}
                   </p>
                 </div>
@@ -195,9 +211,7 @@ const ClientDashboardPage = () => {
                     </p>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">
-                          Created At
-                        </span>
+                        <span className="text-sm text-gray-600">Submitted</span>
                         <span className="font-semibold text-gray-800 text-sm sm:text-base">
                           {format(ticket.createdAt, "MMM dd, yyyy")}
                         </span>

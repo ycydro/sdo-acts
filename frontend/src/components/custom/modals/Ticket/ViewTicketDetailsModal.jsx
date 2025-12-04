@@ -95,8 +95,14 @@ const ViewTicketDetailsModal = ({ ticket, open, onOpenChange }) => {
           <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
             Details
           </p>
-          <div className="bg-muted p-4 rounded-lg border border-border">
-            <p className="text-foreground text-lg leading-relaxed">
+          <div className="bg-muted p-4 rounded-lg border border-border max-h-64 overflow-y-auto">
+            <p
+              className="text-foreground text-lg leading-relaxed"
+              style={{
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+              }}
+            >
               {ticket?.details || "No details provided"}
             </p>
           </div>

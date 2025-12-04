@@ -36,7 +36,7 @@ const PermissionsTable = ({
   ];
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border mt-2">
+    <div className="overflow-x-auto rounded-lg border border-border">
       <table className="w-full">
         <thead>
           <tr className="bg-primary border-b border-border">

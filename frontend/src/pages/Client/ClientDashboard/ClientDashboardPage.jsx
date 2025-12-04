@@ -11,15 +11,10 @@ import {
 } from "@/components/ui/carousel";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  History,
-  Ticket,
-  MessageSquare,
-  ExternalLink,
-} from "lucide-react";
+import { Plus, History, Ticket, ExternalLink } from "lucide-react";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useActiveTicket } from "@/hooks/queries/ticket/useActiveTicket";
+import { formatTimeDisplay } from "@/lib/timeUtils";
 
 const ClientDashboardPage = () => {
   const navigate = useNavigate();
@@ -29,8 +24,6 @@ const ClientDashboardPage = () => {
     isLoading: isActiveTicketLoading,
     isError: isActiveTicketError,
   } = useActiveTicket();
-
-  console.log(ticket);
 
   return (
     <main className="w-full space-y-5">
@@ -209,21 +202,34 @@ const ClientDashboardPage = () => {
                     <p className="text-gray-500 text-xs uppercase tracking-wide font-semibold">
                       Ticket Timeline
                     </p>
+
                     <div className="space-y-2">
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">Submitted</span>
                         <span className="font-semibold text-gray-800 text-sm sm:text-base">
                           {format(ticket.createdAt, "MMM dd, yyyy")}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">
                           Last Updated
                         </span>
-                        <span className="font-semibold text-gray-800 text-sm truncate sm:text-base">
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
                           {formatDistanceToNow(ticket.updatedAt, {
                             addSuffix: true,
                           })}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-sm text-gray-600">
+                          Estimated Processing Time
+                        </span>
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                          {formatTimeDisplay(
+                            ticket.service?.processing_time_in_minutes
+                          )}
                         </span>
                       </div>
                     </div>

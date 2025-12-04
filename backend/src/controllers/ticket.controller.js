@@ -172,7 +172,7 @@ export const getUsersCurrentActiveTicket = async (req, res) => {
         {
           model: Service,
           as: "service",
-          attributes: ["name"],
+          attributes: ["name", "processing_time_in_minutes"],
         },
       ],
       where: {

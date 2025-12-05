@@ -5,17 +5,17 @@ import { formatDistanceToNow } from "date-fns";
 import { useTransactionHistory } from "@/hooks/queries/ticket/useTransactionHistory";
 
 export const TransactionHistoryList = () => {
-  const MINIMUM_HISTORY_ITEMS = 4;
+  const MAXIMUM_HISTORY_ITEMS = 4;
 
   const { data: tickets, isLoading } = useTransactionHistory({
     pageIndex: 0,
-    pageSize: MINIMUM_HISTORY_ITEMS,
+    pageSize: MAXIMUM_HISTORY_ITEMS,
   });
 
   return (
     <div className="flex flex-col w-full justify-evenly gap-1 h-full">
       {isLoading ? (
-        Array.from({ length: MINIMUM_HISTORY_ITEMS }).map((_, idx) => (
+        Array.from({ length: MAXIMUM_HISTORY_ITEMS }).map((_, idx) => (
           <Skeleton
             key={idx}
             className="w-full h-[70px] md:h-[80px] rounded-lg"

@@ -19,8 +19,9 @@ export const ticketsService = {
     return response.data.data;
   },
 
-  getUserTransactionHistory: async () => {
-    const response = await axios.get("/ticket/transaction-history");
+  getUserTransactionHistory: async ({ search, page, limit }) => {
+    const params = buildQueryParams({ search, page, limit });
+    const response = await axios.get("/ticket/transaction-history", { params });
     return response.data;
   },
 

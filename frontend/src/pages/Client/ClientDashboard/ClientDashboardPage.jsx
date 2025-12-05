@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, History, Ticket, ExternalLink } from "lucide-react";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useActiveTicket } from "@/hooks/queries/ticket/useActiveTicket";
-import { formatTimeDisplay } from "@/lib/timeUtils";
+import { formatTimeDisplay, convertMinutesToTimeParts } from "@/lib/timeUtils";
 import { TransactionHistoryList } from "@/components/custom/lists/TransactionHistoryList";
 
 const ClientDashboardPage = () => {
@@ -25,6 +25,10 @@ const ClientDashboardPage = () => {
     isLoading: isActiveTicketLoading,
     isError: isActiveTicketError,
   } = useActiveTicket();
+
+  const processing_time =
+    convertMinutesToTimeParts(ticket?.service?.processing_time_in_minutes) ||
+    {};
 
   return (
     <main className="w-full space-y-5">
@@ -191,7 +195,13 @@ const ClientDashboardPage = () => {
                     </p>
                   </div>
 
-                  <div className="bg-white border rounded-md p-3 sm:p-4 text-sm text-gray-700 leading-relaxed min-h-[40px] sm:min-h-[25px] shadow-sm">
+                  <div
+                    className="bg-white border rounded-md p-3 sm:p-4 text-sm text-gray-700 leading-relaxed min-h-[40px] sm:min-h-[25px] shadow-sm"
+                    style={{
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
+                  >
                     {ticket.details || "No details provided."}
                   </div>
                 </div>
@@ -228,8 +238,10 @@ const ClientDashboardPage = () => {
                         </span>
                         <span className="font-semibold text-gray-800 text-sm sm:text-base">
                           {formatTimeDisplay(
-                            ticket.service?.processing_time_in_minutes
-                          )}
+                            processing_time.days,
+                            processing_time.hours,
+                            processing_time.minutes
+                          ) || "N/A"}
                         </span>
                       </div>
                     </div>

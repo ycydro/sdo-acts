@@ -13,7 +13,7 @@ export const TransactionHistoryList = () => {
   });
 
   return (
-    <div className="flex flex-col w-full gap-3">
+    <div className="flex flex-col w-full justify-evenly gap-1 h-full">
       {isLoading ? (
         Array.from({ length: MINIMUM_HISTORY_ITEMS }).map((_, idx) => (
           <Skeleton

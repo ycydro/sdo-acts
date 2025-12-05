@@ -60,7 +60,7 @@ const TicketsTable = () => {
         key: "status",
         label: "Status",
         options: [
-          { value: "New", label: "New" },
+          { value: "In Queue", label: "In Queue" },
           { value: "Ongoing", label: "Ongoing" },
           { value: "Resolved", label: "Resolved" },
         ],

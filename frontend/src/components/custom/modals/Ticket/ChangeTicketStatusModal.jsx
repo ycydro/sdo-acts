@@ -53,7 +53,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
   };
 
   const statusOptions =
-    ticket?.status === "New"
+    ticket?.status === "In-Queue"
       ? [
           {
             value: "Ongoing",
@@ -67,8 +67,8 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
         ]
       : [
           {
-            value: "On-hold",
-            label: "On-hold",
+            label: "On hold",
+            value: "On hold",
             icon: <AlertCircle className="h-5 w-5" />,
             description: "Paused temporarily",
             color:

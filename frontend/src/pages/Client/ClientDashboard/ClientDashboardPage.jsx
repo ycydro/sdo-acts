@@ -15,6 +15,7 @@ import { Plus, History, Ticket, ExternalLink } from "lucide-react";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useActiveTicket } from "@/hooks/queries/ticket/useActiveTicket";
 import { formatTimeDisplay } from "@/lib/timeUtils";
+import { TransactionHistoryList } from "@/components/custom/lists/TransactionHistoryList";
 
 const ClientDashboardPage = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const ClientDashboardPage = () => {
           </Card>
         </div>
         {/* Mobile Carousel View */}
-        <div className="md:hidden relative">
+        <div className="sm:hidden relative">
           <Carousel
             opts={{
               align: "start",
@@ -190,7 +191,7 @@ const ClientDashboardPage = () => {
                     </p>
                   </div>
 
-                  <div className="bg-white border rounded-md p-3 sm:p-4 text-sm text-gray-700 leading-relaxed min-h-[80px] sm:min-h-[100px] shadow-sm">
+                  <div className="bg-white border rounded-md p-3 sm:p-4 text-sm text-gray-700 leading-relaxed min-h-[40px] sm:min-h-[25px] shadow-sm">
                     {ticket.details || "No details provided."}
                   </div>
                 </div>
@@ -258,14 +259,16 @@ const ClientDashboardPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="min-w-full flex-shrink-0 lg:col-span-1 text-center shadow-lg border border-gray-200 p-6">
-          <CardHeader className="flex items-center justify-center gap-3 w-full">
+        <Card className="min-w-full flex-shrink-0 lg:col-span-1 shadow-lg border border-gray-200 p-6">
+          <CardHeader className="flex items-center justify-center gap-3 w-full pb-3">
             <div className="bg-green-100 p-3 rounded-full w-fit">
               <History className="text-green-800 w-8 h-8" />
             </div>
             <p className="text-2xl font-semibold">Transaction History</p>
           </CardHeader>
-          <CardContent className="flex flex-col justify-center items-center gap-4"></CardContent>
+          <CardContent className="h-full flex flex-col justify-start px-4 pt-0 pb-4">
+            <TransactionHistoryList />
+          </CardContent>
         </Card>
       </div>
     </main>

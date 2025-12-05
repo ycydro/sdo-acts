@@ -19,6 +19,11 @@ export const ticketsService = {
     return response.data.data;
   },
 
+  getUserTransactionHistory: async () => {
+    const response = await axios.get("/ticket/transaction-history");
+    return response.data;
+  },
+
   create: async (data) => {
     const response = await axios.post("/ticket", data);
     return response.data;

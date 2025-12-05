@@ -4,6 +4,7 @@ import {
   getAllTickets,
   getTicketStatusCount,
   getUsersCurrentActiveTicket,
+  getUsersTransactionHistory,
   updateTicketStatus,
 } from "../controllers/ticket.controller.js";
 
@@ -13,6 +14,7 @@ router.get("/", getAllTickets);
 
 router.get("/ticket-status-count", getTicketStatusCount);
 router.get("/active-ticket", getUsersCurrentActiveTicket);
+router.get("/transaction-history", getUsersTransactionHistory);
 
 router.post("/", createTicket);
 

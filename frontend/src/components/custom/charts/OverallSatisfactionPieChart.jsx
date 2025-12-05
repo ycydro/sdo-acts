@@ -55,7 +55,7 @@ export default function MyChart() {
   return (
     <Card className="flex flex-col flex-1">
       <CardHeader className="items-center p-4 pb-0">
-        <CardTitle>Pie Chart - Legend</CardTitle>
+        <CardTitle>Customer Satisfaction</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">

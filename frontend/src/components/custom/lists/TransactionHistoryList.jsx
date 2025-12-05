@@ -26,34 +26,6 @@ export const TransactionHistoryList = () => {
           {tickets.data.map((ticket) => (
             <HistoryItem key={ticket.id} ticket={ticket} />
           ))}
-
-          {/* placeholder items */}
-          {tickets.data.length < MINIMUM_HISTORY_ITEMS &&
-            Array.from({
-              length: MINIMUM_HISTORY_ITEMS - tickets.data.length,
-            }).map((_, idx) => (
-              <div
-                key={`placeholder-${idx}`}
-                className="opacity-40 py-2 md:py-3"
-              >
-                <div className="flex items-start w-full">
-                  <div className="p-2 rounded-full bg-gray-100 flex-shrink-0 mr-2 md:mr-3">
-                    <Check className="text-gray-400 w-5 h-5" />
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="bg-gray-50 rounded-lg p-2.5 py-4 md:p-4 border border-gray-100 border-dashed">
-                      <div className="flex flex-col">
-                        <div className="flex justify-between items-start mb-1">
-                          <Skeleton className="h-4 w-32 md:h-5 md:w-40 rounded" />
-                        </div>
-                        <Skeleton className="h-3 w-20 md:h-4 md:w-28 rounded mt-2" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
         </>
       ) : (
         <div className="py-6 md:py-7 text-center">

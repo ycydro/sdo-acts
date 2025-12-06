@@ -191,7 +191,7 @@ const ClientDashboardPage = () => {
                 <div className="w-full space-y-2 sm:space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Ticket Description
+                      Ticket Details
                     </p>
                   </div>
 

@@ -19,6 +19,7 @@ import {
 
 import {
   overviewItems,
+  queueItems,
   ticketingItems,
   userManagementItems,
 } from "../../../lib/constants/sidebarItems";
@@ -41,6 +42,12 @@ const AppSidebar = () => {
           <SidebarSection
             label="Ticketing"
             items={ticketingItems}
+            permissions={user?.permissions}
+            basePath={"main"}
+          />
+          <SidebarSection
+            label="Queue"
+            items={queueItems}
             permissions={user?.permissions}
             basePath={"main"}
           />
@@ -70,7 +77,7 @@ const SidebarSection = ({ label, items, permissions, basePath }) => (
         {items.map((item) => {
           if (permissions?.includes(item.permission)) {
             const path = `/${basePath}${item.url}`;
-            const isActive = location.pathname.startsWith(path);
+            const isActive = location.pathname === path;
             return (
               <SidebarMenuItem
                 key={item.title}

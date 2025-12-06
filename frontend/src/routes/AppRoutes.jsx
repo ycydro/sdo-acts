@@ -25,6 +25,8 @@ import AccessControlPage from "@/pages/Main/AccessControl/AccessControlPage";
 import ClientDashboardPage from "../pages/Client/ClientDashboard/ClientDashboardPage";
 import ServicesPage from "../pages/Main/Services/ServicesPage";
 import RequestTicketPage from "../pages/Client/Tickets/RequestTicketPage";
+import QueueControllerPage from "@/pages/Main/Queue/QueueControllerPage";
+import QueuePage from "@/pages/Main/Queue/QueuePage";
 
 const AppRoutes = () => {
   return (
@@ -94,6 +96,22 @@ const AppRoutes = () => {
           element={
             <PermissionRoute requiredPermission="view_main">
               <AccessControlPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="queue-controller"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <QueueControllerPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="queue"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <QueuePage />
             </PermissionRoute>
           }
         />

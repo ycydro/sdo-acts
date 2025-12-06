@@ -4,6 +4,8 @@ import {
   Hammer,
   LockKeyhole,
   Building2,
+  UsersRound,
+  Gamepad2,
 } from "lucide-react";
 
 export const overviewItems = [
@@ -33,6 +35,21 @@ export const ticketingItems = [
     url: "/services",
     icon: Hammer,
     permission: "view_departments",
+  },
+];
+
+export const queueItems = [
+  {
+    title: "Queue",
+    url: "/queue",
+    icon: UsersRound,
+    permission: "view_main",
+  },
+  {
+    title: "Queue Controller",
+    url: "/queue-controller",
+    icon: Gamepad2,
+    permission: "view_main",
   },
 ];
 

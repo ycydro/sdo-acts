@@ -19,6 +19,11 @@ export const ticketsService = {
     return response.data.data;
   },
 
+  getTicketByID: async (ticketID) => {
+    const response = await axios.get(`/ticket/${ticketID}`);
+    return response.data.data;
+  },
+
   getUserTransactionHistory: async ({ search, page, limit }) => {
     const params = buildQueryParams({ search, page, limit });
     const response = await axios.get("/ticket/transaction-history", { params });

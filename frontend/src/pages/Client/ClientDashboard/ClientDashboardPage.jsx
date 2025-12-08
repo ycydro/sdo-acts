@@ -249,7 +249,10 @@ const ClientDashboardPage = () => {
                 </div>
 
                 <div className="flex w-full">
-                  <Button className="flex-1 border-green-900 py-4 sm:py-6 text-sm sm:text-base">
+                  <Button
+                    className="flex-1 border-green-900 py-4 sm:py-6 text-sm sm:text-base"
+                    onClick={() => navigate(`/ticket/${ticket.id}`)}
+                  >
                     <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     View Full Details
                   </Button>

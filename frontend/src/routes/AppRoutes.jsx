@@ -14,6 +14,7 @@ import PermissionRoute from "./guards/PermissionRoute";
 
 // Public Pages
 import NotFoundPage from "../pages/NotFoundPage";
+import TicketDetailsPage from "@/pages/Main/Tickets/TicketDetailsPage";
 import Test from "../pages/Test";
 
 // Admin/Staff Pages
@@ -21,6 +22,7 @@ import MainDashboardPage from "../pages/Main/MainDashboard/MainDashboardPage";
 import DepartmentsPage from "../pages/Main/Departments/DepartmentsPage";
 import TicketsPage from "../pages/Main/Tickets/TicketsPage";
 import AccessControlPage from "@/pages/Main/AccessControl/AccessControlPage";
+
 // Client Pages
 import ClientDashboardPage from "../pages/Client/ClientDashboard/ClientDashboardPage";
 import ServicesPage from "../pages/Main/Services/ServicesPage";
@@ -92,6 +94,15 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="tickets/view/:id"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <TicketDetailsPage />
+            </PermissionRoute>
+          }
+        />
+
+        <Route
           path="access-control"
           element={
             <PermissionRoute requiredPermission="view_main">
@@ -131,6 +142,7 @@ const AppRoutes = () => {
 
         <Route path="dashboard" element={<ClientDashboardPage />} />
         <Route path="request-ticket" element={<RequestTicketPage />} />
+        <Route path="ticket/:id" element={<TicketDetailsPage />} />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

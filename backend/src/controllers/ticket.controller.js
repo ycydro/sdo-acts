@@ -47,7 +47,6 @@ export const getAllTickets = async (req, res) => {
 
     const { count, rows: tickets } = await Ticket.findAndCountAll({
       where: whereConditions,
-      attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
           model: Service,
@@ -98,6 +97,54 @@ export const getAllTickets = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Tickets failed to fetch.",
+      error: error.message,
+    });
+  }
+};
+
+export const getTicketByID = async (req, res) => {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+
+    const ticket = await Ticket.findOne({
+      include: [
+        {
+          model: Service,
+          as: "service",
+          include: [
+            {
+              model: Department,
+              attributes: ["id", "name", "department_code"],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: "assignee",
+          attributes: ["id", "first_name", "last_name"],
+        },
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name"],
+        },
+      ],
+      where: {
+        id,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: ticket,
+      message: "Ticket fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Ticket failed to fetch.",
       error: error.message,
     });
   }
@@ -293,7 +340,7 @@ export const createTicket = async (req, res) => {
     const department = await Ticket.create(
       {
         service_id,
-        status: "In-Queue",
+        status: "In Queue",
         details,
         client_id,
         scheduled_date: scheduled_date || null,

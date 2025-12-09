@@ -9,11 +9,13 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { ArrowLeft, Edit, Save, X } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
-import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
 import { useNavigate, useParams } from "react-router";
+import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
+import { useForm, Controller } from "react-hook-form";
 import { convertMinutesToTimeParts, formatTimeDisplay } from "@/lib/timeUtils";
 import { statusColors } from "@/lib/constants/statusColors";
 
@@ -21,26 +23,75 @@ const TicketDetailsPage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data: ticket, isLoading } = useSpecificTicket(id);
-
-  // useEffect(() => {
-  //   // ------------------------------
-  //   // SIMPLE AUTH CHECK (mock only)
-  //   // ------------------------------
-  //   const canView = MOCK_TICKET.submitter.id === MOCK_LOGGED_IN_USER.id;
-  //   setIsAuthorized(canView);
-  // }, []);
-
-  // if (isAuthorized === null) {
-  //   return <p className="p-10">Checking ticket access...</p>;
-  // }
-
-  // if (!isAuthorized) {
-  //   return <Unauthorized />;
-  // }
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   const processing_time =
     convertMinutesToTimeParts(ticket?.service?.processing_time_in_minutes) ||
     {};
+
+  const form = useForm({
+    defaultValues: {
+      status: "",
+      assignedTo: "",
+      transactionType: "",
+    },
+  });
+
+  // Watch for form changes to show/hide update button
+  const formWatch = form.watch();
+  const formDefaultValues = form.formState.defaultValues;
+
+  useEffect(() => {
+    if (ticket) {
+      // Set form values from ticket data
+      form.reset({
+        status: ticket.status || "",
+        assignedTo: ticket.assignedTo || "",
+        transactionType: ticket.classification || "",
+      });
+    }
+  }, [ticket, form.reset]);
+
+  // Check if form is dirty
+  useEffect(() => {
+    const isFormDirty =
+      formWatch.status !== formDefaultValues?.status ||
+      formWatch.assignedTo !== formDefaultValues?.assignedTo ||
+      formWatch.transactionType !== formDefaultValues?.transactionType;
+
+    setIsDirty(isFormDirty);
+  }, [formWatch, formDefaultValues]);
+
+  const handleEditToggle = () => {
+    if (isEditMode && isDirty) {
+      form.reset({
+        status: ticket.status || "",
+        assignedTo: ticket.assignedTo || "",
+        transactionType: ticket.classification || "",
+      });
+    }
+    setIsEditMode(!isEditMode);
+    setIsDirty(false);
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      console.log("Updating ticket with data:", data);
+
+      // toast.success("Ticket updated successfully!");
+
+      setIsEditMode(false);
+      setIsDirty(false);
+    } catch (error) {
+      console.error("Error updating ticket:", error);
+      // toast.error("Failed to update ticket. Please try again.");
+    }
+  };
+
+  const handleSave = () => {
+    form.handleSubmit(onSubmit)();
+  };
 
   if (isLoading) {
     return <p>Loading..</p>;
@@ -59,8 +110,10 @@ const TicketDetailsPage = () => {
           onClick={() => navigate(-1)}
           className="mb-3 lg:mb-4 px-0 lg:px-2"
         >
-          <span className="hidden sm:inline">← Back to Tickets</span>
-          <span className="sm:hidden">← Back</span>
+          <span className="flex gap-1 justify-center items-center">
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-lg">Back</span>
+          </span>
         </Button>
 
         <div className="space-y-1 lg:space-y-2">
@@ -68,14 +121,9 @@ const TicketDetailsPage = () => {
             {getTicketHeader(ticket)}
           </h1>
           <p className="text-sm lg:text-base text-muted-foreground">
-            Created on {format(ticket.createdAt, "MMMM dd, yyyy h:mm a")}
+            Submitted on {format(ticket.createdAt, "MMMM dd, yyyy h:mm a")}
           </p>
         </div>
-
-        {/* <Badge className="mt-2 lg:mt-3 bg-yellow-200 text-yellow-900 text-xs lg:text-sm">
-          This ticket has been {MOCK_TICKET.status} {MOCK_TICKET.resolvedDiff}{" "}
-          ago
-        </Badge> */}
       </div>
 
       <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-4">
@@ -171,13 +219,6 @@ const TicketDetailsPage = () => {
 
                   <div className="space-y-2">
                     <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-sm text-gray-600">Submitted</span>
-                      <span className="font-semibold text-gray-800 text-sm sm:text-base">
-                        {format(ticket.createdAt, "MMM dd, yyyy")}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-sm text-gray-600">
                         Last Updated
                       </span>
@@ -212,60 +253,147 @@ const TicketDetailsPage = () => {
           {/* TICKET FIELDS CARD */}
           <Card className="shadow-sm border">
             <CardContent className="p-4 lg:p-6">
-              <h3 className="font-semibold text-base lg:text-lg mb-4 lg:mb-6">
-                Ticket Fields
-              </h3>
-
-              <div className="space-y-4 lg:space-y-6">
-                {/* STATUS */}
-                <div>
-                  <label className="text-xs lg:text-sm font-medium mb-2 block">
-                    Status
-                  </label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={ticket.status} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="In Progress">In Progress</SelectItem>
-                      <SelectItem value="Resolved">Resolved</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* ASSIGNED TO */}
-                <div>
-                  <label className="text-xs lg:text-sm font-medium mb-2 block">
-                    Assigned to
-                  </label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Human Resource (HR)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hr">Human Resource</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* TRANSACTION TYPE */}
-                <div>
-                  <label className="text-xs lg:text-sm font-medium mb-2 block">
-                    Transaction Type
-                  </label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={ticket.classification} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Simple">Simple</SelectItem>
-                      <SelectItem value="Complex">Complex</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="flex justify-between items-center mb-4 lg:mb-6">
+                <h3 className="font-semibold text-base lg:text-lg">
+                  Ticket Fields
+                </h3>
+                <Button
+                  type="button"
+                  variant={isEditMode ? "destructive" : "outline"}
+                  size="sm"
+                  onClick={handleEditToggle}
+                  className="flex items-center gap-2"
+                >
+                  {isEditMode ? (
+                    <>
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </>
+                  )}
+                </Button>
               </div>
+
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="space-y-4 lg:space-y-6">
+                  {/* STATUS */}
+                  <Controller
+                    control={form.control}
+                    name="status"
+                    render={({ field, fieldState: { error } }) => (
+                      <Field>
+                        <FieldLabel className="text-xs lg:text-sm font-medium mb-2 block">
+                          Status
+                        </FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={!isEditMode}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={ticket.status} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Pending">Pending</SelectItem>
+                            <SelectItem value="In Progress">
+                              In Progress
+                            </SelectItem>
+                            <SelectItem value="Resolved">Resolved</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {error && (
+                          <FieldError className="text-xs text-red-500 mt-1">
+                            {error.message}
+                          </FieldError>
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  {/* ASSIGNED TO */}
+                  <Controller
+                    control={form.control}
+                    name="assignedTo"
+                    render={({ field, fieldState: { error } }) => (
+                      <Field>
+                        <FieldLabel className="text-xs lg:text-sm font-medium mb-2 block">
+                          Assigned to
+                        </FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={!isEditMode}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Human Resource (HR)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hr">Human Resource</SelectItem>
+                            <SelectItem value="finance">Finance</SelectItem>
+                            <SelectItem value="it">IT Department</SelectItem>
+                            <SelectItem value="admin">
+                              Administration
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {error && (
+                          <FieldError className="text-xs text-red-500 mt-1">
+                            {error.message}
+                          </FieldError>
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  {/* TRANSACTION TYPE */}
+                  <Controller
+                    control={form.control}
+                    name="transactionType"
+                    render={({ field, fieldState: { error } }) => (
+                      <Field>
+                        <FieldLabel className="text-xs lg:text-sm font-medium mb-2 block">
+                          Transaction Type
+                        </FieldLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={!isEditMode}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={ticket.classification} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Simple">Simple</SelectItem>
+                            <SelectItem value="Complex">Complex</SelectItem>
+                            <SelectItem value="Urgent">Urgent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {error && (
+                          <FieldError className="text-xs text-red-500 mt-1">
+                            {error.message}
+                          </FieldError>
+                        )}
+                      </Field>
+                    )}
+                  />
+
+                  {/* UPDATE BUTTON - Only shows in edit mode when form is dirty */}
+                  {isEditMode && isDirty && (
+                    <Button
+                      type="button"
+                      onClick={handleSave}
+                      className="w-full mt-4 flex items-center justify-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      Update Ticket
+                    </Button>
+                  )}
+                </div>
+              </form>
             </CardContent>
           </Card>
         </div>

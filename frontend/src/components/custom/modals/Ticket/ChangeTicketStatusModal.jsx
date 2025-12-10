@@ -38,9 +38,9 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
 
   const { updateTicketStatus } = useTicketMutations();
 
-  const handleStatusChange = async (ticketID, status) => {
+  const handleStatusChange = async (id, status) => {
     const ticketData = {
-      ticketID,
+      id,
       status,
     };
     try {

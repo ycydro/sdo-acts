@@ -369,7 +369,7 @@ export const createTicket = async (req, res) => {
 export const updateTicketStatus = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { ticketID, status } = req.body;
+    const { id, status } = req.body;
 
     await Ticket.update(
       {
@@ -377,7 +377,7 @@ export const updateTicketStatus = async (req, res) => {
       },
       {
         where: {
-          id: ticketID,
+          id,
         },
         transaction,
       }

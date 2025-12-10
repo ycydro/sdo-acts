@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
 import {
   Select,
   SelectTrigger,
@@ -18,8 +19,11 @@ import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
 import { useForm, Controller } from "react-hook-form";
 import { convertMinutesToTimeParts, formatTimeDisplay } from "@/lib/timeUtils";
 import { statusColors } from "@/lib/constants/statusColors";
+import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
+import { useAuth } from "@/context/AuthContext";
 
 const TicketDetailsPage = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams();
   const { data: ticket, isLoading } = useSpecificTicket(id);
@@ -32,43 +36,31 @@ const TicketDetailsPage = () => {
 
   const form = useForm({
     defaultValues: {
-      status: "",
-      assignedTo: "",
-      transactionType: "",
+      status: ticket?.status || "",
     },
   });
 
-  // Watch for form changes to show/hide update button
-  const formWatch = form.watch();
-  const formDefaultValues = form.formState.defaultValues;
+  const { updateTicketStatus } = useTicketMutations();
 
   useEffect(() => {
     if (ticket) {
-      // Set form values from ticket data
+      // Set form values AND default values from ticket data
       form.reset({
         status: ticket.status || "",
-        assignedTo: ticket.assignedTo || "",
-        transactionType: ticket.classification || "",
       });
     }
-  }, [ticket, form.reset]);
+  }, [ticket, form]);
 
-  // Check if form is dirty
   useEffect(() => {
-    const isFormDirty =
-      formWatch.status !== formDefaultValues?.status ||
-      formWatch.assignedTo !== formDefaultValues?.assignedTo ||
-      formWatch.transactionType !== formDefaultValues?.transactionType;
-
+    const currentStatus = form.getValues("status");
+    const isFormDirty = currentStatus !== (ticket?.status || "");
     setIsDirty(isFormDirty);
-  }, [formWatch, formDefaultValues]);
+  }, [form.watch("status"), ticket?.status]);
 
   const handleEditToggle = () => {
     if (isEditMode && isDirty) {
       form.reset({
-        status: ticket.status || "",
-        assignedTo: ticket.assignedTo || "",
-        transactionType: ticket.classification || "",
+        status: ticket?.status || "",
       });
     }
     setIsEditMode(!isEditMode);
@@ -76,16 +68,17 @@ const TicketDetailsPage = () => {
   };
 
   const onSubmit = async (data) => {
+    console.log("Updating ticket with data:", { id, ...data });
+    const ticketData = { id, ...data };
+
     try {
-      console.log("Updating ticket with data:", data);
-
-      // toast.success("Ticket updated successfully!");
-
+      await updateTicketStatus.mutateAsync(ticketData);
+      toast.success("Ticket changed status successfully!");
       setIsEditMode(false);
       setIsDirty(false);
     } catch (error) {
-      console.error("Error updating ticket:", error);
-      // toast.error("Failed to update ticket. Please try again.");
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to update ticket.");
     }
   };
 
@@ -257,30 +250,52 @@ const TicketDetailsPage = () => {
                 <h3 className="font-semibold text-base lg:text-lg">
                   Ticket Fields
                 </h3>
-                <Button
-                  type="button"
-                  variant={isEditMode ? "destructive" : "outline"}
-                  size="sm"
-                  onClick={handleEditToggle}
-                  className="flex items-center gap-2"
-                >
-                  {isEditMode ? (
-                    <>
-                      <X className="h-4 w-4" />
-                      Cancel
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="h-4 w-4" />
-                      Edit
-                    </>
-                  )}
-                </Button>
+                {user?.permissions?.includes("update_tickets") && (
+                  <Button
+                    type="button"
+                    variant={isEditMode ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={handleEditToggle}
+                    className="flex items-center gap-2"
+                  >
+                    {isEditMode ? (
+                      <>
+                        <X className="h-4 w-4" />
+                        Cancel
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="h-4 w-4" />
+                        Edit
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
 
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="space-y-4 lg:space-y-6">
-                  {/* STATUS */}
+                  {/* DEPARTMENT - Read only */}
+                  <div>
+                    <p className="text-xs lg:text-sm font-medium mb-2 text-gray-700">
+                      Department
+                    </p>
+                    <div className="flex items-center h-10 px-3 py-2 text-sm border rounded-md bg-gray-50 text-gray-900">
+                      {ticket?.service?.department?.name || "N/A"}
+                    </div>
+                  </div>
+
+                  {/* CLASSIFICATION - Read only */}
+                  <div>
+                    <p className="text-xs lg:text-sm font-medium mb-2 text-gray-700">
+                      Classification
+                    </p>
+                    <div className="flex items-center h-10 px-3 py-2 text-sm border rounded-md bg-gray-50 text-gray-900">
+                      {ticket?.service.classification || "N/A"}
+                    </div>
+                  </div>
+
+                  {/* STATUS - Editable field */}
                   <Controller
                     control={form.control}
                     name="status"
@@ -290,86 +305,30 @@ const TicketDetailsPage = () => {
                           Status
                         </FieldLabel>
                         <Select
-                          onValueChange={field.onChange}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                          }}
                           value={field.value}
-                          disabled={!isEditMode}
+                          disabled={
+                            !isEditMode ||
+                            !user?.permissions.includes("update_tickets")
+                          }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder={ticket.status} />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="In Progress">
-                              In Progress
-                            </SelectItem>
-                            <SelectItem value="Resolved">Resolved</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {error && (
-                          <FieldError className="text-xs text-red-500 mt-1">
-                            {error.message}
-                          </FieldError>
-                        )}
-                      </Field>
-                    )}
-                  />
-
-                  {/* ASSIGNED TO */}
-                  <Controller
-                    control={form.control}
-                    name="assignedTo"
-                    render={({ field, fieldState: { error } }) => (
-                      <Field>
-                        <FieldLabel className="text-xs lg:text-sm font-medium mb-2 block">
-                          Assigned to
-                        </FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={!isEditMode}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Human Resource (HR)" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="hr">Human Resource</SelectItem>
-                            <SelectItem value="finance">Finance</SelectItem>
-                            <SelectItem value="it">IT Department</SelectItem>
-                            <SelectItem value="admin">
-                              Administration
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {error && (
-                          <FieldError className="text-xs text-red-500 mt-1">
-                            {error.message}
-                          </FieldError>
-                        )}
-                      </Field>
-                    )}
-                  />
-
-                  {/* TRANSACTION TYPE */}
-                  <Controller
-                    control={form.control}
-                    name="transactionType"
-                    render={({ field, fieldState: { error } }) => (
-                      <Field>
-                        <FieldLabel className="text-xs lg:text-sm font-medium mb-2 block">
-                          Transaction Type
-                        </FieldLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          disabled={!isEditMode}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder={ticket.classification} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Simple">Simple</SelectItem>
-                            <SelectItem value="Complex">Complex</SelectItem>
-                            <SelectItem value="Urgent">Urgent</SelectItem>
+                            {["In Queue", "Ongoing", "On hold", "Resolved"].map(
+                              (status) => (
+                                <SelectItem
+                                  key={status}
+                                  value={status}
+                                  disabled={ticket.status === status}
+                                >
+                                  {status}
+                                </SelectItem>
+                              )
+                            )}
                           </SelectContent>
                         </Select>
                         {error && (

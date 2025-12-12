@@ -82,10 +82,6 @@ const TicketDetailsPage = () => {
     }
   };
 
-  const handleSave = () => {
-    form.handleSubmit(onSubmit)();
-  };
-
   if (isLoading) {
     return <p>Loading..</p>;
   }
@@ -343,8 +339,7 @@ const TicketDetailsPage = () => {
                   {/* UPDATE BUTTON - Only shows in edit mode when form is dirty */}
                   {isEditMode && isDirty && (
                     <Button
-                      type="button"
-                      onClick={handleSave}
+                      type="submit"
                       className="w-full mt-4 flex items-center justify-center gap-2"
                     >
                       <Save className="h-4 w-4" />

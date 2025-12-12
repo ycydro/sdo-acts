@@ -12,7 +12,7 @@ export const TicketRequestList = () => {
     {}
   );
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="flex flex-col gap-5 max-w-full">
       {isLatestTicketsLoading ? (
         Array.from({ length: 6 }).map((_, idx) => (
           <Skeleton key={idx} className="min-w-[300px] min-h-[100px]" />
@@ -34,7 +34,7 @@ const TicketRequestCard = ({ ticket }) => {
   return (
     <div
       key={ticket.id}
-      className="group p-4 shadow-md border border-black/30 rounded-lg flex flex-col bg-white hover:bg-gray-50 hover:shadow-lg hover:border-black/50 transition-all duration-200 cursor-pointer min-w-[300px] h-full"
+      className="group p-4 shadow-md border border-black/30 rounded-lg flex flex-col bg-white hover:bg-gray-50 hover:shadow-lg hover:border-black/50 transition-all duration-200 cursor-pointer h-full max-w-[575px]"
       onClick={() => navigate(`/main/tickets/view/${ticket.id}`)}
     >
       {/* Header with ticket code and status */}

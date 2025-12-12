@@ -17,8 +17,10 @@ import { ArrowLeftRight, Ellipsis, Eye } from "lucide-react";
 import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
 import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
 import { statusColors } from "@/lib/constants/statusColors";
+import { useNavigate } from "react-router-dom";
 
 const TicketsTable = () => {
+  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
 
@@ -194,7 +196,7 @@ const TicketsTable = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="left">
                 <DropdownMenuItem
-                  onClick={() => handleOpenModal(ticket, "view-details")}
+                  onClick={() => navigate(`/main/tickets/view/${id}`)}
                 >
                   <Eye className="h-4 w-4" />
                   View Details

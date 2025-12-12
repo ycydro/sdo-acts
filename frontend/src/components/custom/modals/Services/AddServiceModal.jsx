@@ -34,6 +34,7 @@ import { useForm, Controller } from "react-hook-form";
 import { convertToMinutes } from "../../../../lib/timeUtils";
 import { useDepartments } from "../../../../hooks/queries/department/useDepartments";
 import { useServiceMutations } from "../../../../hooks/queries/service/useServiceMutations";
+import { priorityColors } from "@/lib/constants/priorityColors";
 
 const AddServiceModal = ({ open, onOpenChange }) => {
   const { data: departments, isLoading: isDepartmentsLoading } =
@@ -47,6 +48,7 @@ const AddServiceModal = ({ open, onOpenChange }) => {
       name: "",
       description: "",
       classification: "",
+      priority: "",
       department_id: "",
       time_days: 0,
       time_hours: 0,
@@ -134,6 +136,43 @@ const AddServiceModal = ({ open, onOpenChange }) => {
               )}
             />
 
+            {/* Department */}
+            <Controller
+              control={form.control}
+              name="department_id"
+              render={({ field, fieldState: { error } }) => (
+                <Field className="space-y-1 w-full flex-2">
+                  <FieldLabel>Department</FieldLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="min-w-full">
+                      <SelectValue placeholder="Select what department will offer this service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isDepartmentsLoading ? (
+                        <SelectItem value="loading" disabled>
+                          Loading departments...
+                        </SelectItem>
+                      ) : departments?.data ? (
+                        departments.data.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="error" disabled>
+                          No departments available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {error && <FieldError>{error.message}</FieldError>}
+                </Field>
+              )}
+            />
+
             <div className="flex gap-3">
               {/* Classification */}
               <Controller
@@ -159,36 +198,27 @@ const AddServiceModal = ({ open, onOpenChange }) => {
                 )}
               />
 
-              {/* Department */}
               <Controller
                 control={form.control}
-                name="department_id"
+                name="priority"
                 render={({ field, fieldState: { error } }) => (
-                  <Field className="space-y-1 w-full flex-2">
-                    <FieldLabel>Department</FieldLabel>
+                  <Field className="space-y-1 w-full flex-1">
+                    <FieldLabel>Priority</FieldLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <SelectTrigger className="min-w-full">
-                        <SelectValue placeholder="Select what department will offer this service" />
+                      <SelectTrigger
+                        className={`min-w-full border-2 ${
+                          priorityColors[field.value] || ""
+                        }`}
+                      >
+                        <SelectValue placeholder="Select priority level" />
                       </SelectTrigger>
                       <SelectContent>
-                        {isDepartmentsLoading ? (
-                          <SelectItem value="loading" disabled>
-                            Loading departments...
-                          </SelectItem>
-                        ) : departments?.data ? (
-                          departments.data.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.id}>
-                              {dept.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="error" disabled>
-                            No departments available
-                          </SelectItem>
-                        )}
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
                       </SelectContent>
                     </Select>
                     {error && <FieldError>{error.message}</FieldError>}

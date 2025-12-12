@@ -5,6 +5,7 @@ export const serviceSchema = z
     name: z.string().min(1, "Service name is required"),
     description: z.string().min(1, "Description is required"),
     classification: z.string().min(1, "Classification is required"),
+    priority: z.string().min(1, "Priority is required"),
     department_id: z.uuid("Invalid department"),
 
     time_days: z.coerce.number().min(0).default(0),

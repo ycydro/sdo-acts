@@ -13,6 +13,7 @@ import {
   ClipboardList,
   BookText,
   AlertCircle,
+  TriangleAlert,
   Send,
   ArrowLeft,
 } from "lucide-react";
@@ -46,6 +47,7 @@ import { useServicesByDepartment } from "@/hooks/queries/service/useServicesByDe
 
 import { useAuth } from "@/context/AuthContext";
 import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
+import { priorityColors } from "@/lib/constants/priorityColors";
 
 const RequestTicketForm = () => {
   const navigate = useNavigate();
@@ -62,6 +64,7 @@ const RequestTicketForm = () => {
       service_id: "",
       details: "",
       classification: "",
+      priority: "",
       date: "",
     },
   });
@@ -86,14 +89,18 @@ const RequestTicketForm = () => {
     if (selectedService && selectedService.classification) {
       form.setValue("classification", selectedService.classification);
     }
+
+    if (selectedService && selectedService.priority) {
+      form.setValue("priority", selectedService.priority);
+    }
   }, [selectedService, form]);
 
   // reset mga service related fields kapag nag bago ng selected department
   useEffect(() => {
     if (selectedDepartmentID) {
       form.setValue("service_id", "");
-      form.setValue("serviceCategory", "");
       form.setValue("classification", "");
+      form.setValue("priority", "");
     }
   }, [selectedDepartmentID, form]);
 
@@ -243,7 +250,31 @@ const RequestTicketForm = () => {
                 <AlertCircle className="w-4 h-4 text-gray-700" />
                 Classification
               </FieldLabel>
-              <Input readOnly className="bg-gray-100" {...field} />
+              <Input
+                readOnly
+                className={`bg-gray-100 ${priorityColors[field.value] || ""}`}
+                {...field}
+              />
+              {error && <FieldError>{error.message}</FieldError>}
+            </Field>
+          )}
+        />
+
+        {/* Priority */}
+        <Controller
+          control={form.control}
+          name="priority"
+          render={({ field, fieldState: { error } }) => (
+            <Field>
+              <FieldLabel className="flex items-center gap-2">
+                <TriangleAlert className="w-4 h-4 text-gray-700" />
+                Priority
+              </FieldLabel>
+              <Input
+                readOnly
+                className={`bg-gray-100 ${priorityColors[field.value] || ""}`}
+                {...field}
+              />
               {error && <FieldError>{error.message}</FieldError>}
             </Field>
           )}

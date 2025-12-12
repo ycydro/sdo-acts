@@ -21,7 +21,9 @@ const Service = sequelize.define("service", {
   classification: {
     type: DataTypes.CHAR,
   },
-
+  priority: {
+    type: DataTypes.CHAR,
+  },
   status: {
     type: DataTypes.CHAR,
   },

@@ -8,7 +8,7 @@ export const serviceSchema = z
     priority: z.string().min(1, "Priority is required"),
     department_id: z.uuid("Invalid department"),
 
-    time_days: z.coerce.number().min(0).default(0),
+    time_days: z.coerce.number().min(0).max(366).default(0),
     time_hours: z.coerce.number().min(0).max(23).default(0),
     time_minutes: z.coerce.number().min(0).max(59).default(0),
   })

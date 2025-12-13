@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import { Service } from "../models/index.js";
+import sequelize from "../configs/sequelize.config.js";
 
 export const getAllServices = async (req, res) => {
   try {
@@ -82,6 +83,35 @@ export const createService = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "An error occurred while creating the service.",
+      error: err.message,
+    });
+  }
+};
+
+export const updateService = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { id } = req.params;
+    const service = req.body;
+
+    await Service.update(
+      {
+        ...service,
+      },
+      { where: { id }, transaction }
+    );
+
+    await transaction.commit();
+    res.status(200).json({
+      success: true,
+      message: "Service updated successfully!",
+    });
+  } catch (err) {
+    await transaction.rollback();
+    console.error("Error updating service:", err);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while updating the service.",
       error: err.message,
     });
   }

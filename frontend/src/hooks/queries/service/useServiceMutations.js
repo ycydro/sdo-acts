@@ -14,16 +14,15 @@ export const useServiceMutations = () => {
     },
   });
 
-  // const updateDepartment = useMutation({
-  //   mutationFn: ({ id, department }) =>
-  //     departmentsService.update(id, department),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries(["departments"]);
-  //   },
-  //   onError: (error) => {
-  //     console.error("Update Department Error:", error);
-  //   },
-  // });
+  const updateService = useMutation({
+    mutationFn: ({ id, service }) => servicesService.update(id, service),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["departments"]);
+    },
+    onError: (error) => {
+      console.error("Update Department Error:", error);
+    },
+  });
 
   // const deleteDepartment = useMutation({
   //   mutationFn: (id) => departmentsService.delete(id),
@@ -35,5 +34,5 @@ export const useServiceMutations = () => {
   //   },
   // });
 
-  return { createService };
+  return { createService, updateService };
 };

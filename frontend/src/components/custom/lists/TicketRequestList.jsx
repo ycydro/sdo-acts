@@ -9,7 +9,7 @@ export const TicketRequestList = () => {
   const { data: tickets, isLoading: isLatestTicketsLoading } = useTickets(
     { pageIndex: 0, pageSize: 6 },
     "",
-    {}
+    { status: "In Queue" }
   );
   return (
     <div className="flex flex-col gap-5 max-w-full">

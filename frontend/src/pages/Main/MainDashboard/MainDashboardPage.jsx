@@ -28,7 +28,11 @@ const MainDashboardPage = () => {
           <CardHeader className="p-4 px-4.5 flex justify-between items-center">
             <CardTitle className="text-2xl">Latest Ticket Request</CardTitle>
             <button
-              onClick={() => navigate("/main/tickets")}
+              onClick={() =>
+                navigate(
+                  `/main/tickets?status=${encodeURIComponent("In Queue")}`
+                )
+              }
               className="flex gap-0.5 items-center text-sm cursor-pointer hover:text-blue-700 transition-colors"
             >
               <p className="text-base">View All</p>

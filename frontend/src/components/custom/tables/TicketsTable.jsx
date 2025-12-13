@@ -19,7 +19,7 @@ import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useNavigate } from "react-router-dom";
 
-const TicketsTable = () => {
+const TicketsTable = ({ initialFilters = {} }) => {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -39,7 +39,13 @@ const TicketsTable = () => {
 
   const { pagination, setPagination } = usePagination();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState(initialFilters);
+
+  useEffect(() => {
+    if (initialFilters.status && initialFilters.status !== filters.status) {
+      setFilters((prev) => ({ ...prev, status: initialFilters.status }));
+    }
+  }, [initialFilters.status]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);

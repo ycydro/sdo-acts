@@ -170,16 +170,14 @@ export const getTicketStatusCount = async (req, res) => {
 
     const whereConditions = {};
 
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-
     if (user.department_id) {
       whereConditions["$service.department_id$"] = user.department_id;
     }
 
     const result = await Ticket.findAll({
       attributes: [
-        [Sequelize.col("Ticket.status"), "status"],
-        [Sequelize.fn("COUNT", Sequelize.col("Ticket.status")), "count"],
+        "status",
+        [Sequelize.fn("COUNT", Sequelize.col("Ticket.id")), "count"],
       ],
       include: [
         {
@@ -190,24 +188,19 @@ export const getTicketStatusCount = async (req, res) => {
       ],
       where: whereConditions,
       group: ["Ticket.status"],
+      raw: true,
     });
 
     const counts = {
-      "In Queue Tickets": 0,
-      "On hold Tickets": 0,
-      "Ongoing Tickets": 0,
-      "Resolved Tickets": 0,
+      "In Queue": 0,
+      "On hold": 0,
+      Ongoing: 0,
+      Resolved: 0,
     };
 
-    result.forEach((row) => {
-      const status = row.getDataValue("status");
-      const count = Number(row.getDataValue("count"));
-
-      if (status === "In Queue") counts["In Queue Tickets"] = count;
-      else if (status === "On hold") counts["On hold Tickets"] = count;
-      else if (status === "Ongoing") counts["Ongoing Tickets"] = count;
-      else if (status === "Resolved") counts["Resolved Tickets"] = count;
-    });
+    for (const row of result) {
+      counts[row.status] = Number(row.count);
+    }
 
     return res.status(200).json({
       success: true,

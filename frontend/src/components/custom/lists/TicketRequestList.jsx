@@ -34,7 +34,7 @@ const TicketRequestCard = ({ ticket }) => {
   return (
     <div
       key={ticket.id}
-      className="group p-4 shadow-md border border-black/30 rounded-lg flex flex-col bg-white hover:bg-gray-50 hover:shadow-lg hover:border-black/50 transition-all duration-200 cursor-pointer h-full max-w-[575px]"
+      className="group p-4 shadow-md border border-black/30 rounded-lg flex flex-col bg-white hover:bg-gray-50 hover:shadow-lg hover:border-black/50 transition-all duration-200 cursor-pointer h-full min-w-[575px] max-w-[575px]"
       onClick={() => navigate(`/main/tickets/view/${ticket.id}`)}
     >
       {/* Header with ticket code and status */}

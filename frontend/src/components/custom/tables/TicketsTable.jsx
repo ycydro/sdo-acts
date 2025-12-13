@@ -70,6 +70,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
         options: [
           { value: "In Queue", label: "In Queue" },
           { value: "Ongoing", label: "Ongoing" },
+          { value: "On hold", label: "On hold" },
           { value: "Resolved", label: "Resolved" },
         ],
       },

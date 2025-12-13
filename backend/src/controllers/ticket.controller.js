@@ -78,7 +78,21 @@ export const getAllTickets = async (req, res) => {
           attributes: ["id", "first_name", "last_name"],
         },
       ],
-      order: [["createdAt", "DESC"]],
+      order: [
+        [
+          Sequelize.literal(
+            `
+            CASE 
+              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 1
+              ELSE 0
+            END
+          `
+          ),
+          "ASC",
+        ],
+        ["createdAt", "DESC"],
+      ],
+
       offset: offset,
       limit: limitNum,
       distinct: true,

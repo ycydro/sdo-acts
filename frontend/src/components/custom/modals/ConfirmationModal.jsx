@@ -27,9 +27,6 @@ const ConfirmationModal = ({
       <AlertDialogContent className="max-w-md border-2 border-red-200 shadow-xl">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
             <AlertDialogTitle className="text-lg font-bold text-gray-900">
               {title}
             </AlertDialogTitle>
@@ -57,9 +54,7 @@ const ConfirmationModal = ({
           </AlertDialogCancel>
           <AlertDialogAction
             className={`font-bold ${
-              isDestructive
-                ? "bg-red-600 hover:bg-red-700 text-white"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+              isDestructive ? "bg-red-600 hover:bg-red-700 text-white" : ""
             }`}
             onClick={onConfirm}
             disabled={isLoading}

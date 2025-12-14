@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
 import {
   Dialog,
   DialogContent,
@@ -26,11 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { serviceSchema } from "../../../../validations/serviceSchema";
 import { useForm, Controller } from "react-hook-form";
-
 import {
   convertToMinutes,
   convertMinutesToTimeParts,
@@ -44,6 +41,7 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
     useDepartments();
 
   const { updateService } = useServiceMutations();
+  const isSubmitting = updateService.isPending;
 
   const form = useForm({
     resolver: zodResolver(serviceSchema),
@@ -83,6 +81,10 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
   }, [open, service, form]);
 
   const onSubmit = async (data) => {
+    if (isSubmitting) {
+      return;
+    }
+
     try {
       const totalMinutes = convertToMinutes(
         data.time_days,
@@ -99,7 +101,6 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
       delete submitData.time_hours;
       delete submitData.time_minutes;
 
-      console.log("Updating service:", { id: service.id, data: submitData });
       await updateService.mutateAsync({
         id: service.id,
         service: submitData,
@@ -317,10 +318,13 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

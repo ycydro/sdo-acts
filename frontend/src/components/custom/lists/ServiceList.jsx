@@ -20,47 +20,38 @@ import { useNavigate } from "react-router-dom";
 import EditServiceModal from "../modals/Services/EditServiceModal";
 
 export const ServiceList = ({ services }) => {
-  //   const { deleteDepartment } = useDepartmentMutations();
-
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleEdit = (department) => {
-    setSelectedService(department);
+  const handleEdit = (service) => {
+    setSelectedService(service);
     setIsModalOpen(true);
   };
 
-  //   const handleDelete = async (departmentID, departmentName) => {
-  //     try {
-  //       await deleteDepartment.mutateAsync(departmentID);
-  //       toast.success(
-  //         `${departmentName} department has been deleted successfully!`
-  //       );
-  //     } catch (error) {
-  //       console.error(error);
-  //       toast.error(
-  //         error.response?.data?.message || "Failed to delete department."
-  //       );
-  //     }
-  //   };
+  const handleModalClose = (open) => {
+    setIsModalOpen(open);
+    if (!open) {
+      setSelectedService(null);
+    }
+  };
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-      {services.map((service) => (
-        <ServiceCard
-          key={service.id}
-          service={service}
-          onEdit={handleEdit}
-          //   onDelete={handleDelete}
-        />
-      ))}
+    <>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {services.map((service) => (
+          <ServiceCard key={service.id} service={service} onEdit={handleEdit} />
+        ))}
+      </div>
 
-      <EditServiceModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        service={selectedService}
-      />
-    </div>
+      {selectedService && (
+        <EditServiceModal
+          key={selectedService.id}
+          open={isModalOpen}
+          onOpenChange={handleModalClose}
+          service={selectedService}
+        />
+      )}
+    </>
   );
 };
 

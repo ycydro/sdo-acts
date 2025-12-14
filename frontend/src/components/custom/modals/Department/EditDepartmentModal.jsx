@@ -24,6 +24,8 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
       department_code: "",
     },
   });
+  const { updateDepartment } = useDepartmentMutations();
+  const isSubmitting = updateDepartment.isPending;
 
   useEffect(() => {
     if (!open) {
@@ -38,9 +40,10 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
     }
   }, [open, department, form]);
 
-  const { updateDepartment } = useDepartmentMutations();
-
   const onSubmit = async (formData) => {
+    if (isSubmitting) {
+      return;
+    }
     try {
       await updateDepartment.mutateAsync({
         id: department.id,
@@ -121,10 +124,13 @@ const EditDepartmentModal = ({ open, onOpenChange, department }) => {
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

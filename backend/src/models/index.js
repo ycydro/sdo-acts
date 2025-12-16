@@ -11,6 +11,10 @@ import Service from "./departments/service.model.js";
 // TICKET RELATED
 import Ticket from "./tickets/ticket.model.js";
 import TicketCounter from "./tickets/ticket-counter.model.js";
+
+// CLIENT SATISFACTION RELATED
+import ClientFeedback from "./client-satisfaction/client-feedback.model.js";
+
 // USER
 User.belongsTo(Role, {
   foreignKey: "role_id",
@@ -96,6 +100,27 @@ Ticket.belongsTo(User, {
   as: "assignee",
 });
 
+// CLIENT SATISFACTION
+User.hasMany(ClientFeedback, {
+  foreignKey: "client_id",
+  as: "givenFeedbacks",
+});
+
+ClientFeedback.belongsTo(User, {
+  foreignKey: "client_id",
+  as: "client",
+});
+
+Ticket.hasOne(ClientFeedback, {
+  foreignKey: "ticket_id",
+  as: "feedback",
+});
+
+ClientFeedback.belongsTo(Ticket, {
+  foreignKey: "ticket_id",
+  as: "ticket",
+});
+
 export {
   // USER
   User,
@@ -110,4 +135,7 @@ export {
   // TICKET
   Ticket,
   TicketCounter,
+
+  // CLIENT SATISFACTION
+  ClientFeedback,
 };

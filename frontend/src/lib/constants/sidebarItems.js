@@ -3,6 +3,7 @@ import {
   Ticket,
   Hammer,
   LockKeyhole,
+  MessageCircleCode,
   Building2,
   UsersRound,
   Gamepad2,
@@ -25,16 +26,16 @@ export const ticketingItems = [
     permission: "view_departments",
   },
   {
-    title: "Tickets",
-    url: "/tickets",
-    icon: Ticket,
-    permission: "view_main",
-  },
-  {
     title: "Services",
     url: "/services",
     icon: Hammer,
     permission: "view_departments",
+  },
+  {
+    title: "Tickets",
+    url: "/tickets",
+    icon: Ticket,
+    permission: "view_main",
   },
 ];
 
@@ -58,6 +59,15 @@ export const userManagementItems = [
     title: "Access Control",
     url: "/access-control",
     icon: LockKeyhole,
+    permission: "view_main",
+  },
+];
+
+export const clientSatisfactionItems = [
+  {
+    title: "Client Feedback",
+    url: "/client-feedbacks",
+    icon: MessageCircleCode,
     permission: "view_main",
   },
 ];

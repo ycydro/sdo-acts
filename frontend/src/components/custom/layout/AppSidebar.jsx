@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import {
+  clientSatisfactionItems,
   overviewItems,
   queueItems,
   ticketingItems,
@@ -48,6 +49,12 @@ const AppSidebar = () => {
           <SidebarSection
             label="Queue"
             items={queueItems}
+            permissions={user?.permissions}
+            basePath={"main"}
+          />
+          <SidebarSection
+            label="Client Satisfaction"
+            items={clientSatisfactionItems}
             permissions={user?.permissions}
             basePath={"main"}
           />

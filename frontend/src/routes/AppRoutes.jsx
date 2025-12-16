@@ -29,6 +29,7 @@ import ServicesPage from "../pages/Main/Services/ServicesPage";
 import RequestTicketPage from "../pages/Client/Tickets/RequestTicketPage";
 import QueueControllerPage from "@/pages/Main/Queue/QueueControllerPage";
 import QueuePage from "@/pages/Main/Queue/QueuePage";
+import OverallClientSatisfactionPage from "@/pages/Main/ClientSatisfaction/OverallClientSatisfactionPage";
 
 const AppRoutes = () => {
   return (
@@ -123,6 +124,14 @@ const AppRoutes = () => {
           element={
             <PermissionRoute requiredPermission="view_main">
               <QueuePage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="client-feedbacks"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <OverallClientSatisfactionPage />
             </PermissionRoute>
           }
         />

@@ -13,7 +13,9 @@ import Ticket from "./tickets/ticket.model.js";
 import TicketCounter from "./tickets/ticket-counter.model.js";
 
 // CLIENT SATISFACTION RELATED
-import ClientFeedback from "./client-satisfaction/client-feedback.model.js";
+import ClientSurveyResponse from "./client-satisfaction/client-survey-response.model.js";
+import ClientSurveyDimensionRating from "./client-satisfaction/client-survey-dimension-rating.model.js";
+import ServiceQualityDimension from "./client-satisfaction/service-quality-dimension.model.js";
 
 // USER
 User.belongsTo(Role, {
@@ -101,24 +103,42 @@ Ticket.belongsTo(User, {
 });
 
 // CLIENT SATISFACTION
-User.hasMany(ClientFeedback, {
+User.hasMany(ClientSurveyResponse, {
   foreignKey: "client_id",
-  as: "givenFeedbacks",
+  as: "givenResponses",
 });
 
-ClientFeedback.belongsTo(User, {
+ClientSurveyResponse.belongsTo(User, {
   foreignKey: "client_id",
   as: "client",
 });
 
-Ticket.hasOne(ClientFeedback, {
+Ticket.hasOne(ClientSurveyResponse, {
   foreignKey: "ticket_id",
-  as: "feedback",
+  as: "surveyReponse",
 });
 
-ClientFeedback.belongsTo(Ticket, {
+ClientSurveyResponse.belongsTo(Ticket, {
   foreignKey: "ticket_id",
   as: "ticket",
+});
+
+ClientSurveyResponse.hasMany(ClientSurveyDimensionRating, {
+  foreignKey: "survey_response_id",
+  as: "dimensionRatings",
+});
+ClientSurveyDimensionRating.belongsTo(ClientSurveyResponse, {
+  foreignKey: "survey_response_id",
+  as: "response",
+});
+
+ServiceQualityDimension.hasMany(ClientSurveyDimensionRating, {
+  foreignKey: "dimension_id",
+  as: "ratings",
+});
+ClientSurveyDimensionRating.belongsTo(ServiceQualityDimension, {
+  foreignKey: "dimension_id",
+  as: "dimension",
 });
 
 export {
@@ -137,5 +157,7 @@ export {
   TicketCounter,
 
   // CLIENT SATISFACTION
-  ClientFeedback,
+  ServiceQualityDimension,
+  ClientSurveyResponse,
+  ClientSurveyDimensionRating,
 };

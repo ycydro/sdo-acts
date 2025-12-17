@@ -1,7 +1,9 @@
 import sequelize from "../configs/sequelize.config.js";
 
 import {
-  ClientFeedback,
+  ClientSurveyResponse,
+  ClientSurveyDimensionRating,
+  ServiceQualityDimension,
   Ticket,
   Service,
   Department,
@@ -9,7 +11,7 @@ import {
 } from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
 
-export const getAllClientFeedbacks = async (req, res) => {
+export const getAllClientSurveyResponses = async (req, res) => {
   try {
     const {
       page = 0,
@@ -45,46 +47,57 @@ export const getAllClientFeedbacks = async (req, res) => {
 
     console.log("🔍 Sequelize where conditions:", whereConditions);
 
-    const { count, rows: feedbacks } = await ClientFeedback.findAndCountAll({
-      where: whereConditions,
-      include: [
-        {
-          model: User,
-          as: "client",
-          attributes: ["id", "first_name", "last_name"],
-        },
-        {
-          model: Ticket,
-          as: "ticket",
-          include: [
-            {
-              model: Service,
-              as: "service",
-              attributes: {
-                exclude: [
-                  "createdAt",
-                  "updatedAt",
-                  "description",
-                  "status",
-                  "department_id",
+    const { count, rows: feedbacks } =
+      await ClientSurveyResponse.findAndCountAll({
+        where: whereConditions,
+        include: [
+          {
+            model: User,
+            as: "client",
+            attributes: ["id", "first_name", "last_name"],
+          },
+          {
+            model: Ticket,
+            as: "ticket",
+            include: [
+              {
+                model: Service,
+                as: "service",
+                attributes: {
+                  exclude: [
+                    "createdAt",
+                    "updatedAt",
+                    "description",
+                    "status",
+                    "department_id",
+                  ],
+                },
+                include: [
+                  {
+                    model: Department,
+                    attributes: ["id", "name", "department_code"],
+                  },
                 ],
               },
-              include: [
-                {
-                  model: Department,
-                  attributes: ["id", "name", "department_code"],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      order: [["createdAt", "DESC"]],
-
-      offset: offset,
-      limit: limitNum,
-      distinct: true,
-    });
+            ],
+          },
+          {
+            model: ClientSurveyDimensionRating,
+            as: "dimensionRatings",
+            include: [
+              {
+                model: ServiceQualityDimension,
+                as: "dimension",
+                attributes: ["dimension_id", "dimension_name", "scenario"],
+              },
+            ],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+        offset: offset,
+        limit: limitNum,
+        distinct: true,
+      });
 
     return res.status(200).json({
       success: true,
@@ -92,13 +105,13 @@ export const getAllClientFeedbacks = async (req, res) => {
       data: feedbacks,
       totalPages: Math.ceil(count / limitNum),
       currentPage: pageNum,
-      message: "Client Feedbacks fetched successfully!",
+      message: "Client Survey Responses fetched successfully!",
     });
   } catch (error) {
     console.error("Internal Server Error:", error);
     return res.status(500).json({
       success: false,
-      message: "Client Feedbacks to fetch.",
+      message: "Client Survey Responses to fetch.",
       error: error.message,
     });
   }

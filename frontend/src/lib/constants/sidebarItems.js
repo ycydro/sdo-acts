@@ -4,6 +4,7 @@ import {
   Hammer,
   LockKeyhole,
   MessageCircleCode,
+  Award,
   Building2,
   UsersRound,
   Gamepad2,
@@ -68,6 +69,12 @@ export const clientSatisfactionItems = [
     title: "Client Feedback",
     url: "/client-feedbacks",
     icon: MessageCircleCode,
+    permission: "view_main",
+  },
+  {
+    title: "SQD",
+    url: "/service-quality-dimensions",
+    icon: Award,
     permission: "view_main",
   },
 ];

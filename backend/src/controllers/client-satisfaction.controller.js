@@ -116,3 +116,23 @@ export const getAllClientSurveyResponses = async (req, res) => {
     });
   }
 };
+
+export const getAllSQDs = async (req, res) => {
+  try {
+    const sqds = await ServiceQualityDimension.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: sqds,
+      message: "SQDs fetched successfuly!",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "SQDs failed to fetch.",
+    });
+  }
+};

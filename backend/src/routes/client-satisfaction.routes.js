@@ -1,5 +1,8 @@
 import express from "express";
-import { getAllClientSurveyResponses } from "../controllers/client-satisfaction.controller.js";
+import {
+  getAllClientSurveyResponses,
+  getAllSQDs,
+} from "../controllers/client-satisfaction.controller.js";
 
 const router = express.Router();
 
@@ -8,6 +11,8 @@ const router = express.Router();
 // router.get("/transaction-history", getUsersTransactionHistory);
 
 router.get("/", getAllClientSurveyResponses);
+router.get("/service-quality-dimensions", getAllSQDs);
+
 // router.get("/:id", getTicketByID);
 
 // router.post("/", createTicket);

@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { requestTicketSchema } from "../../../validations/requestTicketSchema";
-import clsx from "clsx";
 import { format, isSunday, isSaturday } from "date-fns";
 import { toast } from "sonner";
 
@@ -16,7 +15,9 @@ import {
   TriangleAlert,
   Send,
   ArrowLeft,
+  Clock,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -48,12 +49,11 @@ import { useServicesByDepartment } from "@/hooks/queries/service/useServicesByDe
 import { useAuth } from "@/context/AuthContext";
 import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
 import { priorityColors } from "@/lib/constants/priorityColors";
+import { convertMinutesToTimeParts, formatTimeDisplay } from "@/lib/timeUtils";
 
 const RequestTicketForm = () => {
   const navigate = useNavigate();
-
   const { user } = useAuth();
-
   const { data: departments, isLoading: isDepartmentsLoading } =
     useDepartments();
 
@@ -84,6 +84,11 @@ const RequestTicketForm = () => {
   const selectedService = services?.data?.find(
     (service) => service.id === selectedServiceId
   );
+
+  // calculate processing time when service is selected
+  const processingTime = selectedService?.processing_time_in_minutes
+    ? convertMinutesToTimeParts(selectedService.processing_time_in_minutes)
+    : {};
 
   useEffect(() => {
     if (selectedService && selectedService.classification) {
@@ -206,8 +211,28 @@ const RequestTicketForm = () => {
                     </SelectItem>
                   ) : services?.data && services.data.length > 0 ? (
                     services.data.map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.name}
+                      <SelectItem
+                        key={service.id}
+                        value={service.id}
+                        className="flex flex-col items-start py-2"
+                      >
+                        <div className="font-medium">{service.name}</div>
+                        {service.processing_time_in_minutes && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Est. time:{" "}
+                            {formatTimeDisplay(
+                              convertMinutesToTimeParts(
+                                service.processing_time_in_minutes
+                              ).days,
+                              convertMinutesToTimeParts(
+                                service.processing_time_in_minutes
+                              ).hours,
+                              convertMinutesToTimeParts(
+                                service.processing_time_in_minutes
+                              ).minutes
+                            )}
+                          </div>
+                        )}
                       </SelectItem>
                     ))
                   ) : (
@@ -221,6 +246,26 @@ const RequestTicketForm = () => {
             </Field>
           )}
         />
+
+        {/* Estimated Processing Time Display */}
+        {selectedService?.processing_time_in_minutes && (
+          <div className="col-span-2 bg-emerald-50 border border-primary/55 rounded-lg p-2">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary/70" />
+              <span className="text-sm font-medium text-primary">
+                Estimated Processing Time:
+              </span>
+              <span className="ml-auto font-semibold text-primary">
+                {formatTimeDisplay(
+                  processingTime.days,
+                  processingTime.hours,
+                  processingTime.minutes
+                )}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Details */}
         <Controller
           control={form.control}
@@ -240,45 +285,48 @@ const RequestTicketForm = () => {
           )}
         />
 
-        {/* Classification */}
-        <Controller
-          control={form.control}
-          name="classification"
-          render={({ field, fieldState: { error } }) => (
-            <Field>
-              <FieldLabel className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-gray-700" />
-                Classification
-              </FieldLabel>
-              <Input
-                readOnly
-                className={`bg-gray-100 ${priorityColors[field.value] || ""}`}
-                {...field}
-              />
-              {error && <FieldError>{error.message}</FieldError>}
-            </Field>
-          )}
-        />
+        {/* Classification and Priority Container */}
+        <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Classification */}
+          <Controller
+            control={form.control}
+            name="classification"
+            render={({ field, fieldState: { error } }) => (
+              <Field>
+                <FieldLabel className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-gray-700" />
+                  Classification
+                </FieldLabel>
+                <Input
+                  readOnly
+                  className={`bg-gray-100 ${priorityColors[field.value] || ""}`}
+                  {...field}
+                />
+                {error && <FieldError>{error.message}</FieldError>}
+              </Field>
+            )}
+          />
 
-        {/* Priority */}
-        <Controller
-          control={form.control}
-          name="priority"
-          render={({ field, fieldState: { error } }) => (
-            <Field>
-              <FieldLabel className="flex items-center gap-2">
-                <TriangleAlert className="w-4 h-4 text-gray-700" />
-                Priority
-              </FieldLabel>
-              <Input
-                readOnly
-                className={`bg-gray-100 ${priorityColors[field.value] || ""}`}
-                {...field}
-              />
-              {error && <FieldError>{error.message}</FieldError>}
-            </Field>
-          )}
-        />
+          {/* Priority */}
+          <Controller
+            control={form.control}
+            name="priority"
+            render={({ field, fieldState: { error } }) => (
+              <Field>
+                <FieldLabel className="flex items-center gap-2">
+                  <TriangleAlert className="w-4 h-4 text-gray-700" />
+                  Priority
+                </FieldLabel>
+                <Input
+                  readOnly
+                  className={`bg-gray-100 ${priorityColors[field.value] || ""}`}
+                  {...field}
+                />
+                {error && <FieldError>{error.message}</FieldError>}
+              </Field>
+            )}
+          />
+        </div>
 
         <Controller
           control={form.control}

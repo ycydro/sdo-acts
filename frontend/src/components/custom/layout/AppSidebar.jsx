@@ -28,43 +28,64 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 const AppSidebar = () => {
-  const location = useLocation();
   const { user } = useAuth();
+  const location = useLocation();
+
+  const sections = [
+    {
+      label: "Overview",
+      items: overviewItems,
+      requiredPermission: "view_main",
+      basePath: "main",
+    },
+    {
+      label: "Ticketing",
+      items: ticketingItems,
+      requiredPermission: "view_main",
+      basePath: "main",
+    },
+    {
+      label: "Queue",
+      items: queueItems,
+      requiredPermission: "view_main",
+      basePath: "main",
+    },
+    {
+      label: "Client Satisfaction",
+      items: clientSatisfactionItems,
+      requiredPermission: "view_main",
+      basePath: "main",
+    },
+    {
+      label: "User Management",
+      items: userManagementItems,
+      requiredPermission: "view_user_management",
+      basePath: "main",
+    },
+  ];
+
   return (
     <Sidebar>
       <SidebarContent>
-        <SidebarContent>
-          <SidebarSection
-            label="Overview"
-            items={overviewItems}
-            permissions={user?.permissions}
-            basePath={"main"}
-          />
-          <SidebarSection
-            label="Ticketing"
-            items={ticketingItems}
-            permissions={user?.permissions}
-            basePath={"main"}
-          />
-          <SidebarSection
-            label="Queue"
-            items={queueItems}
-            permissions={user?.permissions}
-            basePath={"main"}
-          />
-          <SidebarSection
-            label="Client Satisfaction"
-            items={clientSatisfactionItems}
-            permissions={user?.permissions}
-            basePath={"main"}
-          />
-          <SidebarSection
-            label="User Management"
-            items={userManagementItems}
-            permissions={user?.permissions}
-            basePath={"main"}
-          />
-        </SidebarContent>
+        {sections.map((section) => {
+          // check if user has permission to see entire section
+          const hasSectionPermission =
+            !section.requiredPermission ||
+            user?.permissions?.includes(section.requiredPermission);
+
+          if (!hasSectionPermission) return null;
+
+          return (
+            <SidebarSection
+              key={section.label}
+              label={section.label}
+              items={section.items}
+              permissions={user?.permissions}
+              basePath={section.basePath}
+              location={location}
+            />
+          );
+        })}
       </SidebarContent>
       <SidebarFooter className="py-3 px-4">
         <div className="flex items-center gap-1">
@@ -76,15 +97,23 @@ const AppSidebar = () => {
   );
 };
 
-const SidebarSection = ({ label, items, permissions, basePath }) => (
-  <SidebarGroup>
-    <SidebarGroupLabel>{label}</SidebarGroupLabel>
-    <SidebarGroupContent>
-      <SidebarMenu>
-        {items.map((item) => {
-          if (permissions?.includes(item.permission)) {
+const SidebarSection = ({ label, items, permissions, basePath, location }) => {
+  // filter items based on individual permissions
+  const filteredItems = items.filter(
+    (item) => !item.permission || permissions?.includes(item.permission)
+  );
+
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {filteredItems.map((item) => {
             const path = `/${basePath}${item.url}`;
             const isActive = location.pathname === path;
+
             return (
               <SidebarMenuItem
                 key={item.title}
@@ -97,23 +126,18 @@ const SidebarSection = ({ label, items, permissions, basePath }) => (
                 )}
               >
                 <SidebarMenuButton asChild>
-                  <Link
-                    to={`/${basePath}${item.url}`}
-                    className="flex items-center gap-2"
-                  >
+                  <Link to={path} className="flex items-center gap-2">
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             );
-          } else {
-            return null;
-          }
-        })}
-      </SidebarMenu>
-    </SidebarGroupContent>
-  </SidebarGroup>
-);
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+};
 
 export default AppSidebar;

@@ -75,6 +75,6 @@ export const clientSatisfactionItems = [
     title: "SQD",
     url: "/service-quality-dimensions",
     icon: Award,
-    permission: "view_main",
+    permission: "view_sqd",
   },
 ];

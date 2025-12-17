@@ -1,13 +1,14 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../api/services/authService";
+import { useQueryClient } from "@tanstack/react-query";
 import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -54,6 +55,9 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.setItem("token", jwtToken);
       }
 
+      // clear old cache
+      queryClient.clear();
+
       // redirect based on role
       const redirectPath =
         decoded.role === "client" ? "/dashboard" : "/main/dashboard";
@@ -71,6 +75,9 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
+
+    // clear all user's cache when logging out
+    queryClient.clear();
     navigate("/login");
   };
 

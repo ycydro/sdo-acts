@@ -1,23 +1,18 @@
 import { Sequelize } from "sequelize";
-import { Service } from "../models/index.js";
+import { Department, Service } from "../models/index.js";
 import sequelize from "../configs/sequelize.config.js";
 
 export const getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
-      order: [
-        [
-          Sequelize.literal(`
-            CASE 
-              WHEN classification = 'Simple' THEN 1
-              WHEN classification = 'Complex' THEN 2
-              ELSE 3
-            END
-          `),
-          "ASC",
-        ],
-        ["createdAt", "DESC"],
+      include: [
+        {
+          model: Department,
+          as: "department",
+          attributes: { exclude: ["createdAt", "updatedAt"] },
+        },
       ],
+      order: [["name", "ASC"]],
     });
 
     return res.status(200).json({

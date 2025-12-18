@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { requestTicketSchema } from "../../../validations/requestTicketSchema";
-import { format, isSunday, isSaturday } from "date-fns";
+import { format, isSunday, isSaturday, addDays } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -15,7 +15,6 @@ import { toast } from "sonner";
 
 import {
   CalendarIcon,
-  Building2,
   ClipboardList,
   BookText,
   AlertCircle,
@@ -54,9 +53,7 @@ import {
 } from "@/components/ui/command";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
-import { useDepartments } from "../../../hooks/queries/department/useDepartments";
-import { useServicesByDepartment } from "@/hooks/queries/service/useServicesByDepartment";
-
+import { useServices } from "@/hooks/queries/service/useServices";
 import { useAuth } from "@/context/AuthContext";
 import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
 import { priorityColors } from "@/lib/constants/priorityColors";
@@ -67,8 +64,6 @@ import { cn } from "@/lib/utils";
 const RequestTicketForm = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: departments, isLoading: isDepartmentsLoading } =
-    useDepartments();
   const isMobile = useIsMobile();
 
   const form = useForm({
@@ -83,9 +78,6 @@ const RequestTicketForm = () => {
     },
   });
 
-  // track department_id to trigger services fetch
-  const selectedDepartmentID = form.watch("department_id");
-  // track service_id
   const selectedServiceId = form.watch("service_id");
   const [open, setOpen] = useState(false);
 
@@ -93,7 +85,7 @@ const RequestTicketForm = () => {
     data: services,
     isLoading: isServicesLoading,
     isError: isServicesError,
-  } = useServicesByDepartment(selectedDepartmentID);
+  } = useServices();
 
   // Find the selected service object
   const selectedService = services?.data?.find(
@@ -105,24 +97,21 @@ const RequestTicketForm = () => {
     ? convertMinutesToTimeParts(selectedService.processing_time_in_minutes)
     : {};
 
+  // Set classification and priority when service is selected
   useEffect(() => {
-    if (selectedService && selectedService.classification) {
-      form.setValue("classification", selectedService.classification);
-    }
-
-    if (selectedService && selectedService.priority) {
-      form.setValue("priority", selectedService.priority);
+    if (selectedService) {
+      if (selectedService.classification) {
+        form.setValue("classification", selectedService.classification);
+      }
+      if (selectedService.priority) {
+        form.setValue("priority", selectedService.priority);
+      }
+      // set department_id from the selected service (patago)
+      if (selectedService.department_id) {
+        form.setValue("department_id", selectedService.department_id);
+      }
     }
   }, [selectedService, form]);
-
-  // reset mga service related fields kapag nag bago ng selected department
-  useEffect(() => {
-    if (selectedDepartmentID) {
-      form.setValue("service_id", "");
-      form.setValue("classification", "");
-      form.setValue("priority", "");
-    }
-  }, [selectedDepartmentID, form]);
 
   const { createTicket } = useTicketMutations();
 
@@ -158,11 +147,9 @@ const RequestTicketForm = () => {
             !field.value && "text-muted-foreground",
             isServicesLoading && "opacity-50 cursor-not-allowed"
           )}
-          disabled={!selectedDepartmentID || isServicesLoading}
+          disabled={isServicesLoading}
         >
-          {!selectedDepartmentID
-            ? "Select a department first"
-            : isServicesLoading
+          {isServicesLoading
             ? "Loading services..."
             : field.value
             ? services?.data?.find((service) => service.id === field.value)
@@ -187,15 +174,13 @@ const RequestTicketForm = () => {
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-between truncate",
+            "w-full justify-between truncate border-input hover:bg-inherit hover:text-muted-foreground",
             !field.value && "text-muted-foreground",
             isServicesLoading && "opacity-50 cursor-not-allowed"
           )}
-          disabled={!selectedDepartmentID || isServicesLoading}
+          disabled={isServicesLoading}
         >
-          {!selectedDepartmentID
-            ? "Select a department first"
-            : isServicesLoading
+          {isServicesLoading
             ? "Loading services..."
             : field.value
             ? services?.data?.find((service) => service.id === field.value)
@@ -214,30 +199,44 @@ const RequestTicketForm = () => {
 
   const ServiceCommandList = ({ setOpen, field }) => {
     return (
-      <Command>
-        <CommandInput placeholder="Search services..." />
+      <Command
+        shouldFilter={true}
+        filter={(value, search) => {
+          // Custom filter function to only search in service name
+          const service = services?.data?.find((s) => s.id === value);
+          if (!service) return 0;
+
+          // Check if search term is in service name (case-insensitive)
+          const matches = service.name
+            .toLowerCase()
+            .includes(search.toLowerCase());
+
+          return matches ? 1 : 0;
+        }}
+      >
+        <CommandInput
+          placeholder={
+            services?.data?.length
+              ? `Search within ${services.data.length} available services...`
+              : "Search services..."
+          }
+        />
         <CommandList>
           <CommandEmpty>
-            {!selectedDepartmentID
-              ? "Please select a department first"
-              : isServicesError
+            {isServicesError
               ? "Failed to load services"
-              : "No services found"}
+              : "No matching services found"}
           </CommandEmpty>
           <CommandGroup>
-            {!selectedDepartmentID ? (
-              <CommandItem disabled>
-                Please select a department first
-              </CommandItem>
-            ) : isServicesLoading ? (
+            {isServicesLoading ? (
               <CommandItem disabled>Loading services...</CommandItem>
             ) : services?.data && services.data.length > 0 ? (
               services.data.map((service) => (
                 <CommandItem
                   key={service.id}
-                  value={service.name} // name search
+                  value={service.id}
                   onSelect={() => {
-                    field.onChange(service.id); // but id is stored as value
+                    field.onChange(service.id);
                     setOpen(false);
                   }}
                   className="flex flex-col items-start py-3"
@@ -245,13 +244,20 @@ const RequestTicketForm = () => {
                   <div className="flex items-center w-full">
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-2 h-4 w-4 text-primary",
                         field.value === service.id ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <span className="font-medium">{service.name}</span>
+                    <div className="flex flex-col items-start flex-1">
+                      <span className="font-medium">{service.name}</span>
+                      {service.department && (
+                        <span className="text-xs text-gray-500">
+                          {service.department.name}
+                        </span>
+                      )}
+                    </div>
                     {service.processing_time_in_minutes && (
-                      <div className=" text-gray-500 ml-3">
+                      <div className="text-gray-500 ml-3 text-sm">
                         Est. time:{" "}
                         {formatTimeDisplay(
                           convertMinutesToTimeParts(
@@ -270,9 +276,7 @@ const RequestTicketForm = () => {
                 </CommandItem>
               ))
             ) : (
-              <CommandItem disabled>
-                No services available for this department
-              </CommandItem>
+              <CommandItem disabled>No services available</CommandItem>
             )}
           </CommandGroup>
         </CommandList>
@@ -283,43 +287,7 @@ const RequestTicketForm = () => {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <FieldGroup>
-        {/* Department */}
-        <Controller
-          control={form.control}
-          name="department_id"
-          render={({ field, fieldState: { error } }) => (
-            <Field className="col-span-2">
-              <FieldLabel className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-gray-700" />
-                Department
-              </FieldLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger className="min-w-full">
-                  <SelectValue placeholder="Select what department you want a service from" />
-                </SelectTrigger>
-                <SelectContent>
-                  {isDepartmentsLoading ? (
-                    <SelectItem value="loading" disabled>
-                      Loading departments...
-                    </SelectItem>
-                  ) : departments?.data ? (
-                    departments.data.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="error" disabled>
-                      No departments available
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              {error && <FieldError>{error.message}</FieldError>}
-            </Field>
-          )}
-        />
-
+        {/* Service - Now showing all services */}
         <Controller
           control={form.control}
           name="service_id"
@@ -420,6 +388,7 @@ const RequestTicketForm = () => {
           />
         </div>
 
+        {/* Date */}
         <Controller
           control={form.control}
           name="date"
@@ -443,7 +412,9 @@ const RequestTicketForm = () => {
                     selected={field.value}
                     onSelect={field.onChange}
                     disabled={(date) =>
-                      date <= new Date() || isSunday(date) || isSaturday(date)
+                      date <= new Date(addDays(new Date(), 3)) ||
+                      isSunday(date) ||
+                      isSaturday(date)
                     }
                     initialFocus
                   />
@@ -454,6 +425,7 @@ const RequestTicketForm = () => {
           )}
         />
 
+        {/* Buttons */}
         <div className="col-span-2 flex flex-col sm:flex-row justify-center gap-4 mt-6">
           <Button
             type="button"

@@ -12,7 +12,15 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import { ArrowLeft, Edit, Play, Save, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Play,
+  Save,
+  X,
+  Send,
+  MoreVertical,
+} from "lucide-react";
 import { addMinutes, format, formatDistanceToNow } from "date-fns";
 import { useNavigate, useParams } from "react-router";
 import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
@@ -22,6 +30,13 @@ import { statusColors } from "@/lib/constants/statusColors";
 import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
 import { useAuth } from "@/context/AuthContext";
 import clsx from "clsx";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const TicketDetailsPage = () => {
   const { user } = useAuth();
@@ -31,6 +46,49 @@ const TicketDetailsPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [lateStatus, setLateStatus] = useState(null);
+
+  const [comments, setComments] = useState([
+    {
+      id: 1,
+      user: {
+        id: 101,
+        name: "John Doe",
+        role: "client",
+        avatar: "JD",
+      },
+      content: "Hi, just checking if there are any updates on my request?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+      isEdited: false,
+    },
+    {
+      id: 2,
+      user: {
+        id: 201,
+        name: "Sarah Johnson",
+        role: "staff",
+        department: "IT Support",
+        avatar: "SJ",
+      },
+      content:
+        "We're currently working on your ticket. We should have an update by tomorrow morning.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
+      isEdited: false,
+    },
+    {
+      id: 3,
+      user: {
+        id: 101,
+        name: "John Doe",
+        role: "client",
+        avatar: "JD",
+      },
+      content: "Thank you for the update! Looking forward to hearing from you.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+      isEdited: true,
+    },
+  ]);
+
+  const [newComment, setNewComment] = useState("");
 
   const processing_time =
     convertMinutesToTimeParts(ticket?.service?.processing_time_in_minutes) ||
@@ -46,7 +104,6 @@ const TicketDetailsPage = () => {
 
   useEffect(() => {
     if (ticket) {
-      // Set form values AND default values from ticket data
       form.reset({
         status: ticket.status || "",
       });
@@ -59,7 +116,6 @@ const TicketDetailsPage = () => {
     setIsDirty(isFormDirty);
   }, [form.watch("status"), ticket?.status]);
 
-  // Calculate late status based on estimated processing time
   useEffect(() => {
     if (!ticket?.createdAt || !ticket?.service?.processing_time_in_minutes) {
       setLateStatus(null);
@@ -71,21 +127,15 @@ const TicketDetailsPage = () => {
       ticket.service.processing_time_in_minutes
     );
     const now = new Date();
-
-    // Calculate minutes difference between current time and expected completion
     const minutesLate = Math.floor((now - expectedCompletion) / (1000 * 60));
 
-    // If current time is BEFORE expected completion (negative minutesLate)
     if (minutesLate < 0) {
       setLateStatus("ON SCHEDULE");
       return;
     }
 
-    // Check if ticket is late based on processing time unit
     if (processing_time.days > 0) {
-      // Processing time is in days
       const daysLate = Math.floor(minutesLate / (60 * 24));
-
       if (daysLate >= 2) {
         setLateStatus("EXTREMELY LATE");
       } else if (daysLate >= 1) {
@@ -94,9 +144,7 @@ const TicketDetailsPage = () => {
         setLateStatus(null);
       }
     } else if (processing_time.hours > 0) {
-      // Processing time is in hours
       const hoursLate = Math.floor(minutesLate / 60);
-
       if (hoursLate >= 3) {
         setLateStatus("EXTREMELY LATE");
       } else if (hoursLate >= 1) {
@@ -105,9 +153,7 @@ const TicketDetailsPage = () => {
         setLateStatus(null);
       }
     } else if (processing_time.minutes > 0) {
-      // Processing time is in minutes only
       if (minutesLate >= 120) {
-        // 2 hours = 120 minutes
         setLateStatus("EXTREMELY LATE");
       } else if (minutesLate >= 30) {
         setLateStatus("LATE");
@@ -127,6 +173,47 @@ const TicketDetailsPage = () => {
     }
     setIsEditMode(!isEditMode);
     setIsDirty(false);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+
+    const newCommentObj = {
+      id: comments.length + 1,
+      user: {
+        id: user?.id || 101,
+        name: user?.name || "Current User",
+        role: user?.role || "staff",
+        department: user?.department || "IT Support",
+        avatar:
+          user?.first_name
+            ?.split(" ")
+            .map((n) => n[0])
+            .join("") || "CU",
+      },
+      content: newComment.trim(),
+      timestamp: new Date(),
+      isEdited: false,
+    };
+
+    setComments([...comments, newCommentObj]);
+    setNewComment("");
+    toast.success("Comment added successfully!");
+  };
+
+  const handleDeleteComment = (commentId) => {
+    setComments(comments.filter((comment) => comment.id !== commentId));
+    toast.success("Comment deleted!");
+  };
+
+  const handleEditComment = (commentId, newContent) => {
+    setComments(
+      comments.map((comment) =>
+        comment.id === commentId
+          ? { ...comment, content: newContent, isEdited: true }
+          : comment
+      )
+    );
   };
 
   const unstartedTicket = ticket?.status === "In Queue";
@@ -160,31 +247,55 @@ const TicketDetailsPage = () => {
 
   return (
     <div className="min-w-full">
-      {/* HEADER - Full width on all screens */}
-      <div className="mb-4 lg:mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-3 lg:mb-4 px-0 lg:px-2"
-        >
-          <span className="flex gap-1 justify-center items-center">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="text-lg">Back</span>
-          </span>
-        </Button>
+      {/* HEADER */}
+      <div className="mb-2.5">
+        {/* Mobile: Back button above title */}
+        <div className="lg:hidden mb-3">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="px-0">
+            <span className="flex gap-1 justify-center items-center">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="text-lg">Back</span>
+            </span>
+          </Button>
+        </div>
 
-        <div className="space-y-1 lg:space-y-2">
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold">
+        {/* Desktop: Back button inline with title */}
+        <div className="hidden lg:flex items-start gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="h-8 w-8 lg:h-9 lg:w-9 flex-shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4 lg:h-5 lg:w-5" />
+            <span className="sr-only">Back</span>
+          </Button>
+
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold break-words">
+              {getTicketHeader(ticket)}
+            </h1>
+          </div>
+        </div>
+
+        {/* Mobile: Title below back button */}
+        <div className="lg:hidden mb-2">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold break-words">
             {getTicketHeader(ticket)}
           </h1>
-          <p className="text-sm lg:text-base text-muted-foreground">
+        </div>
+
+        <div className="lg:ml-12">
+          <p className="text-sm text-muted-foreground">
             Submitted on {format(ticket.createdAt, "MMMM dd, yyyy h:mm a")}
           </p>
         </div>
       </div>
 
-      <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-4">
-        <div className="lg:col-span-2 space-y-3">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 lg:gap-6">
+        {/* LEFT COLUMN - Ticket details and comments */}
+        <div className="lg:col-span-2 space-y-2.5">
+          {/* CLIENT INFO CARD */}
           <Card className="shadow-sm border">
             <CardHeader className="p-2 lg:p-4">
               <div className="flex items-center gap-3 lg:gap-4">
@@ -211,7 +322,7 @@ const TicketDetailsPage = () => {
 
           {/* TICKET DETAILS CARD */}
           <Card className="shadow-sm border">
-            <CardContent className="py-4 sm:py-5 flex flex-col items-center w-full mx-auto space-y-4 sm:space-y-5">
+            <CardContent className="py-4 sm:py-5 flex flex-col items-center w-full mx-auto space-y-4 sm:space-y-3.5">
               <div className="w-full space-y-2 sm:space-y-1">
                 <div className="flex flex-row sm:items-center justify-between gap-2 sm:gap-4">
                   <div className="w-full space-y-1">
@@ -327,10 +438,187 @@ const TicketDetailsPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* COMMENTS SECTION CARD */}
+          {/* <Card className="shadow-sm border">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
+              <div className="space-y-4 sm:space-y-6">
+                <div>
+                  <h3 className="font-semibold text-base sm:text-lg lg:text-xl mb-1 sm:mb-2">
+                    Comments
+                  </h3>
+                </div>
+
+                <div className="space-y-3 sm:space-y-4 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1 sm:pr-2 py-1.5">
+                  {comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className={`flex gap-2 sm:gap-3 ${
+                        comment.user.id === user?.id ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <Avatar
+                        className={`w-7 h-7 sm:w-8 sm:h-8 ${
+                          comment.user.id === user?.id ? "order-2" : ""
+                        }`}
+                      >
+                        <AvatarFallback
+                          className={
+                            comment.user.role === "staff"
+                              ? "bg-blue-100 text-blue-800 text-xs sm:text-sm"
+                              : "bg-green-100 text-green-800 text-xs sm:text-sm"
+                          }
+                        >
+                          {comment.user.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div
+                        className={`flex-1 max-w-[calc(100%-2.5rem)] sm:max-w-none ${
+                          comment.user.id === user?.id ? "items-end" : ""
+                        }`}
+                      >
+                        <div
+                          className={`p-2 sm:p-3 rounded-lg ${
+                            comment.user.id === user?.id
+                              ? "bg-blue-50 border border-blue-100"
+                              : "bg-gray-50 border border-gray-100"
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 mb-1">
+                            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                              <span className="font-medium text-xs sm:text-sm truncate">
+                                {comment.user.name}
+                              </span>
+                              {comment.user.role === "staff" && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] sm:text-xs px-1 py-0 h-4 sm:h-5"
+                                >
+                                  {comment.user.department}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between sm:justify-start gap-1 sm:gap-2">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
+                                {formatDistanceToNow(comment.timestamp, {
+                                  addSuffix: true,
+                                })}
+                              </span>
+                              {comment.user.id === user?.id && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-5 w-5 sm:h-6 sm:w-6 p-0"
+                                    >
+                                      <MoreVertical className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent
+                                    align="end"
+                                    className="w-32"
+                                  >
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        const newContent = prompt(
+                                          "Edit your comment:",
+                                          comment.content
+                                        );
+                                        if (
+                                          newContent &&
+                                          newContent !== comment.content
+                                        ) {
+                                          handleEditComment(
+                                            comment.id,
+                                            newContent
+                                          );
+                                        }
+                                      }}
+                                      className="text-xs"
+                                    >
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="text-red-600 text-xs"
+                                      onClick={() =>
+                                        handleDeleteComment(comment.id)
+                                      }
+                                    >
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">
+                            {comment.content}
+                          </p>
+                          {comment.isEdited && (
+                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 italic">
+                              Edited
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <Avatar className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0">
+                      <AvatarFallback
+                        className={
+                          user?.role === "staff"
+                            ? "bg-blue-100 text-blue-800 text-xs sm:text-sm"
+                            : "bg-green-100 text-green-800 text-xs sm:text-sm"
+                        }
+                      >
+                        {user?.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("") || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 space-y-1.5 sm:space-y-2">
+                      <Textarea
+                        placeholder="Type your comment here..."
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        className="min-h-[50px] sm:min-h-[65px] resize-none text-sm"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && e.ctrlKey) {
+                            e.preventDefault();
+                            handleAddComment();
+                          }
+                        }}
+                      />
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                        <p className="hidden lg:inline text-[10px] sm:text-xs text-muted-foreground order-2 sm:order-1">
+                          Press Ctrl+Enter to send
+                        </p>
+                        <Button
+                          onClick={handleAddComment}
+                          disabled={!newComment.trim()}
+                          className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm order-1 sm:order-2"
+                          size="sm"
+                        >
+                          <Send className="h-3 w-3 sm:h-4 sm:w-4" />
+                          Send Comment
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card> */}
         </div>
 
-        {/* RIGHT COLUMN - Full width on mobile, 1/3 on desktop */}
-        <div className="mt-6 lg:mt-0 space-y-4 lg:space-y-6">
+        {/* RIGHT COLUMN - Ticket fields */}
+        <div className="mt-6 lg:mt-0 space-y-6">
           {/* TICKET FIELDS CARD */}
           <Card className="shadow-sm border">
             <CardContent className="p-4 lg:p-6">
@@ -363,7 +651,7 @@ const TicketDetailsPage = () => {
 
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="space-y-4 lg:space-y-6">
-                  {/* DEPARTMENT - Read only */}
+                  {/* DEPARTMENT */}
                   <div>
                     <p className="text-xs lg:text-sm font-medium mb-2 text-gray-700">
                       Department
@@ -373,7 +661,7 @@ const TicketDetailsPage = () => {
                     </div>
                   </div>
 
-                  {/* CLASSIFICATION - Read only */}
+                  {/* CLASSIFICATION */}
                   <div>
                     <p className="text-xs lg:text-sm font-medium mb-2 text-gray-700">
                       Classification
@@ -383,7 +671,7 @@ const TicketDetailsPage = () => {
                     </div>
                   </div>
 
-                  {/* STATUS - Editable field */}
+                  {/* STATUS */}
                   <Controller
                     control={form.control}
                     name="status"
@@ -439,7 +727,7 @@ const TicketDetailsPage = () => {
                       Start this Ticket
                     </Button>
                   )}
-                  {/* UPDATE BUTTON - Only shows in edit mode when form is dirty */}
+
                   {isEditMode && isDirty && (
                     <Button
                       type="submit"

@@ -8,7 +8,7 @@ const ClientLayout = () => {
     <div className="flex flex-col h-screen min-w-screen overflow-hidden">
       <ClientHeader />
 
-      <div className="flex-1 m-3 p-5 overflow-auto flex justify-center items-start">
+      <div className="flex-1 m-3 p-2.5 overflow-auto flex justify-center items-start">
         <Outlet />
       </div>
     </div>

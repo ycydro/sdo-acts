@@ -31,6 +31,14 @@ app.use(
   })
 );
 
+// KAPAG HOST SA SAME NETWORK
+// app.use(
+//   cors({
+//     origin: true,
+//     credentials: true,
+//   })
+// );
+
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
@@ -47,3 +55,9 @@ app.get("/", async (req, res) => {
 });
 
 app.listen(PORT, console.log(`Listening on port: ${PORT}`));
+
+// app.listen(
+//   PORT,
+//   "0.0.0.0",
+//   console.log(`Hosting through network! Listening on port: ${PORT}`)
+// );

@@ -208,12 +208,14 @@ const TicketsTable = ({ initialFilters = {} }) => {
                   <Eye className="h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleOpenModal(ticket, "change-status")}
-                >
-                  <ArrowLeftRight className="h-4 w-4" />
-                  Change Status
-                </DropdownMenuItem>
+                {ticket.status !== "Resolved" && (
+                  <DropdownMenuItem
+                    onClick={() => handleOpenModal(ticket, "change-status")}
+                  >
+                    <ArrowLeftRight className="h-4 w-4" />
+                    Change Status
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           );
@@ -255,7 +257,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
         pagination={pagination}
         onPaginationChange={setPagination}
         onSearch={handleSearch}
-        searchPlaceholder="Search by ticket code, service, or status..."
+        searchPlaceholder="Search by ticket code or service..."
         filters={filters}
         onFiltersChange={handleFiltersChange}
         filterConfig={filterConfig}

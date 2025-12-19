@@ -1,7 +1,7 @@
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
 import TicketsTable from "../../../components/custom/tables/TicketsTable";
 import { TicketStatusCountList } from "@/components/custom/lists/TicketStatusCountList";
-import { useSearchParams } from "react-router-dom"; // Add this import
+import { useSearchParams } from "react-router-dom";
 
 const TicketsPage = () => {
   const [searchParams] = useSearchParams();

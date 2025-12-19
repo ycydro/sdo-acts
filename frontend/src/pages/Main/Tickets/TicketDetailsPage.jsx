@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import { ArrowLeft, Edit, Save, X } from "lucide-react";
+import { ArrowLeft, Edit, Play, Save, X } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useNavigate, useParams } from "react-router";
 import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
@@ -67,9 +67,15 @@ const TicketDetailsPage = () => {
     setIsDirty(false);
   };
 
+  const unstartedTicket = ticket?.status === "In Queue";
+
   const onSubmit = async (data) => {
     console.log("Updating ticket with data:", { id, ...data });
-    const ticketData = { id, ...data };
+    let ticketData = { id, ...data };
+
+    if (unstartedTicket) {
+      ticketData = { ...ticketData, status: "Ongoing" };
+    }
 
     try {
       await updateTicketStatus.mutateAsync(ticketData);
@@ -307,14 +313,15 @@ const TicketDetailsPage = () => {
                           value={field.value}
                           disabled={
                             !isEditMode ||
-                            !user?.permissions.includes("update_tickets")
+                            !user?.permissions.includes("update_tickets") ||
+                            unstartedTicket
                           }
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder={ticket.status} />
                           </SelectTrigger>
                           <SelectContent>
-                            {["In Queue", "Ongoing", "On hold", "Resolved"].map(
+                            {["Ongoing", "On hold", "Resolved"].map(
                               (status) => (
                                 <SelectItem
                                   key={status}
@@ -336,6 +343,16 @@ const TicketDetailsPage = () => {
                     )}
                   />
 
+                  {unstartedTicket && (
+                    <Button
+                      type="submit"
+                      disabled={!isEditMode}
+                      className="w-full mt-4 flex items-center justify-center gap-2"
+                    >
+                      <Play className="h-4 w-4" />
+                      Start this Ticket
+                    </Button>
+                  )}
                   {/* UPDATE BUTTON - Only shows in edit mode when form is dirty */}
                   {isEditMode && isDirty && (
                     <Button

@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { ArrowLeft, Edit, Play, Save, X } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
+import { addMinutes, format, formatDistanceToNow } from "date-fns";
 import { useNavigate, useParams } from "react-router";
 import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
 import { useForm, Controller } from "react-hook-form";
@@ -21,6 +21,7 @@ import { convertMinutesToTimeParts, formatTimeDisplay } from "@/lib/timeUtils";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
 import { useAuth } from "@/context/AuthContext";
+import clsx from "clsx";
 
 const TicketDetailsPage = () => {
   const { user } = useAuth();
@@ -29,6 +30,7 @@ const TicketDetailsPage = () => {
   const { data: ticket, isLoading } = useSpecificTicket(id);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [lateStatus, setLateStatus] = useState(null);
 
   const processing_time =
     convertMinutesToTimeParts(ticket?.service?.processing_time_in_minutes) ||
@@ -56,6 +58,66 @@ const TicketDetailsPage = () => {
     const isFormDirty = currentStatus !== (ticket?.status || "");
     setIsDirty(isFormDirty);
   }, [form.watch("status"), ticket?.status]);
+
+  // Calculate late status based on estimated processing time
+  useEffect(() => {
+    if (!ticket?.createdAt || !ticket?.service?.processing_time_in_minutes) {
+      setLateStatus(null);
+      return;
+    }
+
+    const expectedCompletion = addMinutes(
+      ticket.createdAt,
+      ticket.service.processing_time_in_minutes
+    );
+    const now = new Date();
+
+    // Calculate minutes difference between current time and expected completion
+    const minutesLate = Math.floor((now - expectedCompletion) / (1000 * 60));
+
+    // If current time is BEFORE expected completion (negative minutesLate)
+    if (minutesLate < 0) {
+      setLateStatus("ON SCHEDULE");
+      return;
+    }
+
+    // Check if ticket is late based on processing time unit
+    if (processing_time.days > 0) {
+      // Processing time is in days
+      const daysLate = Math.floor(minutesLate / (60 * 24));
+
+      if (daysLate >= 2) {
+        setLateStatus("EXTREMELY LATE");
+      } else if (daysLate >= 1) {
+        setLateStatus("LATE");
+      } else {
+        setLateStatus(null);
+      }
+    } else if (processing_time.hours > 0) {
+      // Processing time is in hours
+      const hoursLate = Math.floor(minutesLate / 60);
+
+      if (hoursLate >= 3) {
+        setLateStatus("EXTREMELY LATE");
+      } else if (hoursLate >= 1) {
+        setLateStatus("LATE");
+      } else {
+        setLateStatus(null);
+      }
+    } else if (processing_time.minutes > 0) {
+      // Processing time is in minutes only
+      if (minutesLate >= 120) {
+        // 2 hours = 120 minutes
+        setLateStatus("EXTREMELY LATE");
+      } else if (minutesLate >= 30) {
+        setLateStatus("LATE");
+      } else {
+        setLateStatus(null);
+      }
+    } else {
+      setLateStatus(null);
+    }
+  }, [ticket, processing_time]);
 
   const handleEditToggle = () => {
     if (isEditMode && isDirty) {
@@ -215,17 +277,6 @@ const TicketDetailsPage = () => {
                   <div className="space-y-2">
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-sm text-gray-600">
-                        Last Updated
-                      </span>
-                      <span className="font-semibold text-gray-800 text-sm sm:text-base">
-                        {formatDistanceToNow(ticket.updatedAt, {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-sm text-gray-600">
                         Estimated Processing Time
                       </span>
                       <span className="font-semibold text-gray-800 text-sm sm:text-base">
@@ -236,6 +287,41 @@ const TicketDetailsPage = () => {
                         ) || "N/A"}
                       </span>
                     </div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between">
+                      <span className="text-sm text-gray-600">
+                        Expected Completion
+                      </span>
+                      <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                        {ticket?.createdAt &&
+                        ticket?.service?.processing_time_in_minutes
+                          ? format(
+                              addMinutes(
+                                ticket.createdAt,
+                                ticket.service.processing_time_in_minutes
+                              ),
+                              "MMMM dd, yyyy h:mm a"
+                            )
+                          : "N/A"}
+                      </span>
+                    </div>
+
+                    {lateStatus && !unstartedTicket && (
+                      <div className="flex flex-col sm:flex-row sm:justify-between items-center pt-2 border-t">
+                        <span className="text-sm text-gray-600">Status</span>
+                        <Badge
+                          className={clsx("font-semibold text-xs sm:text-sm", {
+                            "bg-red-100 text-red-800 hover:bg-red-100":
+                              lateStatus === "EXTREMELY LATE",
+                            "bg-amber-100 text-amber-800 hover:bg-amber-100":
+                              lateStatus === "LATE",
+                            "bg-green-100 text-green-800 hover:bg-green-100":
+                              lateStatus === "ON SCHEDULE",
+                          })}
+                        >
+                          {lateStatus}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

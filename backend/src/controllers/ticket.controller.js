@@ -83,10 +83,11 @@ export const getAllTickets = async (req, res) => {
           Sequelize.literal(
             `
             CASE 
-              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 1
+              WHEN \`ticket\`.\`status\` = 'Ongoing' THEN 1
+              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 2
               ELSE 0
             END
-          `
+            `
           ),
           "ASC",
         ],
@@ -344,7 +345,7 @@ export const createTicket = async (req, res) => {
     const { service_id, details, client_id, scheduled_date, is_online } =
       req.body;
 
-    const department = await Ticket.create(
+    const ticket = await Ticket.create(
       {
         service_id,
         status: "In Queue",
@@ -360,7 +361,7 @@ export const createTicket = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Ticket created successfully!",
-      department,
+      ticket,
     });
   } catch (err) {
     await transaction.rollback();

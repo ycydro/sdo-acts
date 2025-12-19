@@ -1,5 +1,5 @@
 import React from "react";
-import { format, formatDistanceToNow } from "date-fns";
+import { addMinutes, format, formatDistanceToNow } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -217,11 +217,11 @@ const ClientDashboardPage = () => {
                       <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">Submitted</span>
                         <span className="font-semibold text-gray-800 text-sm sm:text-base">
-                          {format(ticket.createdAt, "MMM dd, yyyy")}
+                          {format(ticket.createdAt, "MMMM dd, yyyy h:mm a")}
                         </span>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                      {/* <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">
                           Last Updated
                         </span>
@@ -230,7 +230,7 @@ const ClientDashboardPage = () => {
                             addSuffix: true,
                           })}
                         </span>
-                      </div>
+                      </div> */}
 
                       <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">
@@ -242,6 +242,24 @@ const ClientDashboardPage = () => {
                             processing_time.hours,
                             processing_time.minutes
                           ) || "N/A"}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-sm text-gray-600">
+                          Expected Completion
+                        </span>
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                          {ticket?.createdAt &&
+                          ticket?.service?.processing_time_in_minutes
+                            ? format(
+                                addMinutes(
+                                  ticket.createdAt,
+                                  ticket.service.processing_time_in_minutes
+                                ),
+                                "MMMM dd, yyyy h:mm a"
+                              )
+                            : "N/A"}
                         </span>
                       </div>
                     </div>

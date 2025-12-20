@@ -1,7 +1,7 @@
 import axios from "../axios";
 
 export const commentsService = {
-  getComments: async (ticketID, page = 1, limit = 5) => {
+  getComments: async (ticketID, page = 1, limit = 10) => {
     const response = await axios.get(`/ticket/${ticketID}/comments`, {
       params: { page, limit },
     });

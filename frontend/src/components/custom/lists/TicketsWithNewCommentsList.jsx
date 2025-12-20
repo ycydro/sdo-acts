@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,37 @@ import {
   User,
   ChevronRight,
   Loader2,
+  RefreshCcw,
 } from "lucide-react";
 import { useTicketsWithNewComments } from "@/hooks/queries/ticket/comments/useTicketWithNewComments";
 import { ticketsService } from "@/api/services/ticketsService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDebouncedRefetch } from "@/hooks/useDebouncedRefetch";
 
 export const TicketsWithNewCommentsList = () => {
   const { data, isLoading, refetch } = useTicketsWithNewComments();
   const [markedTickets, setMarkedTickets] = useState(new Set());
   const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const [manuallyHiddenTickets, setManuallyHiddenTickets] = useState(new Set());
+
+  const { debouncedRefetch, isRefetching } = useDebouncedRefetch(() => {
+    return refetch();
+  }, 1750);
+
+  useEffect(() => {
+    if (data?.data && manuallyHiddenTickets.size > 0) {
+      const currentTicketIds = new Set(data.data.map((ticket) => ticket.id));
+      const newHiddenTickets = new Set(
+        Array.from(manuallyHiddenTickets).filter((id) =>
+          currentTicketIds.has(id)
+        )
+      );
+
+      if (newHiddenTickets.size !== manuallyHiddenTickets.size) {
+        setManuallyHiddenTickets(newHiddenTickets);
+      }
+    }
+  }, [data?.data]);
 
   const handleMarkAllAsSeen = async () => {
     if (!data?.data || isMarkingAll) return;
@@ -33,7 +55,6 @@ export const TicketsWithNewCommentsList = () => {
 
       await ticketsService.markMultipleCommentsAsSeen(ticketIDs);
 
-      // Wait for animation then refetch
       setTimeout(() => {
         refetch();
         setMarkedTickets(new Set());
@@ -48,16 +69,24 @@ export const TicketsWithNewCommentsList = () => {
   };
 
   const visibleTickets =
-    data?.data?.filter((ticket) => !markedTickets.has(ticket.id)) || [];
+    data?.data?.filter(
+      (ticket) =>
+        !markedTickets.has(ticket.id) && !manuallyHiddenTickets.has(ticket.id)
+    ) || [];
+
+  // calculate the badge count dynamically
+  const badgeCount = visibleTickets.reduce((total, ticket) => {
+    return total + (ticket.newCommentCount || 0);
+  }, 0);
 
   return (
     <Card className="flex-1">
       <CardHeader className="p-4 px-4.5 flex justify-between items-center">
         <div className="flex justify-center items-center">
           <CardTitle className="text-2xl font-semibold">New Comments</CardTitle>
-          {data?.count ? (
+          {badgeCount > 0 ? (
             <Badge className="ml-2 bg-red-500 hover:bg-red-600">
-              {data.count}
+              {badgeCount}
             </Badge>
           ) : null}
         </div>
@@ -122,14 +151,19 @@ export const TicketsWithNewCommentsList = () => {
               No tickets with new comments. When someone comments on a ticket
               you're involved with, it will appear here.
             </p>
-            {/* <Button
+            <Button
               variant="outline"
               size="sm"
-              onClick={() => refetch()}
+              onClick={debouncedRefetch}
               className="gap-2"
             >
-              Refresh
-            </Button> */}
+              <p>Refresh</p>
+              <RefreshCcw
+                className={`cursor-pointer hover:text-primary transition-transform ${
+                  isRefetching ? "animate-spin" : ""
+                }`}
+              />
+            </Button>
           </div>
         )}
       </CardContent>

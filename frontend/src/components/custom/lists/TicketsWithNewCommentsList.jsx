@@ -25,13 +25,13 @@ export const TicketsWithNewCommentsList = () => {
   const handleMarkAllAsSeen = async () => {
     if (!data?.data || isMarkingAll) return;
 
-    const ticketIds = data.data.map((ticket) => ticket.id);
+    const ticketIDs = data.data.map((ticket) => ticket.id);
 
     try {
       setIsMarkingAll(true);
-      setMarkedTickets(new Set(ticketIds));
+      setMarkedTickets(new Set(ticketIDs));
 
-      await ticketsService.markMultipleCommentsAsSeen(ticketIds);
+      await ticketsService.markMultipleCommentsAsSeen(ticketIDs);
 
       // Wait for animation then refetch
       setTimeout(() => {
@@ -122,14 +122,14 @@ export const TicketsWithNewCommentsList = () => {
               No tickets with new comments. When someone comments on a ticket
               you're involved with, it will appear here.
             </p>
-            <Button
+            {/* <Button
               variant="outline"
               size="sm"
               onClick={() => refetch()}
               className="gap-2"
             >
               Refresh
-            </Button>
+            </Button> */}
           </div>
         )}
       </CardContent>
@@ -199,7 +199,7 @@ const TicketWithNewCommentsCard = ({ ticket, onMarkAsSeen }) => {
 
       {/* New Comments Badge */}
       <div className="absolute -top-2 -right-2 z-20">
-        <Badge className="bg-red-500 hover:bg-red-600 text-white px-2 py-0.5 text-xs font-bold gap-1 animate-pulse">
+        <Badge className="bg-red-500 hover:bg-red-600 text-white px-2 py-0.5 text-xs font-bold gap-1">
           <MessageSquare className="h-2.5 w-2.5" />
           {ticket.newCommentCount}
         </Badge>

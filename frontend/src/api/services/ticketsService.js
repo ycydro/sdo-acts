@@ -43,9 +43,9 @@ export const ticketsService = {
     return response.data;
   },
 
-  markMultipleCommentsAsSeen: async (ticketIds) => {
+  markMultipleCommentsAsSeen: async (ticketIDs) => {
     const response = await axios.post("/ticket/mark-multiple-comments-seen", {
-      ticketIds,
+      ticketIDs,
     });
     return response.data;
   },

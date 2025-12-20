@@ -37,6 +37,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CommentSection } from "@/components/custom/modals/Ticket/CommentSection";
 
 const TicketDetailsPage = () => {
   const { user } = useAuth();
@@ -46,49 +47,6 @@ const TicketDetailsPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [lateStatus, setLateStatus] = useState(null);
-
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      user: {
-        id: 101,
-        name: "John Doe",
-        role: "client",
-        avatar: "JD",
-      },
-      content: "Hi, just checking if there are any updates on my request?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-      isEdited: false,
-    },
-    {
-      id: 2,
-      user: {
-        id: 201,
-        name: "Sarah Johnson",
-        role: "staff",
-        department: "IT Support",
-        avatar: "SJ",
-      },
-      content:
-        "We're currently working on your ticket. We should have an update by tomorrow morning.",
-      timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 minutes ago
-      isEdited: false,
-    },
-    {
-      id: 3,
-      user: {
-        id: 101,
-        name: "John Doe",
-        role: "client",
-        avatar: "JD",
-      },
-      content: "Thank you for the update! Looking forward to hearing from you.",
-      timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-      isEdited: true,
-    },
-  ]);
-
-  const [newComment, setNewComment] = useState("");
 
   const processing_time =
     convertMinutesToTimeParts(ticket?.service?.processing_time_in_minutes) ||
@@ -173,47 +131,6 @@ const TicketDetailsPage = () => {
     }
     setIsEditMode(!isEditMode);
     setIsDirty(false);
-  };
-
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-
-    const newCommentObj = {
-      id: comments.length + 1,
-      user: {
-        id: user?.id || 101,
-        name: user?.name || "Current User",
-        role: user?.role || "staff",
-        department: user?.department || "IT Support",
-        avatar:
-          user?.first_name
-            ?.split(" ")
-            .map((n) => n[0])
-            .join("") || "CU",
-      },
-      content: newComment.trim(),
-      timestamp: new Date(),
-      isEdited: false,
-    };
-
-    setComments([...comments, newCommentObj]);
-    setNewComment("");
-    toast.success("Comment added successfully!");
-  };
-
-  const handleDeleteComment = (commentId) => {
-    setComments(comments.filter((comment) => comment.id !== commentId));
-    toast.success("Comment deleted!");
-  };
-
-  const handleEditComment = (commentId, newContent) => {
-    setComments(
-      comments.map((comment) =>
-        comment.id === commentId
-          ? { ...comment, content: newContent, isEdited: true }
-          : comment
-      )
-    );
   };
 
   const unstartedTicket = ticket?.status === "In Queue";
@@ -440,181 +357,7 @@ const TicketDetailsPage = () => {
           </Card>
 
           {/* COMMENTS SECTION CARD */}
-          {/* <Card className="shadow-sm border">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
-              <div className="space-y-4 sm:space-y-6">
-                <div>
-                  <h3 className="font-semibold text-base sm:text-lg lg:text-xl mb-1 sm:mb-2">
-                    Comments
-                  </h3>
-                </div>
-
-                <div className="space-y-3 sm:space-y-4 max-h-[300px] sm:max-h-[400px] overflow-y-auto pr-1 sm:pr-2 py-1.5">
-                  {comments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      className={`flex gap-2 sm:gap-3 ${
-                        comment.user.id === user?.id ? "flex-row-reverse" : ""
-                      }`}
-                    >
-                      <Avatar
-                        className={`w-7 h-7 sm:w-8 sm:h-8 ${
-                          comment.user.id === user?.id ? "order-2" : ""
-                        }`}
-                      >
-                        <AvatarFallback
-                          className={
-                            comment.user.role === "staff"
-                              ? "bg-blue-100 text-blue-800 text-xs sm:text-sm"
-                              : "bg-green-100 text-green-800 text-xs sm:text-sm"
-                          }
-                        >
-                          {comment.user.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div
-                        className={`flex-1 max-w-[calc(100%-2.5rem)] sm:max-w-none ${
-                          comment.user.id === user?.id ? "items-end" : ""
-                        }`}
-                      >
-                        <div
-                          className={`p-2 sm:p-3 rounded-lg ${
-                            comment.user.id === user?.id
-                              ? "bg-blue-50 border border-blue-100"
-                              : "bg-gray-50 border border-gray-100"
-                          }`}
-                        >
-                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 mb-1">
-                            <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                              <span className="font-medium text-xs sm:text-sm truncate">
-                                {comment.user.name}
-                              </span>
-                              {comment.user.role === "staff" && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-[10px] sm:text-xs px-1 py-0 h-4 sm:h-5"
-                                >
-                                  {comment.user.department}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between sm:justify-start gap-1 sm:gap-2">
-                              <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
-                                {formatDistanceToNow(comment.timestamp, {
-                                  addSuffix: true,
-                                })}
-                              </span>
-                              {comment.user.id === user?.id && (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-5 w-5 sm:h-6 sm:w-6 p-0"
-                                    >
-                                      <MoreVertical className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="w-32"
-                                  >
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        const newContent = prompt(
-                                          "Edit your comment:",
-                                          comment.content
-                                        );
-                                        if (
-                                          newContent &&
-                                          newContent !== comment.content
-                                        ) {
-                                          handleEditComment(
-                                            comment.id,
-                                            newContent
-                                          );
-                                        }
-                                      }}
-                                      className="text-xs"
-                                    >
-                                      Edit
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="text-red-600 text-xs"
-                                      onClick={() =>
-                                        handleDeleteComment(comment.id)
-                                      }
-                                    >
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap break-words">
-                            {comment.content}
-                          </p>
-                          {comment.isEdited && (
-                            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 italic">
-                              Edited
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-2 sm:space-y-3">
-                  <div className="flex items-start gap-2 sm:gap-3">
-                    <Avatar className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0">
-                      <AvatarFallback
-                        className={
-                          user?.role === "staff"
-                            ? "bg-blue-100 text-blue-800 text-xs sm:text-sm"
-                            : "bg-green-100 text-green-800 text-xs sm:text-sm"
-                        }
-                      >
-                        {user?.name
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("") || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 space-y-1.5 sm:space-y-2">
-                      <Textarea
-                        placeholder="Type your comment here..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="min-h-[50px] sm:min-h-[65px] resize-none text-sm"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && e.ctrlKey) {
-                            e.preventDefault();
-                            handleAddComment();
-                          }
-                        }}
-                      />
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                        <p className="hidden lg:inline text-[10px] sm:text-xs text-muted-foreground order-2 sm:order-1">
-                          Press Ctrl+Enter to send
-                        </p>
-                        <Button
-                          onClick={handleAddComment}
-                          disabled={!newComment.trim()}
-                          className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm order-1 sm:order-2"
-                          size="sm"
-                        >
-                          <Send className="h-3 w-3 sm:h-4 sm:w-4" />
-                          Send Comment
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
+          <CommentSection ticketID={id || null} />
         </div>
 
         {/* RIGHT COLUMN - Ticket fields */}
@@ -717,16 +460,17 @@ const TicketDetailsPage = () => {
                     )}
                   />
 
-                  {unstartedTicket && (
-                    <Button
-                      type="submit"
-                      disabled={!isEditMode}
-                      className="w-full mt-4 flex items-center justify-center gap-2"
-                    >
-                      <Play className="h-4 w-4" />
-                      Start this Ticket
-                    </Button>
-                  )}
+                  {unstartedTicket &&
+                    user?.permissions.includes("update_tickets") && (
+                      <Button
+                        type="submit"
+                        disabled={!isEditMode}
+                        className="w-full mt-4 flex items-center justify-center gap-2"
+                      >
+                        <Play className="h-4 w-4" />
+                        Start this Ticket
+                      </Button>
+                    )}
 
                   {isEditMode && isDirty && (
                     <Button

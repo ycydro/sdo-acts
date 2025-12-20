@@ -11,11 +11,13 @@ import Service from "./departments/service.model.js";
 // TICKET RELATED
 import Ticket from "./tickets/ticket.model.js";
 import TicketCounter from "./tickets/ticket-counter.model.js";
+import TicketComment from "./tickets/comments/ticket-comment.model.js";
 
 // CLIENT SATISFACTION RELATED
 import ClientSurveyResponse from "./client-satisfaction/client-survey-response.model.js";
 import ClientSurveyDimensionRating from "./client-satisfaction/client-survey-dimension-rating.model.js";
 import ServiceQualityDimension from "./client-satisfaction/service-quality-dimension.model.js";
+import TicketView from "./tickets/ticket-view.model.js";
 
 // USER
 User.belongsTo(Role, {
@@ -102,6 +104,59 @@ Ticket.belongsTo(User, {
   as: "assignee",
 });
 
+// TICKET COMMENTS
+Ticket.hasMany(TicketComment, {
+  foreignKey: "ticket_id",
+  as: "comments",
+  onDelete: "CASCADE",
+});
+
+TicketComment.belongsTo(Ticket, {
+  foreignKey: "ticket_id",
+  as: "ticket",
+});
+
+User.hasMany(TicketComment, {
+  foreignKey: "user_id",
+  as: "comments",
+});
+
+TicketComment.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
+// In your models/index.js or associations file
+
+// User associations
+User.hasMany(TicketView, {
+  foreignKey: "user_id",
+  as: "ticket_views",
+});
+
+Ticket.hasMany(TicketView, {
+  foreignKey: "ticket_id",
+  as: "views",
+});
+
+TicketComment.hasMany(TicketView, {
+  foreignKey: "last_comment_seen_id",
+  as: "viewed_by_users",
+});
+
+TicketView.belongsTo(User, {
+  foreignKey: "user_id",
+});
+
+TicketView.belongsTo(Ticket, {
+  foreignKey: "ticket_id",
+});
+
+TicketView.belongsTo(TicketComment, {
+  foreignKey: "last_comment_seen_id",
+  as: "last_seen_comment",
+});
+
 // CLIENT SATISFACTION
 User.hasMany(ClientSurveyResponse, {
   foreignKey: "client_id",
@@ -155,6 +210,8 @@ export {
   // TICKET
   Ticket,
   TicketCounter,
+  TicketComment,
+  TicketView,
 
   // CLIENT SATISFACTION
   ServiceQualityDimension,

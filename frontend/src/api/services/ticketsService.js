@@ -30,6 +30,30 @@ export const ticketsService = {
     return response.data;
   },
 
+  getTicketsWithNewComments: async () => {
+    const response = await axios.get("/ticket/with-new-comments");
+    return response.data;
+  },
+
+  markCommentsAsSeen: async (ticketID) => {
+    const response = await axios.post(
+      `/ticket/${ticketID}/mark-comments-seen`,
+      {}
+    );
+    return response.data;
+  },
+
+  markMultipleCommentsAsSeen: async (ticketIds) => {
+    const response = await axios.post("/ticket/mark-multiple-comments-seen", {
+      ticketIds,
+    });
+    return response.data;
+  },
+
+  checkTicketHasNewComments: async (ticketID) => {
+    const response = await axios.get(`/ticket/${ticketID}/has-new-comments`);
+    return response.data;
+  },
   create: async (data) => {
     const response = await axios.post("/ticket", data);
     return response.data;

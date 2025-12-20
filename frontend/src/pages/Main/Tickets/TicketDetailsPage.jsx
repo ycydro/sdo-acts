@@ -357,7 +357,10 @@ const TicketDetailsPage = () => {
           </Card>
 
           {/* COMMENTS SECTION CARD */}
-          <CommentSection ticketID={id || null} />
+          <CommentSection
+            ticketID={id || null}
+            ticketStatus={ticket?.status || null}
+          />
         </div>
 
         {/* RIGHT COLUMN - Ticket fields */}

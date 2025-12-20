@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Send, ChevronDown, MessageSquare } from "lucide-react";
+import { Send, ChevronDown, MessageSquare, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCommentMutation } from "@/hooks/queries/ticket/comments/useCommentMutations";
 import { useComments } from "@/hooks/queries/ticket/comments/useComments";
 
-export const CommentSection = ({ ticketID }) => {
+export const CommentSection = ({ ticketID, ticketStatus }) => {
   const { user } = useAuth();
   const [newComment, setNewComment] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -284,7 +284,11 @@ export const CommentSection = ({ ticketID }) => {
               </Avatar>
               <div className="flex-1 space-y-1.5 sm:space-y-2">
                 <Textarea
-                  placeholder="Type your comment here..."
+                  placeholder={
+                    ticketStatus === "Resolved"
+                      ? "Commenting is disabled"
+                      : "Type your comment here..."
+                  }
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   className="min-h-[50px] sm:min-h-[65px] resize-none text-sm"
@@ -294,7 +298,7 @@ export const CommentSection = ({ ticketID }) => {
                       handleAddComment();
                     }
                   }}
-                  disabled={isCreating}
+                  disabled={isCreating || ticketStatus === "Resolved"}
                 />
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <p className="hidden lg:inline text-[10px] sm:text-xs text-muted-foreground order-2 sm:order-1">
@@ -302,7 +306,11 @@ export const CommentSection = ({ ticketID }) => {
                   </p>
                   <Button
                     onClick={handleAddComment}
-                    disabled={!newComment.trim() || isCreating}
+                    disabled={
+                      !newComment.trim() ||
+                      isCreating ||
+                      ticketStatus === "Resolved"
+                    }
                     className="gap-1.5 sm:gap-2 h-8 sm:h-9 text-xs sm:text-sm order-1 sm:order-2"
                     size="sm"
                   >
@@ -310,6 +318,11 @@ export const CommentSection = ({ ticketID }) => {
                       <>
                         <span className="h-3 w-3 sm:h-4 sm:w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         Sending...
+                      </>
+                    ) : ticketStatus === "Resolved" ? (
+                      <>
+                        <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
+                        Unable to Comment
                       </>
                     ) : (
                       <>

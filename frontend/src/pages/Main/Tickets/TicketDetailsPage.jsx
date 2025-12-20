@@ -342,7 +342,7 @@ const TicketDetailsPage = () => {
                     </div>
 
                     {lateStatus && !unstartedTicket && (
-                      <div className="flex flex-col sm:flex-row sm:justify-between items-center pt-2 border-t">
+                      <div className="flex justify-start gap-1.5 sm:justify-between items-center pt-2 border-t">
                         <span className="text-sm text-gray-600">Status</span>
                         <Badge
                           className={clsx("font-semibold text-xs sm:text-sm", {

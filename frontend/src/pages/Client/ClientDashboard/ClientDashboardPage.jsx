@@ -259,8 +259,11 @@ const ClientDashboardPage = () => {
                           onClick={() => handleViewTicket()}
                         >
                           <MessageSquare className="w-3 h-3 transition-transform duration-200 group-hover:scale-110" />
-                          <span className="font-medium transition-all duration-200 group-hover:font-semibold">
+                          <span className="hidden sm:inline font-medium transition-all duration-200 group-hover:font-semibold">
                             New updates from support
+                          </span>
+                          <span className="inline sm:hidden font-medium transition-all duration-200 group-hover:font-semibold">
+                            New updates
                           </span>
                         </div>
                       )}

@@ -10,6 +10,7 @@ import {
   getTicketsWithNewComments,
   markTicketCommentsAsSeen,
   markMultipleTicketsCommentsAsSeen,
+  checkTicketHasNewComments,
 } from "../controllers/ticket.controller.js";
 import {
   createComment,
@@ -31,6 +32,7 @@ router.put("/update-ticket-status", updateTicketStatus);
 
 // comment routes
 router.get("/:ticketID/comments", getCommentsByTicket);
+router.get("/:ticketID/has-new-comments", checkTicketHasNewComments);
 router.post("/:ticketID/comments", createComment);
 router.post("/:ticketID/mark-comments-seen", markTicketCommentsAsSeen);
 router.post("/mark-multiple-comments-seen", markMultipleTicketsCommentsAsSeen);

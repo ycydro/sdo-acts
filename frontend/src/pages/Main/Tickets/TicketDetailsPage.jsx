@@ -154,11 +154,19 @@ const TicketDetailsPage = () => {
     }
   };
 
-  if (isLoading) {
-    return <p>Loading..</p>;
+  if (isLoading || !ticket) {
+    return <p>Loading ticket details...</p>;
+  }
+
+  if (!ticket.service || !ticket.service.department) {
+    return <p>Error: Ticket data is incomplete. Please try again.</p>;
   }
 
   const getTicketHeader = (ticket) => {
+    if (!ticket || !ticket.service || !ticket.service.department) {
+      return "Loading ticket details...";
+    }
+
     return `(${ticket.service.department.department_code}) ${ticket.service.department.name}: ${ticket.service.name}`;
   };
 

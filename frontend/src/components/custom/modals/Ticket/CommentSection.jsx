@@ -286,7 +286,7 @@ export const CommentSection = ({ ticketID, ticketStatus }) => {
                 <Textarea
                   placeholder={
                     ticketStatus === "Resolved"
-                      ? "Commenting is disabled"
+                      ? "Comments are disabled"
                       : "Type your comment here..."
                   }
                   value={newComment}
@@ -322,7 +322,7 @@ export const CommentSection = ({ ticketID, ticketStatus }) => {
                     ) : ticketStatus === "Resolved" ? (
                       <>
                         <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
-                        Unable to Comment
+                        Disabled
                       </>
                     ) : (
                       <>

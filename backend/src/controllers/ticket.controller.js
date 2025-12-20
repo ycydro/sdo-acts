@@ -689,6 +689,7 @@ export const checkTicketHasNewComments = async (req, res) => {
           model: TicketComment,
           as: "comments",
           required: false,
+          separate: true,
           order: [["createdAt", "DESC"]],
         },
         {
@@ -707,25 +708,32 @@ export const checkTicketHasNewComments = async (req, res) => {
       });
     }
 
-    const comments = ticket.comments || [];
+    const allComments = ticket.comments || [];
+
+    const otherUserComments = allComments.filter(
+      (comment) => comment.user_id !== userID
+    );
+
     const userView = ticket.views?.[0];
 
     let newCommentCount = 0;
     let hasNewComments = false;
 
-    if (comments.length > 0) {
+    if (otherUserComments.length > 0) {
       if (userView && userView.last_comment_seen_id) {
-        const lastSeenIndex = comments.findIndex(
+        const lastSeenIndex = otherUserComments.findIndex(
           (comment) => comment.id === userView.last_comment_seen_id
         );
 
         if (lastSeenIndex === -1) {
-          newCommentCount = comments.length;
+          newCommentCount = otherUserComments.length;
         } else if (lastSeenIndex > 0) {
+          // Count comments before the last seen one
           newCommentCount = lastSeenIndex;
         }
       } else {
-        newCommentCount = comments.length;
+        // No view record exists for this user
+        newCommentCount = otherUserComments.length;
       }
 
       hasNewComments = newCommentCount > 0;
@@ -737,9 +745,11 @@ export const checkTicketHasNewComments = async (req, res) => {
         ticketID,
         hasNewComments,
         newCommentCount,
-        totalComments: comments.length,
+        totalComments: allComments.length,
+        otherUserCommentsCount: otherUserComments.length,
         lastSeenAt: userView?.last_viewed_at || null,
         lastCommentSeenId: userView?.last_comment_seen_id || null,
+        latestComment: otherUserComments[0] || null,
       },
     });
   } catch (error) {

@@ -149,7 +149,8 @@ export const CommentSection = ({ ticketID }) => {
                     >
                       <AvatarFallback
                         className={
-                          comment.user?.role.name === "Staff"
+                          comment.user?.role.name === "Staff" ||
+                          comment.user?.role.name === "Superadmin"
                             ? "bg-blue-100 text-blue-800 text-xs sm:text-sm"
                             : "bg-green-100 text-green-800 text-xs sm:text-sm"
                         }

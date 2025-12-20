@@ -1,4 +1,4 @@
-import { TicketComment, User, Ticket } from "../models/index.js";
+import { TicketComment, User, Ticket, Role } from "../models/index.js";
 
 export const getCommentsByTicket = async (req, res) => {
   try {
@@ -28,6 +28,13 @@ export const getCommentsByTicket = async (req, res) => {
         {
           model: User,
           as: "user",
+          include: [
+            {
+              model: Role,
+              as: "role",
+              attributes: { exclude: ["createdAt", "updatedAt"] },
+            },
+          ],
         },
       ],
       order: [["createdAt", "ASC"]],

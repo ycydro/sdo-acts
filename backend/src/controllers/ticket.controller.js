@@ -415,7 +415,33 @@ export const updateTicketStatus = async (req, res) => {
 
 export const getTicketsWithNewComments = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const user = req.user;
+
+    const whereConditions = {
+      [Op.and]: [
+        sequelize.literal(`
+          EXISTS (
+            SELECT 1 FROM ticket_comments tc
+            WHERE tc.ticket_id = ticket.id
+            AND tc.user_id != '${user.id}'
+            AND (
+              NOT EXISTS (
+                SELECT 1 FROM ticket_views tv
+                WHERE tv.ticket_id = ticket.id
+                AND tv.user_id = '${user.id}'
+                AND tv.last_comment_seen_id = tc.id
+              )
+            )
+          )
+        `),
+      ],
+    };
+
+    if (user.department_id) {
+      whereConditions[Op.and].push({
+        "$service.department_id$": user.department_id,
+      });
+    }
 
     const tickets = await Ticket.findAll({
       include: [
@@ -430,7 +456,7 @@ export const getTicketsWithNewComments = async (req, res) => {
           include: [
             {
               model: Department,
-              attributes: ["name", "department_code"],
+              attributes: ["id", "name", "department_code"],
             },
           ],
         },
@@ -451,33 +477,19 @@ export const getTicketsWithNewComments = async (req, res) => {
         {
           model: TicketView,
           as: "views",
-          where: { user_id: userId },
+          where: { user_id: user.id },
           required: false,
         },
       ],
-      where: sequelize.literal(`
-        EXISTS (
-          SELECT 1 FROM ticket_comments tc
-          WHERE tc.ticket_id = ticket.id
-          AND tc.user_id != '${userId}'
-          AND (
-            NOT EXISTS (
-              SELECT 1 FROM ticket_views tv
-              WHERE tv.ticket_id = ticket.id
-              AND tv.user_id = '${userId}'
-              AND tv.last_comment_seen_id = tc.id
-            )
-          )
-        )
-      `),
-      order: [["createdAt", "DESC"]],
+      where: whereConditions,
+      order: [["createdAt", "ASC"]],
     });
 
     const processedTickets = tickets
       .map((ticket) => {
         const comments = ticket.comments || [];
         const otherUserComments = comments.filter(
-          (comment) => comment.user_id !== userId
+          (comment) => comment.user_id !== user.id
         );
         const userView = ticket.views?.[0];
 
@@ -520,7 +532,7 @@ export const getTicketsWithNewComments = async (req, res) => {
 export const markTicketCommentsAsSeen = async (req, res) => {
   try {
     const { ticketID } = req.params;
-    const userId = req.user.id;
+    const userID = req.user.id;
 
     // Find the ticket with comments in separate query
     const ticket = await Ticket.findByPk(ticketID, {
@@ -559,7 +571,7 @@ export const markTicketCommentsAsSeen = async (req, res) => {
     const existingView = await TicketView.findOne({
       where: {
         ticket_id: ticketID,
-        user_id: userId,
+        user_id: userID,
       },
     });
 
@@ -573,7 +585,7 @@ export const markTicketCommentsAsSeen = async (req, res) => {
       // Create new view record
       await TicketView.create({
         ticket_id: ticketID,
-        user_id: userId,
+        user_id: userID,
         last_viewed_at: new Date(),
         last_comment_seen_id: latestCommentId,
       });
@@ -600,8 +612,8 @@ export const markTicketCommentsAsSeen = async (req, res) => {
 
 export const markMultipleTicketsCommentsAsSeen = async (req, res) => {
   try {
-    const { ticketIDs } = req.body; // Array of ticket IDs
-    const userId = req.user.id;
+    const { ticketIDs } = req.body;
+    const userID = req.user.id;
 
     if (!ticketIDs || !Array.isArray(ticketIDs)) {
       return res.status(400).json({
@@ -610,58 +622,51 @@ export const markMultipleTicketsCommentsAsSeen = async (req, res) => {
       });
     }
 
-    // Get all tickets with their latest comments
-    const tickets = await Ticket.findAll({
-      where: {
-        id: ticketIDs,
-      },
-      include: [
-        {
-          model: TicketComment,
-          as: "comments",
+    const results = [];
+
+    for (const ticketId of ticketIDs) {
+      try {
+        // Get the latest comment for this specific ticket
+        const latestComment = await TicketComment.findOne({
+          where: { ticket_id: ticketId },
           order: [["createdAt", "DESC"]],
-        },
-      ],
-    });
-
-    // Create view records for each ticket
-    const viewRecords = [];
-
-    for (const ticket of tickets) {
-      const latestCommentId =
-        ticket.comments.length > 0 ? ticket.comments[0].id : null;
-
-      // Check if view record already exists
-      const [viewRecord, created] = await TicketView.findOrCreate({
-        where: {
-          ticket_id: ticket.id,
-          user_id: userId,
-        },
-        defaults: {
-          last_viewed_at: new Date(),
-          last_comment_seen_id: latestCommentId,
-        },
-      });
-
-      if (!created) {
-        // Update existing record
-        await viewRecord.update({
-          last_viewed_at: new Date(),
-          last_comment_seen_id: latestCommentId,
         });
-      }
 
-      viewRecords.push({
-        ticketID: ticket.id,
-        lastViewedAt: new Date(),
-        lastCommentSeenId: latestCommentId,
-      });
+        const latestCommentId = latestComment ? latestComment.id : null;
+
+        // Update or create the view record
+        const [viewRecord, created] = await TicketView.findOrCreate({
+          where: {
+            ticket_id: ticketId,
+            user_id: userID,
+          },
+          defaults: {
+            last_viewed_at: new Date(),
+            last_comment_seen_id: latestCommentId,
+          },
+        });
+
+        if (!created) {
+          await viewRecord.update({
+            last_viewed_at: new Date(),
+            last_comment_seen_id: latestCommentId,
+          });
+        }
+
+        results.push({
+          ticketID: ticketId,
+          lastViewedAt: new Date(),
+          lastCommentSeenId: latestCommentId,
+        });
+      } catch (error) {
+        console.error(`Error processing ticket ${ticketId}:`, error);
+      }
     }
 
     res.json({
       success: true,
-      message: `${tickets.length} ticket(s) marked as seen`,
-      data: viewRecords,
+      message: `${results.length} of ${ticketIDs.length} ticket(s) marked as seen`,
+      data: results,
     });
   } catch (error) {
     console.error("Error marking multiple tickets as seen:", error);
@@ -676,7 +681,7 @@ export const markMultipleTicketsCommentsAsSeen = async (req, res) => {
 export const checkTicketHasNewComments = async (req, res) => {
   try {
     const { ticketID } = req.params;
-    const userId = req.user.id;
+    const userID = req.user.id;
 
     const ticket = await Ticket.findByPk(ticketID, {
       include: [
@@ -689,7 +694,7 @@ export const checkTicketHasNewComments = async (req, res) => {
         {
           model: TicketView,
           as: "views",
-          where: { user_id: userId },
+          where: { user_id: userID },
           required: false,
         },
       ],

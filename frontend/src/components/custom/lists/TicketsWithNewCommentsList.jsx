@@ -38,7 +38,7 @@ export const TicketsWithNewCommentsList = () => {
         refetch();
         setMarkedTickets(new Set());
         setIsMarkingAll(false);
-      }, 800);
+      }, 1200);
     } catch (error) {
       console.error("Failed to mark comments as seen:", error);
       setMarkedTickets(new Set());

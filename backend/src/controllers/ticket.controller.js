@@ -554,13 +554,17 @@ export const markTicketCommentsAsSeen = async (req, res) => {
     }
 
     // Get the latest comment ID (if any comments exist)
+    const otherUserComments = ticket?.comments.filter(
+      (comment) => comment.user_id !== userID
+    );
+
     const latestCommentId =
-      ticket.comments.length > 0 ? ticket.comments[0].id : null;
+      otherUserComments.length > 0 ? otherUserComments[0].id : null;
 
     console.log("Latest comment ID:", latestCommentId);
     console.log(
       "All comments:",
-      ticket.comments.map((c) => ({
+      otherUserComments.map((c) => ({
         id: c.id,
         createdAt: c.createdAt,
         content: c.content,

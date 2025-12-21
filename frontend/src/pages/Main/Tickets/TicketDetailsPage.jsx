@@ -12,15 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import {
-  ArrowLeft,
-  Edit,
-  Play,
-  Save,
-  X,
-  Send,
-  MoreVertical,
-} from "lucide-react";
+import { ArrowLeft, Edit, Play, Save, X, Copy } from "lucide-react";
 import { addMinutes, format, formatDistanceToNow } from "date-fns";
 import { useNavigate, useParams } from "react-router";
 import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
@@ -154,12 +146,8 @@ const TicketDetailsPage = () => {
     }
   };
 
-  if (isLoading || !ticket) {
+  if (isLoading || !ticket || !ticket.service || !ticket.service.department) {
     return <p>Loading ticket details...</p>;
-  }
-
-  if (!ticket.service || !ticket.service.department) {
-    return <p>Error: Ticket data is incomplete. Please try again.</p>;
   }
 
   const getTicketHeader = (ticket) => {
@@ -257,9 +245,25 @@ const TicketDetailsPage = () => {
                       </p>
                     </div>
 
-                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                      {ticket.ticket_code || "N/A"}
-                    </h3>
+                    <div className="flex items-center gap-0.5">
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                        {ticket.ticket_code || "N/A"}
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 sm:h-9 sm:w-9 p-0 border-0 hover:bg-inherit hover:text-primary"
+                        onClick={() => {
+                          if (ticket.ticket_code) {
+                            navigator.clipboard.writeText(ticket.ticket_code);
+                            toast.success("Ticket code copied to clipboard");
+                          }
+                        }}
+                        title="Copy ticket code"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <Badge
                     className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium w-fit ${

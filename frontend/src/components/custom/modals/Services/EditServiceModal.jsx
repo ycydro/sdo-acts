@@ -134,7 +134,9 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
                 <Field>
                   <FieldLabel>Service Name</FieldLabel>
                   <Input placeholder="The name of the service" {...field} />
-                  {error && <FieldError>{error.message}</FieldError>}
+                  {error && (
+                    <FieldError className="text-xs">{error.message}</FieldError>
+                  )}
                 </Field>
               )}
             />
@@ -151,7 +153,9 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
                     rows={3}
                     {...field}
                   />
-                  {error && <FieldError>{error.message}</FieldError>}
+                  {error && (
+                    <FieldError className="text-xs">{error.message}</FieldError>
+                  )}
                 </Field>
               )}
             />
@@ -185,7 +189,9 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
                       )}
                     </SelectContent>
                   </Select>
-                  {error && <FieldError>{error.message}</FieldError>}
+                  {error && (
+                    <FieldError className="text-xs">{error.message}</FieldError>
+                  )}
                 </Field>
               )}
             />
@@ -207,7 +213,11 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
                         <SelectItem value="Complex">Complex</SelectItem>
                       </SelectContent>
                     </Select>
-                    {error && <FieldError>{error.message}</FieldError>}
+                    {error && (
+                      <FieldError className="text-xs">
+                        {error.message}
+                      </FieldError>
+                    )}
                   </Field>
                 )}
               />
@@ -233,7 +243,11 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
                         <SelectItem value="High">High</SelectItem>
                       </SelectContent>
                     </Select>
-                    {error && <FieldError>{error.message}</FieldError>}
+                    {error && (
+                      <FieldError className="text-xs">
+                        {error.message}
+                      </FieldError>
+                    )}
                   </Field>
                 )}
               />
@@ -306,7 +320,7 @@ const EditServiceModal = ({ open, onOpenChange, service }) => {
                 />
               </div>
               {form.formState.errors.processing_time && (
-                <FieldError>
+                <FieldError className="text-xs">
                   {form.formState.errors.processing_time.message}
                 </FieldError>
               )}

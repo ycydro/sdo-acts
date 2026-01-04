@@ -31,6 +31,7 @@ import QueueControllerPage from "@/pages/Main/Queue/QueueControllerPage";
 import QueuePage from "@/pages/Main/Queue/QueuePage";
 import OverallClientSatisfactionPage from "@/pages/Main/ClientSatisfaction/OverallClientSatisfactionPage";
 import ServiceQualityDimensionsPage from "@/pages/Main/ClientSatisfaction/ServiceQualityDimensionsPage";
+import ClientSatisfactorySurveyPage from "@/pages/Client/ClientSatisfactorySurvey/ClientSatisfactorySurveyPage";
 
 const AppRoutes = () => {
   return (
@@ -155,12 +156,15 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        {/* Automatically routes to /test */}
+        {/* Automatically routes to /dashboard */}
         <Route path="" element={<Navigate to="dashboard" replace />} />
-
         <Route path="dashboard" element={<ClientDashboardPage />} />
         <Route path="request-ticket" element={<RequestTicketPage />} />
         <Route path="ticket/:id" element={<TicketDetailsPage />} />
+        <Route
+          path="ticket/client-satisfactory-survey/:id"
+          element={<ClientSatisfactorySurveyPage />}
+        />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

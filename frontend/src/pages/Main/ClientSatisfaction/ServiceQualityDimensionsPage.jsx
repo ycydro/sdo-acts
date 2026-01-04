@@ -30,7 +30,7 @@ const ServiceQualityDimensionsPage = () => {
           <div className="flex-1 max-w-md">
             <Input
               type="search"
-              placeholder="Search departments..."
+              placeholder="Search dimensions..."
               className="w-full"
             />
           </div>

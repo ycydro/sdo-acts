@@ -126,8 +126,6 @@ TicketComment.belongsTo(User, {
   as: "user",
 });
 
-// In your models/index.js or associations file
-
 // User associations
 User.hasMany(TicketView, {
   foreignKey: "user_id",

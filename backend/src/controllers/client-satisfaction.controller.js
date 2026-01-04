@@ -136,3 +136,82 @@ export const getAllSQDs = async (req, res) => {
     });
   }
 };
+
+export const getClientSurveyResponseByID = async (req, res) => {
+  try {
+    const { ticket_id } = req.params;
+
+    const survey = await ClientSurveyResponse.findOne({
+      where: { ticket_id },
+      include: [
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name"],
+        },
+        {
+          model: Ticket,
+          as: "ticket",
+          include: [
+            {
+              model: Service,
+              as: "service",
+              attributes: {
+                exclude: [
+                  "createdAt",
+                  "updatedAt",
+                  "description",
+                  "status",
+                  "department_id",
+                ],
+              },
+              include: [
+                {
+                  model: Department,
+                  attributes: ["id", "name", "department_code"],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: ClientSurveyDimensionRating,
+          as: "dimensionRatings",
+          include: [
+            {
+              model: ServiceQualityDimension,
+              as: "dimension",
+              attributes: ["dimension_id", "dimension_name", "scenario"],
+            },
+          ],
+        },
+      ],
+      raw: false,
+    });
+
+    if (!survey) {
+      return res.json({
+        ticket_id,
+        survey: null,
+      });
+    }
+
+    const plainSurvey = survey.get({ plain: true });
+
+    return res.status(200).json({
+      success: true,
+      ticket_id,
+      survey: {
+        ...plainSurvey,
+        answered: Boolean(plainSurvey.completed_date),
+        answered_at: plainSurvey.completed_date,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Client Survey Response failed to fetch.",
+    });
+  }
+};

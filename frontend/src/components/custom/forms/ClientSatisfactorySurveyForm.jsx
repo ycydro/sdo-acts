@@ -79,7 +79,7 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-background to-muted/20 py-4 sm:py-8 px-4">
+    <div className="bg-gradient-to-b from-background to-muted/20 px-4">
       <div className="max-w-2xl mx-auto">
         <Card className="mb-4 sm:mb-6 py-4">
           <CardHeader className="pb-3">

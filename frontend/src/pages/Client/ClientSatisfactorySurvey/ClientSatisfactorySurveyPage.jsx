@@ -3,9 +3,13 @@ import { useSQDs } from "@/hooks/queries/client-satisfaction/useSQDs";
 import ClientSatisfactorySurveyForm from "@/components/custom/forms/ClientSatisfactorySurveyForm";
 import { useParams } from "react-router";
 import { useSpecificClientSurveyResponse } from "@/hooks/queries/client-satisfaction/useSpecificClientSurveyResponse";
+import { useAuth } from "@/context/AuthContext";
+import { clientSatisfactionService } from "@/api/services/clientSatisfactionService";
 
 const ClientSatisfactorySurveyPage = () => {
   const { id: ticketID } = useParams();
+  const { user } = useAuth();
+
   const {
     data: surveyResponse,
     isLoading: isSurveyResponseLoading,
@@ -19,24 +23,29 @@ const ClientSatisfactorySurveyPage = () => {
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [surveyResults, setSurveyResults] = useState(null);
 
+  if (!surveyResponse?.success) {
+    return <SurveyUnavailable />;
+  }
+
+  const { survey } = surveyResponse;
+
   const handleSubmitSurvey = async (surveyResponses) => {
     try {
-      console.log("Survey responses:", surveyResponses);
+      await clientSatisfactionService.submitSurvey(
+        ticketID,
+        survey.client_id,
+        surveyResponses
+      );
 
-      // Here you can add your API call
-      // await api.submitSurvey(surveyResponses);
-
-      // Update local states
       setSurveyResults(surveyResponses);
       setSurveyCompleted(true);
 
       alert("Survey submitted successfully!");
 
-      // You can also do additional processing here
-      const averageRating =
-        surveyResponses.reduce((sum, item) => sum + item.rating, 0) /
-        surveyResponses.length;
-      console.log("Average rating:", averageRating);
+      // const averageRating =
+      //   surveyResponses.reduce((sum, item) => sum + item.rating, 0) /
+      //   surveyResponses.length;
+      // console.log("Average rating:", averageRating);
     } catch (error) {
       console.error("Error submitting survey:", error);
       alert("Failed to submit survey. Please try again.");
@@ -71,15 +80,35 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  if (!surveyResponse?.success) {
-    return <SurveyUnavailable />;
+  // check if user is authenticated
+  if (!user) {
+    return (
+      <div className="max-w-md mx-auto mt-20 text-center">
+        <h2 className="text-xl font-semibold">Access Denied</h2>
+        <p className="text-muted-foreground mt-2">
+          Please log in to access this survey.
+        </p>
+      </div>
+    );
   }
-
-  const { survey } = surveyResponse;
 
   // check if survey exists
   if (!survey) {
     return <SurveyUnavailable />;
+  }
+
+  const isTicketOwner = survey.client_id === user.id;
+
+  if (!isTicketOwner) {
+    return (
+      <div className="max-w-md mx-auto mt-20 text-center">
+        <h2 className="text-xl font-semibold">Access Restricted</h2>
+        <p className="text-muted-foreground mt-2">
+          You are not authorized to access this survey. This survey is only
+          available to the ticket owner.
+        </p>
+      </div>
+    );
   }
 
   // check ticket status
@@ -96,28 +125,9 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // check if survey has already been answered
+  // check if survey has already been answered - allow admins to see anyway
   if (survey.answered || survey.completed_date) {
     return <SurveyAlreadyAnswered />;
-  }
-
-  // check if survey is in progress (has been started)
-  if (survey.status === "In-Progress") {
-    return (
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold">Client Satisfaction Survey</h1>
-          <p className="text-muted-foreground mt-2">
-            You have a survey in progress. Please complete it below.
-          </p>
-        </div>
-        <ClientSatisfactorySurveyForm
-          dimensions={dimensions}
-          onSubmitSurvey={handleSubmitSurvey}
-          initialData={survey.dimensionRatings}
-        />
-      </div>
-    );
   }
 
   // check if dimensions are loaded
@@ -137,31 +147,10 @@ const ClientSatisfactorySurveyPage = () => {
 
   // show survey form for new survey
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold">Client Satisfaction Survey</h1>
-        <p className="text-muted-foreground mt-2">
-          Thank you for using our service. Please take a moment to provide
-          feedback on your experience.
-        </p>
-        <div className="mt-4 text-sm text-left bg-gray-50 p-4 rounded-lg">
-          <p>
-            <strong>Ticket:</strong> {survey.ticket?.ticket_code}
-          </p>
-          <p>
-            <strong>Service:</strong> {survey.ticket?.service?.name}
-          </p>
-          <p>
-            <strong>Department:</strong>{" "}
-            {survey.ticket?.service?.department?.name}
-          </p>
-        </div>
-      </div>
-      <ClientSatisfactorySurveyForm
-        dimensions={dimensions}
-        onSubmitSurvey={handleSubmitSurvey}
-      />
-    </div>
+    <ClientSatisfactorySurveyForm
+      dimensions={dimensions}
+      onSubmitSurvey={handleSubmitSurvey}
+    />
   );
 };
 

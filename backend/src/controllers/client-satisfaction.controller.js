@@ -215,3 +215,154 @@ export const getClientSurveyResponseByID = async (req, res) => {
     });
   }
 };
+
+export const submitSurvey = async (req, res) => {
+  const { ticket_id, client_id, ratings } = req.body;
+
+  if (!ticket_id || !client_id || !ratings || !Array.isArray(ratings)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Missing required fields: ticket_id, client_id, and ratings array are required",
+    });
+  }
+
+  if (ratings.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "At least one rating is required",
+    });
+  }
+
+  for (const rating of ratings) {
+    if (!rating.dimension_id || !rating.rating) {
+      return res.status(400).json({
+        success: false,
+        message: "Each rating must have dimension_id and rating",
+      });
+    }
+    if (rating.rating < 1 || rating.rating > 5) {
+      return res.status(400).json({
+        success: false,
+        message: `Rating for dimension ${rating.dimension_id} must be between 1-5`,
+      });
+    }
+  }
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    // check if survey already exists for this ticket
+    const existingSurvey = await ClientSurveyResponse.findOne({
+      where: { ticket_id, client_id },
+      transaction,
+    });
+
+    // if (existingSurvey) {
+    //   await transaction.rollback();
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Survey already submitted for this ticket",
+    //   });
+    // }
+
+    // get active dimensions to validate
+    const activeDimensions = await ServiceQualityDimension.findAll({
+      where: { is_active: true },
+      attributes: ["dimension_id"],
+      transaction,
+    });
+
+    const activeDimensionIds = activeDimensions.map((d) => d.dimension_id);
+
+    // validate submitted dimensions are active
+    for (const rating of ratings) {
+      if (!activeDimensionIds.includes(rating.dimension_id)) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          message: `Dimension ${rating.dimension_id} is not active or doesn't exist`,
+        });
+      }
+    }
+
+    // create dimension ratings
+    const dimensionRatings = ratings.map((rating) => ({
+      survey_response_id: existingSurvey.survey_response_id,
+      dimension_id: rating.dimension_id,
+      rating_value: rating.rating,
+    }));
+
+    await ClientSurveyDimensionRating.bulkCreate(dimensionRatings, {
+      transaction,
+    });
+
+    // calculate scores
+    const scores = await calculateSurveyScores(
+      existingSurvey.survey_response_id,
+      transaction
+    );
+
+    // update survey with calculated scores
+    await existingSurvey.update(
+      {
+        status: "Completed",
+        overall_rating: scores.averageScore,
+        total_score: scores.totalScore,
+        completed_date: new Date(),
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        survey_id: surveyResponse.response_id,
+        overall_rating: scores.averageScore,
+        dimensions_rated: ratings.length,
+        message: "Survey submitted successfully",
+      },
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Survey submission error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit survey",
+      error: error.message,
+    });
+  }
+};
+
+const calculateSurveyScores = async (responseId, transaction) => {
+  const dimensionResponses = await ClientSurveyDimensionRating.findAll({
+    where: { survey_response_id: responseId },
+    include: [
+      {
+        model: ServiceQualityDimension,
+        as: "dimension",
+        attributes: ["weight"],
+      },
+    ],
+    transaction,
+  });
+
+  let totalWeightedScore = 0;
+  let totalWeight = 0;
+
+  dimensionResponses.forEach((response) => {
+    const weight = parseFloat(response.dimension.weight) || 1.0;
+    totalWeightedScore += response.rating_value * weight;
+    totalWeight += weight;
+  });
+
+  const averageScore = totalWeightedScore / totalWeight;
+  const totalScore = dimensionResponses.reduce(
+    (sum, r) => sum + r.rating_value,
+    0
+  );
+
+  return { averageScore, totalScore };
+};

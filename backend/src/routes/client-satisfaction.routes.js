@@ -3,6 +3,7 @@ import {
   getAllClientSurveyResponses,
   getAllSQDs,
   getClientSurveyResponseByID,
+  submitSurvey,
 } from "../controllers/client-satisfaction.controller.js";
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get("/survey/:ticket_id", getClientSurveyResponseByID);
 
 // router.get("/:id", getTicketByID);
 
+router.post("/survey/submit", submitSurvey);
 // router.post("/", createTicket);
 // router.put("/update-ticket-status", updateTicketStatus);
 

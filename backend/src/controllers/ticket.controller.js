@@ -7,6 +7,7 @@ import {
   User,
   TicketComment,
   TicketView,
+  ClientSurveyResponse,
 } from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
 
@@ -383,28 +384,104 @@ export const createTicket = async (req, res) => {
 
 export const updateTicketStatus = async (req, res) => {
   const transaction = await sequelize.transaction();
+
   try {
     const { id, status } = req.body;
 
-    await Ticket.update(
+    if (!id) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "Ticket ID is required",
+      });
+    }
+
+    if (!status) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    const allowedStatuses = ["In Queue", "Ongoing", "Resolved", "On hold"];
+    if (!allowedStatuses.includes(status)) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Allowed values: ${allowedStatuses.join(
+          ", "
+        )}`,
+      });
+    }
+
+    const ticket = await Ticket.findByPk(id, { transaction });
+
+    if (!ticket) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
+    const [updatedCount] = await Ticket.update(
+      { status },
       {
-        status,
-      },
-      {
-        where: {
-          id,
-        },
+        where: { id },
         transaction,
       }
     );
+
+    if (updatedCount === 0) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found or no changes made",
+      });
+    }
+
+    if (status === "Resolved") {
+      const existingSurvey = await ClientSurveyResponse.findOne({
+        where: { ticket_id: id },
+        transaction,
+      });
+
+      if (!existingSurvey) {
+        await ClientSurveyResponse.create(
+          {
+            client_id: ticket.client_id,
+            ticket_id: id,
+            survey_date: new Date(),
+            status: "Pending",
+            overall_rating: null,
+            total_score: null,
+            comments: null,
+          },
+          { transaction }
+        );
+
+        console.log(`Created unanswered survey for ticket ${id}`);
+      } else {
+        console.log(`Survey already exists for ticket ${id}`);
+      }
+
+      // TODO: SEND EMAIL
+    }
+
     await transaction.commit();
+
+    const updatedTicket = await Ticket.findByPk(id);
+
     res.status(200).json({
       success: true,
       message: "Ticket status updated successfully!",
+      data: updatedTicket,
     });
   } catch (err) {
     await transaction.rollback();
     console.error("Error updating ticket:", err);
+
     res.status(500).json({
       success: false,
       message: "An error occurred while updating the ticket status.",

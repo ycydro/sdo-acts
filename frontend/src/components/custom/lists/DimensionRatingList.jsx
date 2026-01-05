@@ -1,32 +1,12 @@
 import { Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSQDs } from "@/hooks/queries/client-satisfaction/useSQDs";
-
-// Mock rating generator for each dimension
-const generateMockRatings = (dimensions) => {
-  return dimensions.map((dimension) => {
-    // Generate random rating between 1-5
-    const rating = (Math.random() * 4 + 1).toFixed(1);
-    const weight =
-      typeof dimension.weight === "string"
-        ? parseFloat(dimension.weight)
-        : dimension.weight;
-
-    return {
-      ...dimension,
-      average_rating: parseFloat(rating),
-      response_count: Math.floor(Math.random() * 100) + 10,
-      weight,
-    };
-  });
-};
+import { useSQDsWithRatings } from "@/hooks/queries/client-satisfaction/useSQDsWithRatings";
 
 export const DimensionRatingList = () => {
-  const { data: response, isLoading } = useSQDs();
+  const { data: response, isLoading } = useSQDsWithRatings();
 
   // Access the data array from the response
-  const dimensions = response?.data || [];
-  const dimensionRatings = generateMockRatings(dimensions);
+  const dimensionsWithRatings = response?.data || [];
 
   if (isLoading) {
     return (
@@ -39,7 +19,7 @@ export const DimensionRatingList = () => {
   }
 
   // Also add a check for empty data
-  if (dimensions.length === 0) {
+  if (dimensionsWithRatings.length === 0) {
     return (
       <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white shadow-md p-5 rounded-3xl flex-1 space-y-4 border text-center">
@@ -52,11 +32,11 @@ export const DimensionRatingList = () => {
 
   return (
     <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-      {dimensionRatings.map((dimension) => (
+      {dimensionsWithRatings.map((dimension) => (
         <DimensionRatingCard
           key={dimension.dimension_id}
           dimension={dimension.dimension_name}
-          rating={dimension.average_rating}
+          rating={parseFloat(dimension.average_rating)}
           responseCount={dimension.response_count}
           weight={dimension.weight}
           code={dimension.dimension_code}
@@ -81,8 +61,15 @@ const DimensionRatingCard = ({
     return "text-red-600";
   };
 
+  const getWeightColor = (weight) => {
+    if (weight >= 1.2) return "bg-blue-100 text-blue-800";
+    if (weight >= 1.0) return "bg-green-100 text-green-800";
+    if (weight >= 0.8) return "bg-yellow-100 text-yellow-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
   return (
-    <div className="bg-white shadow-md p-5 rounded-3xl flex-1 space-y-4 cursor-pointer border">
+    <div className="bg-white shadow-md p-5 rounded-3xl flex-1 space-y-1 cursor-pointer border">
       {/* Header row */}
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
@@ -94,12 +81,15 @@ const DimensionRatingCard = ({
       </div>
 
       {/* Rating display */}
-      <div className="space-y-2">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex items-baseline gap-1">
           <span className={`font-bold text-3xl ${getRatingColor(rating)}`}>
             {rating.toFixed(1)}
           </span>
           <span className="text-sm text-muted-foreground">/ 5.0</span>
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {responseCount} {responseCount === 1 ? "response" : "responses"}
         </div>
       </div>
     </div>

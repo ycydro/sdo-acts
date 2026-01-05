@@ -8,6 +8,13 @@ export const clientSatisfactionService = {
     return response.data;
   },
 
+  getSQDsWithRatings: async () => {
+    const response = await axios.get(
+      "/client-satisfaction/service-quality-dimensions/with-ratings"
+    );
+    return response.data;
+  },
+
   getClientSurveyResponseByID: async (ticketID) => {
     const response = await axios.get(`/client-satisfaction/survey/${ticketID}`);
     return response.data;

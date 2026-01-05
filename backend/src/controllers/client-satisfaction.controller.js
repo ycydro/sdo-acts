@@ -137,6 +137,66 @@ export const getAllSQDs = async (req, res) => {
   }
 };
 
+export const getSQDsWithRatings = async (req, res) => {
+  try {
+    //  get all active dimensions
+    const dimensions = await ServiceQualityDimension.findAll({
+      where: { is_active: true },
+      order: [["dimension_code", "ASC"]],
+    });
+
+    // get average ratings and response counts for each dimension
+    const dimensionRatings = await ClientSurveyDimensionRating.findAll({
+      attributes: [
+        "dimension_id",
+        [sequelize.fn("AVG", sequelize.col("rating_value")), "average_rating"],
+        [
+          sequelize.fn("COUNT", sequelize.col("rating_value")),
+          "response_count",
+        ],
+      ],
+      include: [
+        {
+          model: ClientSurveyResponse,
+          as: "response",
+          where: { status: "completed" },
+          required: true,
+          attributes: [],
+        },
+      ],
+      group: ["dimension_id"],
+      raw: true,
+    });
+
+    const dimensionsWithRatings = dimensions.map((dimension) => {
+      const dimensionData = dimension.toJSON();
+      const ratingData = dimensionRatings.find(
+        (r) => r.dimension_id === dimension.dimension_id
+      );
+
+      return {
+        ...dimensionData,
+        average_rating: ratingData
+          ? parseFloat(ratingData.average_rating).toFixed(1)
+          : 0,
+        response_count: ratingData ? parseInt(ratingData.response_count) : 0,
+      };
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: dimensionsWithRatings,
+      message: "SQDs with ratings fetched successfully!",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "SQDs with ratings failed to fetch.",
+    });
+  }
+};
+
 export const getClientSurveyResponseByID = async (req, res) => {
   try {
     const { ticket_id } = req.params;

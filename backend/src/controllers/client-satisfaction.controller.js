@@ -139,13 +139,47 @@ export const getAllSQDs = async (req, res) => {
 
 export const getSQDsWithRatings = async (req, res) => {
   try {
-    //  get all active dimensions
+    const user = req.user;
+
+    // where clause for dimensions
+    const dimensionWhere = { is_active: true };
+
+    // include clause for ratings with department filtering
+    const ratingInclude = {
+      model: ClientSurveyResponse,
+      as: "response",
+      where: { status: "completed" },
+      required: true,
+      attributes: [],
+      include: [
+        {
+          model: Ticket,
+          as: "ticket",
+          required: true,
+          attributes: [],
+          include: [
+            {
+              model: Service,
+              as: "service",
+              required: true,
+              attributes: [],
+              where: user.department_id
+                ? { department_id: user.department_id }
+                : {},
+            },
+          ],
+        },
+      ],
+    };
+
+    // get all active dimensions
     const dimensions = await ServiceQualityDimension.findAll({
-      where: { is_active: true },
+      where: dimensionWhere,
       order: [["dimension_code", "ASC"]],
     });
 
     // get average ratings and response counts for each dimension
+    // now filtered by user department if staff si user (may department_id)
     const dimensionRatings = await ClientSurveyDimensionRating.findAll({
       attributes: [
         "dimension_id",
@@ -155,15 +189,7 @@ export const getSQDsWithRatings = async (req, res) => {
           "response_count",
         ],
       ],
-      include: [
-        {
-          model: ClientSurveyResponse,
-          as: "response",
-          where: { status: "completed" },
-          required: true,
-          attributes: [],
-        },
-      ],
+      include: [ratingInclude],
       group: ["dimension_id"],
       raw: true,
     });

@@ -29,15 +29,15 @@ const ClientSatisfactorySurveyPage = () => {
 
   const { survey } = surveyResponse;
 
-  const handleSubmitSurvey = async (surveyResponses) => {
+  const handleSubmitSurvey = async (surveyData) => {
     try {
       await clientSatisfactionService.submitSurvey(
         ticketID,
         survey.client_id,
-        surveyResponses
+        surveyData
       );
 
-      setSurveyResults(surveyResponses);
+      setSurveyResults(surveyData);
       setSurveyCompleted(true);
 
       alert("Survey submitted successfully!");

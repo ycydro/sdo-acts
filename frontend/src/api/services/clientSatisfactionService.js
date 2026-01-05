@@ -13,11 +13,12 @@ export const clientSatisfactionService = {
     return response.data;
   },
 
-  submitSurvey: async (ticketID, clientID, ratings) => {
+  submitSurvey: async (ticketID, clientID, { ratings, comment }) => {
     const response = await axios.post("/client-satisfaction/survey/submit", {
       ticket_id: ticketID,
       client_id: clientID,
       ratings,
+      comment,
     });
     return response.data;
   },

@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea"; // Make sure to import Textarea
 import {
   Angry,
   Frown,
@@ -17,11 +18,17 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // +1 for the comment step
+  const totalSteps = dimensions.length + 1;
+
   const form = useForm({
-    defaultValues: dimensions.reduce((acc, dimension) => {
-      acc[dimension.dimension_id] = "";
-      return acc;
-    }, {}),
+    defaultValues: {
+      ...dimensions.reduce((acc, dimension) => {
+        acc[dimension.dimension_id] = "";
+        return acc;
+      }, {}),
+      comment: "",
+    },
     mode: "onChange",
   });
 
@@ -33,15 +40,32 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
     { value: "5", label: "Strongly Agree", Icon: Laugh },
   ];
 
-  const currentDimension = dimensions[currentStep];
-  const progress =
-    dimensions.length > 0 ? ((currentStep + 1) / dimensions.length) * 100 : 0;
+  // Check if we're on a dimension step or the comment step
+  const isCommentStep = currentStep === dimensions.length;
 
-  const currentValue = form.watch(currentDimension?.dimension_id);
-  const isCurrentStepValid = Boolean(currentValue);
+  // Get current dimension (if not on comment step)
+  const currentDimension = !isCommentStep ? dimensions[currentStep] : null;
+
+  // Calculate progress including the comment step
+  const progress = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
+
+  // Get current value based on which step we're on
+  const getCurrentValue = () => {
+    if (isCommentStep) {
+      return form.watch("comment");
+    }
+    return currentDimension ? form.watch(currentDimension.dimension_id) : "";
+  };
+
+  const currentValue = getCurrentValue();
+
+  // For dimension steps, it's valid if a rating is selected
+  const isCurrentStepValid = isCommentStep ? true : Boolean(currentValue);
 
   const handleNext = () => {
-    if (currentStep < dimensions.length - 1 && isCurrentStepValid) {
+    if (!isCurrentStepValid) return;
+
+    if (currentStep < totalSteps - 1) {
       setCurrentStep((prev) => prev + 1);
     }
   };
@@ -56,16 +80,22 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
     setIsSubmitting(true);
 
     try {
-      const surveyResponses = Object.entries(data).map(
-        ([dimension_id, value]) => ({
+      // Extract survey responses from dimensions
+      const surveyResponses = Object.entries(data)
+        .filter(([key]) => key !== "comment") // exclude comment field
+        .map(([dimension_id, value]) => ({
           dimension_id,
           dimension: dimensions.find((d) => d.dimension_id === dimension_id)
             ?.dimension_name,
           rating: parseInt(value),
-        })
-      );
+        }));
 
-      await onSubmitSurvey(surveyResponses);
+      const surveyData = {
+        ratings: surveyResponses,
+        comment: data.comment || null,
+      };
+
+      await onSubmitSurvey(surveyData);
 
       // reset form after successful submission
       form.reset();
@@ -87,7 +117,9 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
               Client Satisfactory Survey
             </CardTitle>
             <p className="text-center text-sm sm:text-base text-muted-foreground mt-1">
-              Please rate each scenario below
+              {isCommentStep
+                ? "Please share any additional comments (optional)"
+                : "Please rate each scenario below"}
             </p>
           </CardHeader>
           <CardContent className="pt-0">
@@ -95,7 +127,7 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
               <div className="flex justify-between text-xs sm:text-sm">
                 <span>Progress</span>
                 <span>
-                  {currentStep + 1} of {dimensions.length}
+                  {currentStep + 1} of {totalSteps}
                 </span>
               </div>
               <Progress value={progress} className="h-1.5 sm:h-2" />
@@ -109,91 +141,131 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <span className="text-xs font-medium text-muted-foreground">
-                    Question {currentStep + 1} of {dimensions.length}
+                    {isCommentStep
+                      ? `Additional Comments`
+                      : `Question ${currentStep + 1} of ${dimensions.length}`}
                   </span>
                   <h3 className="text-base sm:text-lg font-semibold mt-0.5">
-                    {currentDimension.dimension_name}
+                    {isCommentStep
+                      ? "Share Your Thoughts"
+                      : currentDimension.dimension_name}
                   </h3>
                 </div>
-                <span className="px-2 py-1 bg-primary/10 text-primary text-xs sm:text-sm rounded-full self-start sm:self-center">
-                  {currentDimension.dimension_code}
-                </span>
+                {!isCommentStep && (
+                  <span className="px-2 py-1 bg-primary/10 text-primary text-xs sm:text-sm rounded-full self-start sm:self-center">
+                    {currentDimension.dimension_code}
+                  </span>
+                )}
               </div>
             </CardHeader>
 
             <CardContent className="space-y-4 sm:space-y-6">
-              {/* Scenario Text */}
-              <div className="bg-muted/50 p-3 sm:p-4 rounded-lg">
-                <p className="text-sm sm:text-base leading-relaxed">
-                  "{currentDimension.scenario}"
-                </p>
-              </div>
-
-              <Controller
-                key={currentDimension.dimension_id}
-                control={form.control}
-                name={currentDimension.dimension_id}
-                rules={{ required: "Please select a response to continue" }}
-                render={({ field, fieldState: { error } }) => {
-                  const fieldValue = form.getValues(
-                    currentDimension.dimension_id
-                  );
-
-                  return (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-5 gap-3 sm:gap-6">
-                        {ratingOptions.map(({ value, label, Icon }) => {
-                          const isSelected = fieldValue === value;
-
-                          return (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() =>
-                                field.onChange(isSelected ? "" : value)
-                              }
-                              className={`
-                                flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl
-                                border transition-all duration-200
-                                ${
-                                  isSelected
-                                    ? "border-primary bg-primary/10 scale-105"
-                                    : "border-muted hover:border-primary/50 hover:bg-muted/40"
-                                }
-                              `}
-                            >
-                              <Icon
-                                className={`
-                                w-8 h-8 sm:w-10 sm:h-10
-                                ${
-                                  isSelected
-                                    ? "text-primary"
-                                    : "text-muted-foreground"
-                                }
-                              `}
-                              />
-                              <span
-                                className={`
-                    text-xs sm:text-sm font-medium text-center
-                    ${isSelected ? "text-primary" : "text-muted-foreground"}
-                  `}
-                              >
-                                {label}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {error && (
-                        <p className="text-sm text-destructive text-center">
-                          {error.message}
-                        </p>
+              {/* Display either scenario or textarea based on step */}
+              {isCommentStep ? (
+                <div className="space-y-4">
+                  <div className="bg-muted/50 p-3 sm:p-4 rounded-lg">
+                    <p className="text-sm sm:text-base leading-relaxed mb-4">
+                      Thank you for rating all the scenarios. If you have any
+                      additional comments or feedback about our service, please
+                      share them below (optional).
+                    </p>
+                    <Controller
+                      control={form.control}
+                      name="comment"
+                      render={({ field, fieldState: { error } }) => (
+                        <div className="space-y-2">
+                          <Textarea
+                            {...field}
+                            placeholder="Enter your comments here..."
+                            className="min-h-[150px] resize-none"
+                          />
+                          {error && (
+                            <p className="text-sm text-destructive">
+                              {error.message}
+                            </p>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  );
-                }}
-              />
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Scenario Text */}
+                  <div className="bg-muted/50 p-3 sm:p-4 rounded-lg">
+                    <p className="text-sm sm:text-base leading-relaxed">
+                      "{currentDimension.scenario}"
+                    </p>
+                  </div>
+
+                  <Controller
+                    key={currentDimension.dimension_id}
+                    control={form.control}
+                    name={currentDimension.dimension_id}
+                    rules={{ required: "Please select a response to continue" }}
+                    render={({ field, fieldState: { error } }) => {
+                      const fieldValue = form.getValues(
+                        currentDimension.dimension_id
+                      );
+
+                      return (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-5 gap-3 sm:gap-6">
+                            {ratingOptions.map(({ value, label, Icon }) => {
+                              const isSelected = fieldValue === value;
+
+                              return (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  onClick={() =>
+                                    field.onChange(isSelected ? "" : value)
+                                  }
+                                  className={`
+                                    flex flex-col items-center gap-2 p-3 sm:p-4 rounded-xl
+                                    border transition-all duration-200
+                                    ${
+                                      isSelected
+                                        ? "border-primary bg-primary/10 scale-105"
+                                        : "border-muted hover:border-primary/50 hover:bg-muted/40"
+                                    }
+                                  `}
+                                >
+                                  <Icon
+                                    className={`
+                                    w-8 h-8 sm:w-10 sm:h-10
+                                    ${
+                                      isSelected
+                                        ? "text-primary"
+                                        : "text-muted-foreground"
+                                    }
+                                  `}
+                                  />
+                                  <span
+                                    className={`
+                      text-xs sm:text-sm font-medium text-center
+                      ${isSelected ? "text-primary" : "text-muted-foreground"}
+                    `}
+                                  >
+                                    {label}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {error && (
+                            <p className="text-sm text-destructive text-center">
+                              {error.message}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }}
+                  />
+                </>
+              )}
+
               <div className="flex justify-between pt-4 sm:pt-6 border-t">
                 <div>
                   {currentStep > 0 && (
@@ -212,7 +284,7 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
                 </div>
 
                 <div>
-                  {currentStep < dimensions.length - 1 ? (
+                  {currentStep < dimensions.length ? (
                     <Button
                       type="button"
                       onClick={handleNext}
@@ -225,10 +297,11 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
                     </Button>
                   ) : (
                     <Button
-                      type="submit"
-                      disabled={!isCurrentStepValid || isSubmitting}
+                      type="button"
+                      disabled={isSubmitting}
                       size="sm"
                       className="h-9"
+                      onClick={form.handleSubmit(onSubmit)}
                     >
                       {isSubmitting ? (
                         <>
@@ -283,6 +356,36 @@ const ClientSatisfactorySurveyForm = ({ dimensions, onSubmitSurvey }) => {
                     />
                   );
                 })}
+                {/* Indicator for comment step */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Only allow navigation to comment step if all dimensions are completed
+                    const allDimensionsAnswered = dimensions.every((dim) =>
+                      form.getValues(dim.dimension_id)
+                    );
+                    if (allDimensionsAnswered) {
+                      setCurrentStep(dimensions.length);
+                    }
+                  }}
+                  className={`
+                    w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-200
+                    ${isCommentStep ? "bg-primary w-4 sm:w-6" : "bg-muted"}
+                    ${
+                      // Enable if all dimensions are answered or it's the current step
+                      dimensions.every((dim) =>
+                        form.getValues(dim.dimension_id)
+                      ) || isCommentStep
+                        ? "cursor-pointer hover:scale-125"
+                        : "cursor-not-allowed"
+                    }
+                  `}
+                  title={
+                    isCommentStep
+                      ? "Additional comments"
+                      : "Additional comments (complete all questions first)"
+                  }
+                />
               </div>
             </CardContent>
           </Card>

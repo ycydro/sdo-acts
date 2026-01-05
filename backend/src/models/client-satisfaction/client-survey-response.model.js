@@ -33,7 +33,7 @@ const ClientSurveyResponse = sequelize.define("client_survey_response", {
     // Sum of all dimension ratings
     type: DataTypes.DECIMAL(5, 2),
   },
-  comments: DataTypes.TEXT,
+  comment: DataTypes.TEXT,
 });
 
 export default ClientSurveyResponse;

@@ -217,7 +217,7 @@ export const getClientSurveyResponseByID = async (req, res) => {
 };
 
 export const submitSurvey = async (req, res) => {
-  const { ticket_id, client_id, ratings } = req.body;
+  const { ticket_id, client_id, ratings, comment } = req.body;
 
   if (!ticket_id || !client_id || !ratings || !Array.isArray(ratings)) {
     return res.status(400).json({
@@ -310,6 +310,7 @@ export const submitSurvey = async (req, res) => {
         overall_rating: scores.averageScore,
         total_score: scores.totalScore,
         completed_date: new Date(),
+        comment,
       },
       { transaction }
     );
@@ -319,7 +320,7 @@ export const submitSurvey = async (req, res) => {
     res.status(201).json({
       success: true,
       data: {
-        survey_id: surveyResponse.response_id,
+        survey_id: existingSurvey.response_id,
         overall_rating: scores.averageScore,
         dimensions_rated: ratings.length,
         message: "Survey submitted successfully",

@@ -244,7 +244,10 @@ const ClientDashboardPage = () => {
             <div className="flex justify-end gap-3 pt-2">
               <Button
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  setShowSurveyModal(false);
+                  setIsProcessing(false);
+                }}
                 disabled={isProcessing}
               >
                 Later

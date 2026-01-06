@@ -132,27 +132,35 @@ const ViewClientFeedbackModal = ({ feedback, open, onOpenChange }) => {
                     DETAILED RATINGS
                   </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {feedback.dimensionRatings.map((dimension) => (
-                      <div
-                        key={dimension.dimension_rating_id}
-                        className={`p-3 rounded-lg border ${getRatingColor(
-                          dimension.rating_value
-                        )} transition-all`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-semibold text-sm">
-                            {Number.parseFloat(dimension.rating_value).toFixed(
-                              1
-                            )}
-                            /5.0
-                          </span>
-                          <Star className="h-4 w-4 fill-current" />
+                    {/* sort alphabetically */}
+                    {feedback.dimensionRatings
+                      .slice()
+                      .sort((a, b) =>
+                        a.dimension.dimension_name.localeCompare(
+                          b.dimension.dimension_name
+                        )
+                      )
+                      .map((dimension) => (
+                        <div
+                          key={dimension.dimension_rating_id}
+                          className={`p-3 rounded-lg border ${getRatingColor(
+                            dimension.rating_value
+                          )} transition-all`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-sm">
+                              {Number.parseFloat(
+                                dimension.rating_value
+                              ).toFixed(1)}
+                              /5.0
+                            </span>
+                            <Star className="h-4 w-4 fill-current" />
+                          </div>
+                          <p className="text-sm font-medium line-clamp-2">
+                            {dimension.dimension.dimension_name}
+                          </p>
                         </div>
-                        <p className="text-sm font-medium line-clamp-2">
-                          {dimension.dimension.dimension_name}
-                        </p>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 </div>
               )}

@@ -112,7 +112,7 @@ const ClientDashboardPage = () => {
       return "Active Ticket in Progress";
     }
     if (surveyData?.hasUnansweredSurvey) {
-      return "Complete Survey First";
+      return "Answer Survey";
     }
     if (isProcessing) {
       return "Processing...";
@@ -168,7 +168,7 @@ const ClientDashboardPage = () => {
       return "Service Request Unavailable";
     }
     if (surveyData?.hasUnansweredSurvey) {
-      return "Complete Survey to Request Service";
+      return "Answer Survey to Request Service";
     }
     return "Request a Service";
   };
@@ -178,7 +178,7 @@ const ClientDashboardPage = () => {
       return "You already have an active ticket. Please wait for it to be resolved before requesting another service.";
     }
     if (surveyData?.hasUnansweredSurvey) {
-      return "Complete your previous ticket survey to proceed with a new request.";
+      return "Please answer your previous ticket survey to proceed with a new request.";
     }
     return "Click below to proceed to the official service request form.";
   };
@@ -257,7 +257,7 @@ const ClientDashboardPage = () => {
                 disabled={isProcessing}
                 className="bg-amber-600 hover:bg-amber-700"
               >
-                {isProcessing ? "Loading..." : "Complete Survey"}
+                {isProcessing ? "Loading..." : "Continue to survey"}
               </Button>
             </div>
           </div>

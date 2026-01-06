@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSQDs } from "@/hooks/queries/client-satisfaction/useSQDs";
 import ClientSatisfactorySurveyForm from "@/components/custom/forms/ClientSatisfactorySurveyForm";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useSpecificClientSurveyResponse } from "@/hooks/queries/client-satisfaction/useSpecificClientSurveyResponse";
 import { useAuth } from "@/context/AuthContext";
 import { clientSatisfactionService } from "@/api/services/clientSatisfactionService";
+import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Check, Home } from "lucide-react";
 
 const ClientSatisfactorySurveyPage = () => {
   const { id: ticketID } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const {
     data: surveyResponse,
@@ -22,12 +27,23 @@ const ClientSatisfactorySurveyPage = () => {
 
   const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [surveyResults, setSurveyResults] = useState(null);
+  const [countdown, setCountdown] = useState(10);
 
-  if (!surveyResponse?.success) {
-    return <SurveyUnavailable />;
-  }
-
-  const { survey } = surveyResponse;
+  // Now handle the conditional logic AFTER all hooks are called
+  useEffect(() => {
+    if (surveyCompleted) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(timer);
+            navigate("/dashboard");
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [surveyCompleted, navigate]);
 
   const handleSubmitSurvey = async (surveyData) => {
     try {
@@ -40,20 +56,18 @@ const ClientSatisfactorySurveyPage = () => {
       setSurveyResults(surveyData);
       setSurveyCompleted(true);
 
-      alert("Survey submitted successfully!");
-
-      // const averageRating =
-      //   surveyResponses.reduce((sum, item) => sum + item.rating, 0) /
-      //   surveyResponses.length;
-      // console.log("Average rating:", averageRating);
+      toast.success("Survey has been answered successfully! Thank you!");
     } catch (error) {
       console.error("Error submitting survey:", error);
-      alert("Failed to submit survey. Please try again.");
-      throw error; // Let the form handle the error
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to submit survey. Please try again."
+      );
+      throw error;
     }
   };
 
-  // check loading states
+  // Early return conditions should come AFTER all hooks
   if (isSurveyResponseLoading || isSQDsLoading) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[400px]">
@@ -65,7 +79,6 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // check for errors
   if (isSurveyError || surveyError) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[400px]">
@@ -80,7 +93,12 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // check if user is authenticated
+  if (!surveyResponse?.success) {
+    return <SurveyUnavailable />;
+  }
+
+  const { survey } = surveyResponse;
+
   if (!user) {
     return (
       <div className="max-w-md mx-auto mt-20 text-center">
@@ -92,7 +110,6 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // check if survey exists
   if (!survey) {
     return <SurveyUnavailable />;
   }
@@ -111,7 +128,6 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // check ticket status
   if (survey.ticket?.status !== "Resolved") {
     return (
       <div className="max-w-md mx-auto mt-20 text-center">
@@ -125,12 +141,10 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // check if survey has already been answered - allow admins to see anyway
   if (survey.answered || survey.completed_date) {
     return <SurveyAlreadyAnswered />;
   }
 
-  // check if dimensions are loaded
   if (dimensions.length === 0) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[400px]">
@@ -145,7 +159,63 @@ const ClientSatisfactorySurveyPage = () => {
     );
   }
 
-  // show survey form for new survey
+  if (surveyCompleted) {
+    return (
+      <div className="flex items-center justify-center p-4 sm:p-6 md:p-8">
+        <Card className="w-full max-w-md sm:max-w-lg md:max-w-xl p-6 sm:p-8 md:p-10 text-center shadow-lg">
+          {/* Success Icon */}
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="relative">
+              <div className="w-15 h-15 sm:w-18 sm:h-18 md:w-20 md:h-20 border-primary rounded-full flex items-center justify-center animate-pulse">
+                <div className="w-10 h-10 sm:w-13 sm:h-13 md:w-15 md:h-15 bg-inherit rounded-full flex items-center justify-center">
+                  <Check className="text-primary w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
+                </div>
+              </div>
+              {/* Animated ring effect */}
+              <div className="absolute inset-0 border-4 border-primary rounded-full animate-ping opacity-20"></div>
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 sm:mb-4">
+            Thank You!
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8">
+            Your survey answers have been submitted successfully!
+          </p>
+
+          {/* Countdown Display */}
+          <div className="mb-8 sm:mb-10">
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-yellow-50 rounded-full">
+              <span className="text-sm sm:text-base text-gray-600">
+                Redirecting in
+              </span>
+              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-yellow-100">
+                <span className="text-lg sm:text-xl font-bold text-yellow-600">
+                  {countdown}
+                </span>
+              </div>
+              <span className="text-sm sm:text-base text-gray-600">
+                seconds
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div>
+            <Button
+              onClick={() => navigate("/dashboard")}
+              className="flex-1 bg-primary text-white text-sm sm:text-base font-medium py-3 sm:py-4 px-4 rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-lg"
+            >
+              <Home className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+              Go to Dashboard
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <ClientSatisfactorySurveyForm
       dimensions={dimensions}

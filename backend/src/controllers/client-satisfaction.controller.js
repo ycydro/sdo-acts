@@ -349,6 +349,77 @@ export const getClientSurveyResponseByID = async (req, res) => {
   }
 };
 
+export const getUnansweredSurvey = async (req, res) => {
+  try {
+    const user = req.user;
+
+    // find the latest resolved ticket with pending survey
+    const latestResolvedTicket = await Ticket.findOne({
+      where: {
+        client_id: user.id,
+        status: "Resolved",
+      },
+      order: [["updatedAt", "DESC"]],
+      include: [
+        {
+          model: Service,
+          as: "service",
+          include: [
+            {
+              model: Department,
+              attributes: ["id", "name", "department_code"],
+            },
+          ],
+        },
+        {
+          model: ClientSurveyResponse,
+          as: "surveyReponse",
+          required: false,
+          where: {
+            status: "Pending",
+            completed_date: null,
+          },
+        },
+      ],
+    });
+
+    if (!latestResolvedTicket) {
+      return res.json({
+        hasUnansweredSurvey: false,
+        survey: null,
+        ticket: null,
+      });
+    }
+
+    const pendingSurvey = await ClientSurveyResponse.findOne({
+      where: {
+        ticket_id: latestResolvedTicket.id,
+        status: "Pending",
+        completed_date: null,
+      },
+    });
+
+    if (pendingSurvey) {
+      return res.json({
+        hasUnansweredSurvey: true,
+        survey: pendingSurvey,
+        ticket: latestResolvedTicket,
+        message:
+          "Please complete the survey for your previous ticket before requesting a new service.",
+      });
+    }
+
+    return res.json({
+      hasUnansweredSurvey: false,
+      survey: null,
+      ticket: null,
+    });
+  } catch (error) {
+    console.error("Error checking unanswered survey:", error);
+    res.status(500).json({ error: "Failed to check survey status" });
+  }
+};
+
 export const submitSurvey = async (req, res) => {
   const { ticket_id, client_id, ratings, comment } = req.body;
 

@@ -4,6 +4,7 @@ import {
   getAllSQDs,
   getSQDsWithRatings,
   getClientSurveyResponseByID,
+  getUnansweredSurvey,
   submitSurvey,
 } from "../controllers/client-satisfaction.controller.js";
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get("/service-quality-dimensions", getAllSQDs);
 router.get("/service-quality-dimensions/with-ratings", getSQDsWithRatings);
 router.get("/survey/responses", getAllClientSurveyResponses);
+router.get("/survey/unanswered", getUnansweredSurvey);
 router.get("/survey/:ticket_id", getClientSurveyResponseByID);
 
 // router.get("/:id", getTicketByID);

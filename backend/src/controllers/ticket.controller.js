@@ -353,6 +353,61 @@ export const createTicket = async (req, res) => {
     const { service_id, details, client_id, scheduled_date, is_online } =
       req.body;
 
+    const latestResolvedTicket = await Ticket.findOne({
+      where: {
+        client_id,
+        status: "Resolved",
+      },
+      order: [["createdAt", "DESC"]],
+      transaction,
+    });
+
+    let hasPendingSurvey = false;
+    let pendingSurveyData = null;
+
+    if (latestResolvedTicket) {
+      pendingSurveyData = await ClientSurveyResponse.findOne({
+        where: {
+          ticket_id: latestResolvedTicket.id,
+          client_id,
+          status: "Pending",
+          completed_date: null,
+        },
+        transaction,
+      });
+
+      hasPendingSurvey = !!pendingSurveyData;
+    }
+
+    // if client has pending survey, block ticket creation
+    if (hasPendingSurvey) {
+      await transaction.rollback();
+
+      const latestTicketService = await Service.findByPk(
+        latestResolvedTicket.service_id,
+        { attributes: ["name"] }
+      );
+
+      return res.status(403).json({
+        success: false,
+        message:
+          "Cannot create new ticket. Please complete the survey for your previous resolved ticket first.",
+        error: "SURVEY_PENDING",
+        details: {
+          pendingSurvey: {
+            ticket_id: latestResolvedTicket.id,
+            ticket_code: latestResolvedTicket.ticket_code,
+            resolved_date: latestResolvedTicket.updatedAt,
+            service_name: latestTicketService?.name || "Unknown service",
+            service_id: latestResolvedTicket.service_id,
+          },
+          instructions:
+            "Complete the survey for your previous ticket to request new services.",
+        },
+      });
+    }
+
+    // create ticket if no pending survey
     const ticket = await Ticket.create(
       {
         service_id,
@@ -374,6 +429,16 @@ export const createTicket = async (req, res) => {
   } catch (err) {
     await transaction.rollback();
     console.error("Error creating ticket:", err);
+
+    if (err.message === "SURVEY_PENDING") {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Cannot create new ticket. Please complete the survey for your previous resolved ticket first.",
+        error: "SURVEY_PENDING",
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: "An error occurred while creating the ticket.",

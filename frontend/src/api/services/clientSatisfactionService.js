@@ -11,6 +11,11 @@ export const clientSatisfactionService = {
     return response.data;
   },
 
+  getUnansweredSurvey: async () => {
+    const response = await axios.get("/client-satisfaction/survey/unanswered");
+    return response.data;
+  },
+
   getAllSQDs: async () => {
     const response = await axios.get(
       "/client-satisfaction/service-quality-dimensions"

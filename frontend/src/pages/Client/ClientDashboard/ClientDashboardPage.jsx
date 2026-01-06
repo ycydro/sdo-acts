@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { addMinutes, format, formatDistanceToNow } from "date-fns";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,9 @@ import {
   Ticket,
   ExternalLink,
   MessageSquare,
+  AlertCircle,
+  XCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useActiveTicket } from "@/hooks/queries/ticket/useActiveTicket";
@@ -24,9 +27,20 @@ import { formatTimeDisplay, convertMinutesToTimeParts } from "@/lib/timeUtils";
 import { TransactionHistoryList } from "@/components/custom/lists/TransactionHistoryList";
 import { ticketsService } from "@/api/services/ticketsService";
 import { useCheckCommentsByTicket } from "@/hooks/queries/ticket/comments/useCheckCommentsByTicket";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useUnansweredSurvey } from "@/hooks/queries/client-satisfaction/useUnansweredSurvey";
 
 const ClientDashboardPage = () => {
   const navigate = useNavigate();
+  const [showSurveyModal, setShowSurveyModal] = useState(false);
+  const [surveyTicketId, setSurveyTicketId] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const {
     data: ticket,
@@ -39,6 +53,13 @@ const ClientDashboardPage = () => {
     isLoading: isNewCommentLoading,
     isError: isNewCommentError,
   } = useCheckCommentsByTicket(ticket?.id);
+
+  const {
+    data: surveyData,
+    isLoading: isSurveyLoading,
+    isError: isSurveyError,
+    refetch: refetchSurvey,
+  } = useUnansweredSurvey();
 
   const processing_time =
     convertMinutesToTimeParts(ticket?.service?.processing_time_in_minutes) ||
@@ -58,27 +79,209 @@ const ClientDashboardPage = () => {
     }
   };
 
+  const handleRequestService = () => {
+    if (isProcessing) return;
+
+    if (ticket) {
+      return;
+    }
+
+    if (surveyData?.hasUnansweredSurvey) {
+      setIsProcessing(true);
+      setSurveyTicketId(surveyData.ticket?.id);
+      setShowSurveyModal(true);
+      setTimeout(() => setIsProcessing(false), 500);
+    } else {
+      setIsProcessing(true);
+      navigate("/request-ticket");
+    }
+  };
+
+  const handleCompleteSurvey = () => {
+    setIsProcessing(true);
+    navigate(`/ticket/survey/${surveyTicketId}`);
+  };
+
+  // determine if request service should be disabled
+  const hasActiveTicket = !!ticket;
+  const isRequestDisabled =
+    isActiveTicketLoading || hasActiveTicket || isSurveyLoading || isProcessing;
+
+  const getButtonText = () => {
+    if (hasActiveTicket) {
+      return "Active Ticket in Progress";
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return "Complete Survey First";
+    }
+    if (isProcessing) {
+      return "Processing...";
+    }
+    return "Proceed to Form";
+  };
+
+  const getCardStyle = () => {
+    if (hasActiveTicket) {
+      return "border-gray-300 bg-gray-50";
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return "border-amber-200 bg-amber-50";
+    }
+    return "border-gray-200";
+  };
+
+  const getIconStyle = () => {
+    if (hasActiveTicket) {
+      return "bg-gray-200";
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return "bg-amber-100";
+    }
+    return "bg-green-100";
+  };
+
+  const getIcon = () => {
+    if (hasActiveTicket) {
+      return <XCircle className="text-gray-600 w-8 h-8" />;
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return <AlertCircle className="text-amber-800 w-8 h-8" />;
+    }
+    return <Plus className="text-green-800 w-8 h-8" />;
+  };
+
+  const getButtonStyle = () => {
+    if (hasActiveTicket) {
+      return "bg-gray-500 hover:bg-gray-500 cursor-not-allowed";
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return "bg-amber-600 hover:bg-amber-700";
+    }
+    if (isProcessing) {
+      return "bg-gray-500 hover:bg-gray-500 cursor-not-allowed";
+    }
+    return "bg-green-700 hover:bg-green-800";
+  };
+
+  const getCardTitle = () => {
+    if (hasActiveTicket) {
+      return "Service Request Unavailable";
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return "Complete Survey to Request Service";
+    }
+    return "Request a Service";
+  };
+
+  const getCardDescription = () => {
+    if (hasActiveTicket) {
+      return "You already have an active ticket. Please wait for it to be resolved before requesting another service.";
+    }
+    if (surveyData?.hasUnansweredSurvey) {
+      return "Complete your previous ticket survey to proceed with a new request.";
+    }
+    return "Click below to proceed to the official service request form.";
+  };
+
   return (
     <main className="w-full space-y-5">
+      {/* Survey Required Modal */}
+      {/* CREATE SEPARATE COMPONENT FOR THIS MODAL */}
+      <Dialog
+        open={showSurveyModal}
+        onOpenChange={(open) => {
+          setShowSurveyModal(open);
+          if (!open) setIsProcessing(false);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="space-y-2">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+              <DialogTitle className="text-lg">Complete Survey</DialogTitle>
+            </div>
+            <DialogDescription>
+              {surveyData?.message ||
+                "Help us improve by completing a quick survey about your recent service."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5">
+            <div className="rounded-lg border border-border bg-card p-4 space-y-2">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Ticket
+                </p>
+                <p className="text-base font-semibold text-foreground">
+                  {surveyData?.ticket?.ticket_code}
+                </p>
+              </div>
+              {surveyData?.ticket?.service?.name && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Service
+                  </p>
+                  <p className="text-sm text-foreground">
+                    {surveyData.ticket.service.name}
+                  </p>
+                </div>
+              )}
+              {surveyData?.ticket?.updatedAt && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Resolved
+                  </p>
+                  <p className="text-sm text-foreground">
+                    {format(
+                      new Date(surveyData.ticket.updatedAt),
+                      "MMM dd, yyyy"
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isProcessing}
+              >
+                Later
+              </Button>
+              <Button
+                onClick={handleCompleteSurvey}
+                disabled={isProcessing}
+                className="bg-amber-600 hover:bg-amber-700"
+              >
+                {isProcessing ? "Loading..." : "Complete Survey"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* CTA */}
       <div className="relative">
         <div className="hidden md:grid md:grid-cols-2 gap-6 px-1 md:px-0">
-          <Card className="text-center shadow-lg border border-gray-200 flex flex-col justify-center p-6">
+          {/* Request Service Card */}
+          <Card
+            className={`text-center shadow-lg border flex flex-col justify-center p-6 ${getCardStyle()}`}
+          >
             <CardContent className="flex flex-col justify-center items-center gap-4">
-              <div className="bg-green-100 p-3 rounded-full">
-                <Plus className="text-green-800 w-8 h-8" />
+              <div className={`p-3 rounded-full ${getIconStyle()}`}>
+                {getIcon()}
               </div>
               <div className="space-y-1.5">
-                <p className="text-xl font-bold">Request a Service</p>
-                <p className="text-gray-600 text-sm">
-                  Click below to proceed to the official service request form.
-                </p>
+                <p className="text-xl font-bold">{getCardTitle()}</p>
+                <p className="text-gray-600 text-sm">{getCardDescription()}</p>
               </div>
               <Button
-                onClick={() => navigate("/request-ticket")}
-                className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full"
+                onClick={handleRequestService}
+                disabled={isRequestDisabled}
+                className={`${getButtonStyle()} text-white font-semibold text-base px-5 py-2 rounded-full w-full`}
               >
-                Proceed to Form
+                {getButtonText()}
               </Button>
             </CardContent>
           </Card>
@@ -100,6 +303,7 @@ const ClientDashboardPage = () => {
             </CardContent>
           </Card>
         </div>
+
         {/* Mobile Carousel View */}
         <div className="sm:hidden relative">
           <Carousel
@@ -111,23 +315,25 @@ const ClientDashboardPage = () => {
           >
             <CarouselContent className="z-0">
               <CarouselItem className="pl-4 basis-full sm:basis-1/2">
-                <Card className="text-center shadow-lg border border-gray-200 flex flex-col justify-center p-6 h-full">
+                <Card
+                  className={`text-center shadow-lg border flex flex-col justify-center p-6 h-full ${getCardStyle()}`}
+                >
                   <CardContent className="flex flex-col justify-center items-center gap-4">
-                    <div className="bg-green-100 p-3 rounded-full">
-                      <Plus className="text-green-800 w-8 h-8" />
+                    <div className={`p-3 rounded-full ${getIconStyle()}`}>
+                      {getIcon()}
                     </div>
                     <div className="space-y-1.5">
-                      <p className="text-xl font-bold">Request a Service</p>
+                      <p className="text-xl font-bold">{getCardTitle()}</p>
                       <p className="text-gray-600 text-sm">
-                        Click below to proceed to the official service request
-                        form.
+                        {getCardDescription()}
                       </p>
                     </div>
                     <Button
-                      onClick={() => navigate("/request-ticket")}
-                      className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full"
+                      onClick={handleRequestService}
+                      disabled={isRequestDisabled}
+                      className={`${getButtonStyle()} text-white font-semibold text-base px-5 py-2 rounded-full w-full`}
                     >
-                      Proceed to Form
+                      {getButtonText()}
                     </Button>
                   </CardContent>
                 </Card>

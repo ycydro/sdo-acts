@@ -1,14 +1,14 @@
 import React from "react";
 import { Star } from "lucide-react";
 
-const StarRating = ({ value, large }) => {
+const StarRating = ({ value }) => {
   return (
     <div className="flex gap-1">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {[1, 2, 3, 4, 5].map((star) => (
         <Star
-          key={i}
-          className={`${large ? "h-6 w-6" : "h-4 w-4"} ${
-            i < value ? "fill-yellow-400 text-yellow-400" : "text-muted"
+          key={star}
+          className={`h-5 w-5 ${
+            star <= value ? `fill-current text-yellow-400` : "text-border"
           }`}
         />
       ))}

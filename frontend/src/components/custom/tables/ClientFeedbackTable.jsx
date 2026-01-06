@@ -4,23 +4,12 @@ import { usePagination } from "../../../hooks/usePagination";
 import { useDepartments } from "@/hooks/queries/department/useDepartments";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
-import { ArrowLeft, Search, Star } from "lucide-react";
-import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
-import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
-import { statusColors } from "@/lib/constants/statusColors";
-import { useNavigate } from "react-router-dom";
 import ViewClientFeedbackModal from "../modals/ClientSatisfaction/ViewClientFeedbackModal";
 import StarRating from "../StarRating";
+import { useClientSurveyResponses } from "@/hooks/queries/client-satisfaction/useClientSurveyResponses";
 
 const ClientFeedbackTable = ({ initialFilters = {} }) => {
-  const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState(null);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
 
@@ -92,9 +81,14 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
           const row = info.row.original;
           return (
             <div className="text-left">
-              <p className="font-medium">{row.name}</p>
+              <p className="font-medium">
+                {row.client?.first_name} {row.client?.last_name}
+              </p>
               <p className="text-sm text-muted-foreground truncate">
-                {row.comment}
+                {row.comment || "No comment"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Ticket: {row.ticket?.ticket_code}
               </p>
             </div>
           );
@@ -106,7 +100,11 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
         size: 120,
         cell: (info) => {
           const row = info.row.original;
-          return <div>{row.department}</div>;
+          return (
+            <div className="capitalize">
+              {row.ticket?.service?.department?.name}
+            </div>
+          );
         },
       },
       {
@@ -115,7 +113,11 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
         size: 120,
         cell: (info) => {
           const row = info.row.original;
-          return <div>{row.service}</div>;
+          return (
+            <div className="truncate capitalize">
+              {row.ticket?.service?.name}
+            </div>
+          );
         },
       },
       {
@@ -124,10 +126,11 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
         size: 100,
         cell: (info) => {
           const row = info.row.original;
+          const rating = parseFloat(row.overall_rating) || 0;
           return (
-            <div className="flex items-center justify-center w-full   gap-2">
-              <span className="font-bold">{row.rating}</span>
-              <StarRating value={row.rating} />
+            <div className="flex items-center justify-center w-full gap-2">
+              <span className="font-bold">{rating.toFixed(1)}</span>
+              <StarRating value={rating} />
             </div>
           );
         },
@@ -153,55 +156,49 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
     []
   );
 
-  //   const {
-  //     data: ticketsData,
-  //     isLoading: loading,
-  //     error,
-  //   } = useTickets(pagination, searchQuery, filters);
+  const {
+    data: surveyResponsesData,
+    isLoading: loading,
+    error,
+  } = useClientSurveyResponses(pagination, searchQuery, filters);
 
   // Extract data from response
-  //   const tickets = ticketsData?.data || [];
-  //   const rowCount = ticketsData?.count || 0;
+  const surveyResponses = surveyResponsesData?.data || [];
+  const rowCount = surveyResponsesData?.count || 0;
 
-  //   if (error) {
-  //     return (
-  //       <div className="p-4 text-center text-red-500">
-  //         Error loading tickets: {error.message}
-  //       </div>
-  //     );
-  //   }
+  if (error) {
+    return (
+      <div className="p-4 text-center text-red-500">
+        Error loading survey responses: {error.message}
+      </div>
+    );
+  }
 
   return (
     <>
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Feedback</h2>
-          {/* <div className="text-sm text-gray-500">Total: {rowCount} feedback</div> */}
+          <h2 className="text-2xl font-bold text-gray-900">Client Feedback</h2>
+          <div className="text-sm text-gray-500">
+            {/* Total: {apiResponseData?.count || 0} feedback */}
+          </div>
         </div>
 
         <DataTable
           columns={columns}
-          data={mockReviews}
-          rowCount={mockReviews.length}
+          data={surveyResponses}
+          rowCount={rowCount}
           pagination={pagination}
           onPaginationChange={setPagination}
           onSearch={handleSearch}
-          searchPlaceholder="Search reviews..."
+          searchPlaceholder="Search feedback..."
           filters={filters}
           onFiltersChange={handleFiltersChange}
           filterConfig={filterConfig}
-          loading={false}
+          loading={loading}
         />
-        {/*
-      <ChangeTicketStatusModal
-        ticket={selectedTicket}
-        open={activeModal === "change-status"}
-        onOpenChange={(open) => {
-          if (!open) handleCloseModal();
-        }}
-        onClose={() => setSelectedTicket(null)}
-      /> */}
       </div>
+
       {selectedFeedback && (
         <ViewClientFeedbackModal
           feedback={selectedFeedback}
@@ -215,29 +212,5 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
     </>
   );
 };
-
-const mockReviews = [
-  {
-    id: 1,
-    name: "Japeth Aguilar",
-    comment: "Clear ang instruction at mabilis kumilos...",
-    fullComment:
-      "Clear ang instruction at mabilis kumilos. Maayos din yung pila dahil sa bagong system.",
-    department: "ICT",
-    departmentFull: "Information and Communication Technology (ICT)",
-    service: "Upgrade",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "Kyle Korver",
-    comment: "Sakto lang ang process nila...",
-    fullComment: "Sakto lang ang process nila okay pero may delay.",
-    department: "FN",
-    departmentFull: "Finance",
-    service: "IOR",
-    rating: 4,
-  },
-];
 
 export default ClientFeedbackTable;

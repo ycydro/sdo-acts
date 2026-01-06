@@ -31,18 +31,54 @@ export const getAllClientSurveyResponses = async (req, res) => {
     // search
     if (search && search.trim() != "") {
       const searchText = search.trim();
-      //   whereConditions[Op.or] = [
-      //     { ticket_code: { [Op.like]: `%${searchText}%` } },
-      //     { "$service.name$": { [Op.like]: `%${searchText}%` } },
-      //     { "$client.first_name$": { [Op.like]: `%${searchText}%` } },
-      //     { "$client.last_name$": { [Op.like]: `%${searchText}%` } },
-      //   ];
+      const searchNum = parseFloat(search.trim());
+
+      whereConditions[Op.or] = [
+        // by ticket code
+        { "$ticket.ticket_code$": { [Op.like]: `%${searchText}%` } },
+
+        // by service name
+        { "$ticket.service.name$": { [Op.like]: `%${searchText}%` } },
+
+        // by client first name
+        { "$client.first_name$": { [Op.like]: `%${searchText}%` } },
+
+        // by client last name
+        { "$client.last_name$": { [Op.like]: `%${searchText}%` } },
+
+        // by full name (first + last)
+        Sequelize.where(
+          Sequelize.fn(
+            "concat",
+            Sequelize.col("client.first_name"),
+            " ",
+            Sequelize.col("client.last_name")
+          ),
+          { [Op.like]: `%${searchText}%` }
+        ),
+
+        // by overall rating (exact number)
+        ...(searchNum && !isNaN(searchNum)
+          ? [{ overall_rating: { [Op.eq]: searchNum } }]
+          : []),
+
+        // by overall rating as string
+        { overall_rating: { [Op.like]: `%${searchText}%` } },
+
+        // by total score (exact number)
+        ...(searchNum && !isNaN(searchNum)
+          ? [{ total_score: { [Op.eq]: searchNum } }]
+          : []),
+
+        // by total score as string
+        { total_score: { [Op.like]: `%${searchText}%` } },
+      ];
     }
 
     if (user.department_id) {
-      whereConditions["$service.department_id$"] = user.department_id;
+      whereConditions["$ticket.service.department_id$"] = user.department_id;
     } else if (department_id) {
-      whereConditions["$service.department_id$"] = department_id;
+      whereConditions["$ticket.service.department_id$"] = department_id;
     }
 
     console.log("🔍 Sequelize where conditions:", whereConditions);
@@ -54,14 +90,17 @@ export const getAllClientSurveyResponses = async (req, res) => {
           {
             model: User,
             as: "client",
+            required: true,
             attributes: ["id", "first_name", "last_name"],
           },
           {
             model: Ticket,
+            required: true,
             as: "ticket",
             include: [
               {
                 model: Service,
+                required: true,
                 as: "service",
                 attributes: {
                   exclude: [
@@ -75,6 +114,7 @@ export const getAllClientSurveyResponses = async (req, res) => {
                 include: [
                   {
                     model: Department,
+                    required: true,
                     attributes: ["id", "name", "department_code"],
                   },
                 ],
@@ -84,6 +124,9 @@ export const getAllClientSurveyResponses = async (req, res) => {
           {
             model: ClientSurveyDimensionRating,
             as: "dimensionRatings",
+            attributes: {
+              exclude: ["createdAt", "updatedAt"],
+            },
             include: [
               {
                 model: ServiceQualityDimension,
@@ -116,7 +159,6 @@ export const getAllClientSurveyResponses = async (req, res) => {
     });
   }
 };
-
 export const getAllSQDs = async (req, res) => {
   try {
     const sqds = await ServiceQualityDimension.findAll({

@@ -1,6 +1,16 @@
+import { buildQueryParams } from "@/lib/buildQueryParams";
 import axios from "../axios";
 
 export const clientSatisfactionService = {
+  getAll: async ({ search, filters, page, limit }) => {
+    const params = buildQueryParams({ search, filters, page, limit });
+    const response = await axios.get("/client-satisfaction/survey/responses", {
+      params,
+    });
+
+    return response.data;
+  },
+
   getAllSQDs: async () => {
     const response = await axios.get(
       "/client-satisfaction/service-quality-dimensions"

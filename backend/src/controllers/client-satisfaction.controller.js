@@ -26,7 +26,12 @@ export const getAllClientSurveyResponses = async (req, res) => {
     const limitNum = parseInt(limit);
     const offset = pageNum * limitNum;
 
-    const whereConditions = {};
+    // only fetch completed survey
+    const whereConditions = {
+      completed_date: {
+        [Op.ne]: null,
+      },
+    };
 
     // search
     if (search && search.trim() != "") {

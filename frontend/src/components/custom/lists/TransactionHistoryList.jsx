@@ -6,7 +6,7 @@ import { useTransactionHistory } from "@/hooks/queries/ticket/useTransactionHist
 import { useNavigate } from "react-router";
 
 export const TransactionHistoryList = () => {
-  const MAXIMUM_HISTORY_ITEMS = 4;
+  const MAXIMUM_HISTORY_ITEMS = 3;
 
   const { data: tickets, isLoading } = useTransactionHistory({
     pageIndex: 0,

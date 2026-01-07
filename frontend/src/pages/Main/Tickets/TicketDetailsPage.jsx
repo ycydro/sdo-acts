@@ -406,27 +406,28 @@ const TicketDetailsPage = () => {
                 <h3 className="font-semibold text-base lg:text-lg">
                   Ticket Fields
                 </h3>
-                {user?.permissions?.includes("update_tickets") && (
-                  <Button
-                    type="button"
-                    variant={isEditMode ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={handleEditToggle}
-                    className="flex items-center gap-2"
-                  >
-                    {isEditMode ? (
-                      <>
-                        <X className="h-4 w-4" />
-                        Cancel
-                      </>
-                    ) : (
-                      <>
-                        <Edit className="h-4 w-4" />
-                        Edit
-                      </>
-                    )}
-                  </Button>
-                )}
+                {user?.permissions?.includes("update_tickets") &&
+                  ticket?.status !== "Resolved" && (
+                    <Button
+                      type="button"
+                      variant={isEditMode ? "destructive" : "outline"}
+                      size="sm"
+                      onClick={handleEditToggle}
+                      className="flex items-center gap-2"
+                    >
+                      {isEditMode ? (
+                        <>
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </>
+                      ) : (
+                        <>
+                          <Edit className="h-4 w-4" />
+                          Edit
+                        </>
+                      )}
+                    </Button>
+                  )}
               </div>
 
               <form onSubmit={form.handleSubmit(onSubmit)}>

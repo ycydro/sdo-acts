@@ -5,24 +5,41 @@ import { statusColors } from "@/lib/constants/statusColors";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, RefreshCcw } from "lucide-react";
+import { useDebouncedRefetch } from "@/hooks/useDebouncedRefetch";
+import { Button } from "@/components/ui/button";
 
 export const TicketRequestList = () => {
-  const { data: tickets, isLoading: isLatestTicketsLoading } = useTickets(
-    { pageIndex: 0, pageSize: 6 },
-    "",
-    { status: "In Queue" }
-  );
+  const {
+    data: tickets,
+    isLoading: isLatestTicketsLoading,
+    refetch,
+  } = useTickets({ pageIndex: 0, pageSize: 6 }, "", { status: "In Queue" });
+
+  const { debouncedRefetch, isRefetching } = useDebouncedRefetch(() => {
+    return refetch();
+  }, 1750);
 
   const navigate = useNavigate();
 
   return (
     <Card className="flex-1">
       <CardHeader className="p-4 px-4.5 flex justify-between items-center">
-        <div>
+        <div className="flex gap-1 items-center">
           <CardTitle className="text-2xl font-semibold">
             Latest Ticket Request
           </CardTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={debouncedRefetch}
+            className="h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
+            title="Refresh tickets"
+          >
+            <RefreshCcw
+              className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+            />
+          </Button>
         </div>
         <button
           onClick={() =>
@@ -79,6 +96,19 @@ export const TicketRequestList = () => {
               All tickets are currently being processed. New ticket requests
               will appear here.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={debouncedRefetch}
+              className="gap-2"
+            >
+              <p>Refresh</p>
+              <RefreshCcw
+                className={`cursor-pointer hover:text-primary transition-transform ${
+                  isRefetching ? "animate-spin" : ""
+                }`}
+              />
+            </Button>
           </div>
         )}
       </CardContent>

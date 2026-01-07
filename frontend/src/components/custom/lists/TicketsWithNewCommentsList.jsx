@@ -84,11 +84,23 @@ export const TicketsWithNewCommentsList = () => {
       <CardHeader className="p-4 px-4.5 flex justify-between items-center">
         <div className="flex justify-center items-center">
           <CardTitle className="text-2xl font-semibold">New Comments</CardTitle>
+
           {badgeCount > 0 ? (
             <Badge className="ml-2 bg-red-500 hover:bg-red-600">
               {badgeCount}
             </Badge>
           ) : null}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={debouncedRefetch}
+            className="h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
+            title="Refresh tickets"
+          >
+            <RefreshCcw
+              className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
+            />
+          </Button>
         </div>
         {visibleTickets.length > 0 && (
           <Button

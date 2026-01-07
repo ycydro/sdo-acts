@@ -67,13 +67,13 @@ const TicketDetailsPage = () => {
   }, [form.watch("status"), ticket?.status]);
 
   useEffect(() => {
-    if (!ticket?.createdAt || !ticket?.service?.processing_time_in_minutes) {
+    if (!ticket?.start_date || !ticket?.service?.processing_time_in_minutes) {
       setLateStatus(null);
       return;
     }
 
     const expectedCompletion = addMinutes(
-      ticket.createdAt,
+      ticket.start_date,
       ticket.service.processing_time_in_minutes
     );
     const now = new Date();

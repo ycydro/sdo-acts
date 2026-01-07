@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { ArrowLeftRight, Ellipsis, Eye } from "lucide-react";
+import { Edit, Eye } from "lucide-react";
 import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
 import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
 import { statusColors } from "@/lib/constants/statusColors";
@@ -119,7 +119,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "service",
         header: "Service",
-        maxSize: 400,
+        maxSize: 275,
         cell: (info) => {
           const service = info.getValue();
           const serviceName = service?.name || "N/A";
@@ -136,22 +136,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
           return <div className="truncate">{departmentCode}</div>;
         },
       },
-      {
-        accessorKey: "details",
-        header: "Details",
-        size: 100,
-        minSize: 100,
-        maxSize: 250,
-        cell: (info) => {
-          const details = info.getValue();
-          const displayText = details ? details : "No Details.";
-          return (
-            <div className="truncate" title={details}>
-              {displayText}
-            </div>
-          );
-        },
-      },
+
       {
         accessorKey: "assignee",
         header: "Assignee",
@@ -183,46 +168,43 @@ const TicketsTable = ({ initialFilters = {} }) => {
       },
       {
         accessorKey: "id",
-        header: "Action",
-        size: 300,
+        header: "Actions",
+        size: 120,
         cell: (info) => {
           const ticket = info.row.original;
           const id = info.getValue();
 
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <div className="flex justify-center items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-auto px-0.5 hover:text-primary"
+                title="View Details"
+                onClick={() => navigate(`/main/tickets/view/${id}`)}
+              >
+                <Eye className="h-4 w-4 mr-1" />
+                View
+              </Button>
+
+              {ticket.status !== "Resolved" && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 -mt-1 hover:text-primary"
+                  className="h-8 w-auto px-0.5 hover:text-primary"
+                  title="Change Status"
+                  onClick={() => handleOpenModal(ticket, "change-status")}
                 >
-                  <span className="sr-only">Open menu</span>
-                  <Ellipsis />
+                  <Edit className="h-4 w-4 mr-1" />
+                  Status
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="left">
-                <DropdownMenuItem
-                  onClick={() => navigate(`/main/tickets/view/${id}`)}
-                >
-                  <Eye className="h-4 w-4" />
-                  View Details
-                </DropdownMenuItem>
-                {ticket.status !== "Resolved" && (
-                  <DropdownMenuItem
-                    onClick={() => handleOpenModal(ticket, "change-status")}
-                  >
-                    <ArrowLeftRight className="h-4 w-4" />
-                    Change Status
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              )}
+            </div>
           );
         },
       },
     ],
-    []
+    [navigate, handleOpenModal]
   );
 
   const {

@@ -493,7 +493,7 @@ export const updateTicketStatus = async (req, res) => {
     const updatedTicketData = { status };
 
     // add start_date if status is being changed to 'Ongoing'
-    if (status === "Ongoing" && ticket.status !== "Ongoing") {
+    if (status === "Ongoing" && ticket.status === "In Queue") {
       updatedTicketData.start_date = new Date();
     }
 

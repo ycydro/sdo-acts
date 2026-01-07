@@ -325,6 +325,16 @@ const TicketDetailsPage = () => {
                         </span>
                       </div>
                     )}
+                    {ticket.end_date && (
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-sm text-gray-600">
+                          Resolve Date
+                        </span>
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                          {format(ticket.end_date, "MMMM dd, yyyy h:mm a")}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-sm text-gray-600">
                         Estimated Processing Time

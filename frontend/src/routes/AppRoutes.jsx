@@ -162,7 +162,7 @@ const AppRoutes = () => {
         <Route path="request-ticket" element={<RequestTicketPage />} />
         <Route path="ticket/:id" element={<TicketDetailsPage />} />
         <Route
-          path="ticket/client-satisfactory-survey/:id"
+          path="ticket/survey/:id"
           element={<ClientSatisfactorySurveyPage />}
         />
       </Route>

@@ -29,7 +29,6 @@ const ClientSatisfactorySurveyPage = () => {
   const [surveyResults, setSurveyResults] = useState(null);
   const [countdown, setCountdown] = useState(10);
 
-  // Now handle the conditional logic AFTER all hooks are called
   useEffect(() => {
     if (surveyCompleted) {
       const timer = setInterval(() => {
@@ -67,7 +66,6 @@ const ClientSatisfactorySurveyPage = () => {
     }
   };
 
-  // Early return conditions should come AFTER all hooks
   if (isSurveyResponseLoading || isSQDsLoading) {
     return (
       <div className="flex items-center justify-center p-4 min-h-[400px]">
@@ -171,7 +169,6 @@ const ClientSatisfactorySurveyPage = () => {
                   <Check className="text-primary w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
                 </div>
               </div>
-              {/* Animated ring effect */}
               <div className="absolute inset-0 border-4 border-primary rounded-full animate-ping opacity-20"></div>
             </div>
           </div>

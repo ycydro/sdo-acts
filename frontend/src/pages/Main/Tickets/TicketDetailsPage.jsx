@@ -315,6 +315,16 @@ const TicketDetailsPage = () => {
                   </p>
 
                   <div className="space-y-2">
+                    {ticket.start_date && (
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-sm text-gray-600">
+                          Start Date
+                        </span>
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                          {format(ticket.start_date, "MMMM dd, yyyy h:mm a")}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-sm text-gray-600">
                         Estimated Processing Time
@@ -327,23 +337,25 @@ const TicketDetailsPage = () => {
                         ) || "N/A"}
                       </span>
                     </div>
-                    <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-sm text-gray-600">
-                        Expected Completion
-                      </span>
-                      <span className="font-semibold text-gray-800 text-sm sm:text-base">
-                        {ticket?.createdAt &&
-                        ticket?.service?.processing_time_in_minutes
-                          ? format(
-                              addMinutes(
-                                ticket.createdAt,
-                                ticket.service.processing_time_in_minutes
-                              ),
-                              "MMMM dd, yyyy h:mm a"
-                            )
-                          : "N/A"}
-                      </span>
-                    </div>
+                    {ticket.start_date && (
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <span className="text-sm text-gray-600">
+                          Expected Completion
+                        </span>
+                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                          {ticket?.start_date &&
+                          ticket?.service?.processing_time_in_minutes
+                            ? format(
+                                addMinutes(
+                                  ticket.start_date,
+                                  ticket.service.processing_time_in_minutes
+                                ),
+                                "MMMM dd, yyyy h:mm a"
+                              )
+                            : "N/A"}
+                        </span>
+                      </div>
+                    )}
 
                     {lateStatus && !unstartedTicket && (
                       <div className="flex justify-start gap-1.5 sm:justify-between items-center pt-2 border-t">

@@ -479,12 +479,25 @@ const ClientDashboardPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-sm text-gray-600">Submitted</span>
-                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
-                          {format(ticket.createdAt, "MMMM dd, yyyy h:mm a")}
-                        </span>
-                      </div>
+                      {ticket.start_date ? (
+                        <div className="flex flex-col sm:flex-row sm:justify-between">
+                          <span className="text-sm text-gray-600">
+                            Start Date
+                          </span>
+                          <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                            {format(ticket.start_date, "MMMM dd, yyyy h:mm a")}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row sm:justify-between">
+                          <span className="text-sm text-gray-600">
+                            Submitted
+                          </span>
+                          <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                            {format(ticket.createdAt, "MMMM dd, yyyy h:mm a")}
+                          </span>
+                        </div>
+                      )}
 
                       <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">
@@ -499,23 +512,25 @@ const ClientDashboardPage = () => {
                         </span>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row sm:justify-between">
-                        <span className="text-sm text-gray-600">
-                          Expected Completion
-                        </span>
-                        <span className="font-semibold text-gray-800 text-sm sm:text-base">
-                          {ticket?.createdAt &&
-                          ticket?.service?.processing_time_in_minutes
-                            ? format(
-                                addMinutes(
-                                  ticket.createdAt,
-                                  ticket.service.processing_time_in_minutes
-                                ),
-                                "MMMM dd, yyyy h:mm a"
-                              )
-                            : "N/A"}
-                        </span>
-                      </div>
+                      {ticket.start_date && (
+                        <div className="flex flex-col sm:flex-row sm:justify-between">
+                          <span className="text-sm text-gray-600">
+                            Expected Completion
+                          </span>
+                          <span className="font-semibold text-gray-800 text-sm sm:text-base">
+                            {ticket?.start_date &&
+                            ticket?.service?.processing_time_in_minutes
+                              ? format(
+                                  addMinutes(
+                                    ticket.start_date,
+                                    ticket.service.processing_time_in_minutes
+                                  ),
+                                  "MMMM dd, yyyy h:mm a"
+                                )
+                              : "N/A"}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

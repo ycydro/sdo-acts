@@ -490,13 +490,22 @@ export const updateTicketStatus = async (req, res) => {
       });
     }
 
-    const [updatedCount] = await Ticket.update(
-      { status },
-      {
-        where: { id },
-        transaction,
-      }
-    );
+    const updatedTicketData = { status };
+
+    // add start_date if status is being changed to 'Ongoing'
+    if (status === "Ongoing" && ticket.status !== "Ongoing") {
+      updatedTicketData.start_date = new Date();
+    }
+
+    // add end_date if status is being changed to 'Resolved'
+    if (status === "Resolved" && ticket.status !== "Resolved") {
+      updatedTicketData.end_date = new Date();
+    }
+
+    const [updatedCount] = await Ticket.update(updatedTicketData, {
+      where: { id },
+      transaction,
+    });
 
     if (updatedCount === 0) {
       await transaction.rollback();

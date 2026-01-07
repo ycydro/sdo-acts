@@ -31,19 +31,21 @@ const ConfirmationModal = ({
               {title}
             </AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="text-gray-700 mt-2">
+          <AlertDialogDescription className="text-md text-gray-700 mt-2">
             {description}
           </AlertDialogDescription>
 
           {/* Warning highlight box */}
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-              <p className="text-sm font-medium text-red-800">
-                Please review this action carefully before confirming.
-              </p>
+          {isDestructive && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm font-medium text-red-800">
+                  Please review this action carefully before confirming.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </AlertDialogHeader>
         <AlertDialogFooter className="mt-6">
           <AlertDialogCancel

@@ -18,12 +18,14 @@ import { useTicketsWithNewComments } from "@/hooks/queries/ticket/comments/useTi
 import { ticketsService } from "@/api/services/ticketsService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebouncedRefetch } from "@/hooks/useDebouncedRefetch";
+import ConfirmationModal from "../modals/ConfirmationModal";
 
 export const TicketsWithNewCommentsList = () => {
   const { data, isLoading, refetch } = useTicketsWithNewComments();
   const [markedTickets, setMarkedTickets] = useState(new Set());
   const [isMarkingAll, setIsMarkingAll] = useState(false);
   const [manuallyHiddenTickets, setManuallyHiddenTickets] = useState(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { debouncedRefetch, isRefetching } = useDebouncedRefetch(() => {
     return refetch();
@@ -80,106 +82,119 @@ export const TicketsWithNewCommentsList = () => {
   }, 0);
 
   return (
-    <Card className="flex-1">
-      <CardHeader className="p-4 px-4.5 flex justify-between items-center">
-        <div className="flex justify-center items-center">
-          <CardTitle className="text-2xl font-semibold">New Comments</CardTitle>
+    <>
+      <Card className="flex-1">
+        <CardHeader className="p-4 px-4.5 flex justify-between items-center">
+          <div className="flex justify-center items-center">
+            <CardTitle className="text-2xl font-semibold">
+              New Comments
+            </CardTitle>
 
-          {badgeCount > 0 ? (
-            <Badge className="ml-2 bg-red-500 hover:bg-red-600">
-              {badgeCount}
-            </Badge>
-          ) : null}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={debouncedRefetch}
-            className="h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
-            title="Refresh tickets"
-          >
-            <RefreshCcw
-              className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
-            />
-          </Button>
-        </div>
-        {visibleTickets.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleMarkAllAsSeen}
-            disabled={isMarkingAll}
-            className="h-8 gap-2"
-          >
-            {isMarkingAll ? (
-              <>
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Marking...
-              </>
-            ) : (
-              <>
-                <Eye className="h-3 w-3" />
-                Mark All as Seen
-              </>
-            )}
-          </Button>
-        )}
-      </CardHeader>
-
-      <CardContent className="flex-1 p-0 overflow-hidden">
-        {isLoading ? (
-          <div className="p-6 space-y-4">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <Skeleton key={idx} className="h-24 w-full rounded-lg" />
-            ))}
-          </div>
-        ) : visibleTickets.length > 0 ? (
-          <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto px-4 py-2 max-h-[calc(100vh-365px)]">
-              <div className="space-y-3">
-                {visibleTickets.map((ticket) => (
-                  <TicketWithNewCommentsCard
-                    key={ticket.id}
-                    ticket={ticket}
-                    onMarkAsSeen={(ticketID) => {
-                      setMarkedTickets((prev) => new Set([...prev, ticketID]));
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-            {visibleTickets.length > 5 && (
-              <div className="border-t px-4 py-2 bg-muted/5 text-xs text-muted-foreground text-center">
-                Scroll for more tickets ({visibleTickets.length} total)
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="h-full flex flex-col items-center justify-center p-8 text-center">
-            <div className="rounded-full bg-muted p-4 mb-4">
-              <MessageSquare className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">All caught up!</h3>
-            <p className="text-sm text-muted-foreground mb-4 max-w-sm">
-              No tickets with new comments. When someone comments on a ticket
-              you're involved with, it will appear here.
-            </p>
+            {badgeCount > 0 ? (
+              <Badge className="ml-2 bg-red-500 hover:bg-red-600">
+                {badgeCount}
+              </Badge>
+            ) : null}
             <Button
-              variant="outline"
-              size="sm"
+              variant="ghost"
+              size="icon"
               onClick={debouncedRefetch}
-              className="gap-2"
+              className="h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
+              title="Refresh comments"
             >
-              <p>Refresh</p>
               <RefreshCcw
-                className={`cursor-pointer hover:text-primary transition-transform ${
-                  isRefetching ? "animate-spin" : ""
-                }`}
+                className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`}
               />
             </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          {visibleTickets.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
+              disabled={isMarkingAll}
+              className="h-8 gap-2"
+            >
+              {isMarkingAll ? (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Marking...
+                </>
+              ) : (
+                <>
+                  <Eye className="h-3 w-3" />
+                  Mark All as Seen
+                </>
+              )}
+            </Button>
+          )}
+        </CardHeader>
+
+        <CardContent className="flex-1 p-0 overflow-hidden">
+          {isLoading ? (
+            <div className="p-6 space-y-4">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <Skeleton key={idx} className="h-24 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : visibleTickets.length > 0 ? (
+            <div className="h-full flex flex-col">
+              <div className="flex-1 overflow-y-auto px-4 py-2 max-h-[calc(100vh-365px)]">
+                <div className="space-y-3">
+                  {visibleTickets.map((ticket) => (
+                    <TicketWithNewCommentsCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      onMarkAsSeen={(ticketID) => {
+                        setMarkedTickets(
+                          (prev) => new Set([...prev, ticketID])
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+              {visibleTickets.length > 5 && (
+                <div className="border-t px-4 py-2 bg-muted/5 text-xs text-muted-foreground text-center">
+                  Scroll for more tickets ({visibleTickets.length} total)
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+              <div className="rounded-full bg-muted p-4 mb-4">
+                <MessageSquare className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">All caught up!</h3>
+              <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+                No tickets with new comments. When someone comments on a ticket
+                you're involved with, it will appear here.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={debouncedRefetch}
+                className="gap-2"
+              >
+                <p>Refresh</p>
+                <RefreshCcw
+                  className={`cursor-pointer hover:text-primary transition-transform ${
+                    isRefetching ? "animate-spin" : ""
+                  }`}
+                />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <ConfirmationModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onConfirm={handleMarkAllAsSeen}
+        title="Mark all comments as seen?"
+        description={`This will mark all currently unviewed ticket comments as seen.`}
+      />
+    </>
   );
 };
 
@@ -196,20 +211,6 @@ const TicketWithNewCommentsCard = ({ ticket, onMarkAsSeen }) => {
       await ticketsService.markCommentsAsSeen(ticket.id);
       onMarkAsSeen(ticket.id);
       navigate(`/main/tickets/view/${ticket.id}#comments`);
-    } catch (error) {
-      console.error("Failed to mark comments as seen:", error);
-      setIsMarking(false);
-    }
-  };
-
-  const handleMarkAsSeen = async (e) => {
-    e.stopPropagation();
-    if (isMarking) return;
-
-    try {
-      setIsMarking(true);
-      await ticketsService.markCommentsAsSeen(ticket.id);
-      onMarkAsSeen(ticket.id);
     } catch (error) {
       console.error("Failed to mark comments as seen:", error);
       setIsMarking(false);
@@ -323,20 +324,7 @@ const TicketWithNewCommentsCard = ({ ticket, onMarkAsSeen }) => {
           </div>
         </div>
 
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleMarkAsSeen}
-            disabled={isMarking}
-            className="h-7 px-2 text-sm flex items-center gap-1"
-          >
-            <Eye className="h-3 w-3" />
-            <span>Mark as Seen</span>
-          </Button>
-
-          <div className="h-4 w-px bg-border"></div>
-
+        <div className="">
           <Button
             variant="ghost"
             size="sm"

@@ -69,7 +69,7 @@ const DimensionRatingCard = ({
   };
 
   return (
-    <div className="bg-white shadow-md p-5 rounded-3xl flex-1 space-y-1 cursor-pointer border">
+    <div className="bg-white shadow-md p-5 rounded-3xl flex-1 space-y-1 border">
       {/* Header row */}
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">

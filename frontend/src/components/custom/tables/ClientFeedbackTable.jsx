@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import ViewClientFeedbackModal from "../modals/ClientSatisfaction/ViewClientFeedbackModal";
 import StarRating from "../StarRating";
 import { useClientSurveyResponses } from "@/hooks/queries/client-satisfaction/useClientSurveyResponses";
+import { Eye } from "lucide-react";
 
 const ClientFeedbackTable = ({ initialFilters = {} }) => {
   const [activeModal, setActiveModal] = useState(null);
@@ -85,24 +86,34 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
                 {row.client?.first_name} {row.client?.last_name}
               </p>
               <p className="text-sm text-muted-foreground truncate">
-                {row.comment || "No comment"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Ticket: {row.ticket?.ticket_code}
+                {row.comment || ""}
               </p>
             </div>
           );
         },
       },
       {
-        accessorKey: "department",
+        accessorKey: "ticket_code",
+        header: "Ticket",
+        maxSize: 100,
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <div className="truncate capitalize  font-semibold">
+              {row.ticket?.ticket_code}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "department_code",
         header: "Department",
-        size: 120,
+        size: 90,
         cell: (info) => {
           const row = info.row.original;
           return (
             <div className="capitalize">
-              {row.ticket?.service?.department?.name}
+              {row.ticket?.service?.department?.department_code}
             </div>
           );
         },
@@ -110,7 +121,7 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "service",
         header: "Service",
-        size: 120,
+        maxSize: 350,
         cell: (info) => {
           const row = info.row.original;
           return (
@@ -137,17 +148,20 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
       },
       {
         accessorKey: "action",
-        header: "",
+        header: "Action",
         size: 120,
         cell: (info) => {
           const row = info.row.original;
           return (
             <Button
+              variant="ghost"
               size="sm"
-              variant="outline"
+              className="h-8 w-auto px-0.5 hover:text-primary"
+              title="View Details"
               onClick={() => handleOpenModal(row, "view-feedback")}
             >
-              View Details
+              <Eye className="h-4 w-4" />
+              View
             </Button>
           );
         },

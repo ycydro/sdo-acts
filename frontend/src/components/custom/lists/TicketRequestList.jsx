@@ -1,13 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTickets } from "@/hooks/queries/ticket/useTickets";
-import { statusColors } from "@/lib/constants/statusColors";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronRight, RefreshCcw } from "lucide-react";
 import { useDebouncedRefetch } from "@/hooks/useDebouncedRefetch";
 import { Button } from "@/components/ui/button";
+import StatusBadge from "../badges/StatusBadge";
 
 export const TicketRequestList = () => {
   const {
@@ -134,13 +134,7 @@ const TicketRequestCard = ({ ticket }) => {
             {formatDistanceToNow(ticket.createdAt, { addSuffix: true })}
           </span>
         </div>
-        <Badge
-          className={`px-2 py-1 rounded-full text-xs font-medium truncate ${
-            statusColors[ticket.status] || "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {ticket.status}
-        </Badge>
+        <StatusBadge status={ticket.status} className="!px-2 !py-1 !text-xs" />
       </div>
 
       {/* Brief details section */}

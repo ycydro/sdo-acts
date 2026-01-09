@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CommentSection } from "@/components/custom/modals/Ticket/CommentSection";
+import StatusBadge from "@/components/custom/badges/StatusBadge";
 
 const TicketDetailsPage = () => {
   const { user } = useAuth();
@@ -265,13 +266,14 @@ const TicketDetailsPage = () => {
                       </Button>
                     </div>
                   </div>
-                  <Badge
+                  <StatusBadge status={ticket.status} />
+                  {/* <Badge
                     className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium w-fit ${
                       statusColors[ticket.status] || "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {ticket.status || "N/A"}
-                  </Badge>
+                  </Badge> */}
                 </div>
               </div>
 

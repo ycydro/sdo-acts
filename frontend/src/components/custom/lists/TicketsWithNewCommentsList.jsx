@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { statusColors } from "@/lib/constants/statusColors";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router";
 import {
@@ -19,6 +18,7 @@ import { ticketsService } from "@/api/services/ticketsService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDebouncedRefetch } from "@/hooks/useDebouncedRefetch";
 import ConfirmationModal from "../modals/ConfirmationModal";
+import StatusBadge from "../badges/StatusBadge";
 
 export const TicketsWithNewCommentsList = () => {
   const { data, isLoading, refetch } = useTicketsWithNewComments();
@@ -259,13 +259,7 @@ const TicketWithNewCommentsCard = ({ ticket, onMarkAsSeen }) => {
             <p className="truncate text-base font-semibold text-gray-900">
               {ticket.ticket_code}
             </p>
-            <Badge
-              className={`px-2 py-1 rounded-full text-xs font-medium truncate ${
-                statusColors[ticket.status] || "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {ticket.status}
-            </Badge>
+            <StatusBadge status={status} />
           </div>
           <p className="text-xs text-muted-foreground truncate">
             {ticket.service?.name}

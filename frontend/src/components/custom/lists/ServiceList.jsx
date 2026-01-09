@@ -18,6 +18,7 @@ import { Clock, EllipsisVertical } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import EditServiceModal from "../modals/Services/EditServiceModal";
+import PriorityBadge from "../badges/PriorityBadge";
 
 export const ServiceList = ({ services }) => {
   const [selectedService, setSelectedService] = useState(null);
@@ -61,12 +62,6 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
     Complex: "bg-[var(--high)]/10 text-[var(--high)]",
   };
 
-  const PRIORITY_STYLES = {
-    High: "bg-[var(--high)]",
-    Medium: "bg-[var(--medium)]",
-    Low: "bg-[var(--low)]/80",
-  };
-
   const processing_time = convertMinutesToTimeParts(
     service.processing_time_in_minutes
   );
@@ -83,16 +78,7 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
 
           {/* Badges */}
           <div className="flex flex-wrap gap-1.5">
-            {service.priority && (
-              <Badge
-                variant="secondary"
-                className={`text-white font-semibold ${
-                  PRIORITY_STYLES[service.priority]
-                }`}
-              >
-                {service.priority}
-              </Badge>
-            )}
+            {service.priority && <PriorityBadge priority={service.priority} />}
 
             {service.classification && (
               <Badge

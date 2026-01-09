@@ -6,18 +6,14 @@ import { useDepartments } from "@/hooks/queries/department/useDepartments";
 import { useTickets } from "@/hooks/queries/ticket/useTickets";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { Edit, Eye } from "lucide-react";
 import ViewTicketDetailsModal from "../modals/Ticket/ViewTicketDetailsModal";
 import ChangeTicketStatusModal from "../modals/Ticket/ChangeTicketStatusModal";
 import { statusColors } from "@/lib/constants/statusColors";
 import { useNavigate } from "react-router-dom";
+import PriorityBadge from "../badges/PriorityBadge";
+import StatusBadge from "../badges/StatusBadge";
 
 const TicketsTable = ({ initialFilters = {} }) => {
   const navigate = useNavigate();
@@ -97,7 +93,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "ticket_code",
         header: "Code",
-        size: 120,
+        size: 100,
         cell: (info) => (
           <div className="truncate">
             <strong>{info.getValue()}</strong>
@@ -119,7 +115,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "service",
         header: "Service",
-        maxSize: 275,
+        maxSize: 220,
         cell: (info) => {
           const service = info.getValue();
           const serviceName = service?.name || "N/A";
@@ -129,14 +125,22 @@ const TicketsTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "service.department",
         header: "Department",
-        maxSize: 125,
+        maxSize: 80,
         cell: (info) => {
           const department = info.getValue();
           const departmentCode = department?.department_code || "N/A";
           return <div className="truncate">{departmentCode}</div>;
         },
       },
-
+      {
+        accessorKey: "service.priority",
+        header: "Priority",
+        maxSize: 125,
+        cell: (info) => {
+          const priority = info.getValue();
+          return <PriorityBadge priority={priority} />;
+        },
+      },
       {
         accessorKey: "assignee",
         header: "Assignee",
@@ -156,13 +160,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
         cell: (info) => {
           const status = info.getValue();
           return (
-            <Badge
-              className={`px-2 py-1 rounded-full text-xs font-medium truncate ${
-                statusColors[status] || "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {status}
-            </Badge>
+            <StatusBadge status={status} className="!px-2 !py-1 !text-xs" />
           );
         },
       },

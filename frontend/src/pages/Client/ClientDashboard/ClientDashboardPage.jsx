@@ -21,7 +21,6 @@ import {
   XCircle,
   CheckCircle2,
 } from "lucide-react";
-import { statusColors } from "@/lib/constants/statusColors";
 import { useActiveTicket } from "@/hooks/queries/ticket/useActiveTicket";
 import { formatTimeDisplay, convertMinutesToTimeParts } from "@/lib/timeUtils";
 import { TransactionHistoryList } from "@/components/custom/lists/TransactionHistoryList";
@@ -35,6 +34,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useUnansweredSurvey } from "@/hooks/queries/client-satisfaction/useUnansweredSurvey";
+import StatusBadge from "@/components/custom/badges/StatusBadge";
 
 const ClientDashboardPage = () => {
   const navigate = useNavigate();
@@ -412,14 +412,7 @@ const ClientDashboardPage = () => {
                         )}
                       </div>
                     </div>
-                    <Badge
-                      className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium w-fit ${
-                        statusColors[ticket.status] ||
-                        "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {ticket.status || "N/A"}
-                    </Badge>
+                    <StatusBadge status={ticket.status} />
                   </div>
                 </div>
 

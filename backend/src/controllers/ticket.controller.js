@@ -21,6 +21,8 @@ export const getAllTickets = async (req, res) => {
       department_id = "", // galing buildqueryparams
     } = req.query;
 
+    const sortByPriority = req.query.sortByPriority === "true";
+
     const user = req.user;
 
     const pageNum = parseInt(page);
@@ -87,28 +89,33 @@ export const getAllTickets = async (req, res) => {
         },
       ],
       order: [
-        // priority first
-        [
-          Sequelize.literal(`
-          CASE 
-            WHEN \`service\`.\`priority\` = 'High' THEN 1
-            WHEN \`service\`.\`priority\` = 'Medium' THEN 2
-            WHEN \`service\`.\`priority\` = 'Low' THEN 3
-            ELSE 4
-          END
-        `),
-          "ASC",
-        ],
         [
           Sequelize.literal(`
             CASE 
               WHEN \`ticket\`.\`status\` = 'Ongoing' THEN 1
               WHEN \`ticket\`.\`status\` = 'Resolved' THEN 2
-              ELSE 0
+              ELSE 3
             END
           `),
           "ASC",
         ],
+
+        ...(sortByPriority
+          ? [
+              [
+                Sequelize.literal(`
+            CASE 
+              WHEN \`service\`.\`priority\` = 'High' THEN 1
+              WHEN \`service\`.\`priority\` = 'Medium' THEN 2
+              WHEN \`service\`.\`priority\` = 'Low' THEN 3
+              ELSE 4
+            END
+          `),
+                "ASC",
+              ],
+            ]
+          : []),
+
         ["createdAt", "DESC"],
       ],
 
@@ -430,11 +437,32 @@ export const createTicket = async (req, res) => {
       { transaction }
     );
 
+    const createdTicketWithRelations = await Ticket.findOne({
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["name"],
+          include: [
+            {
+              model: Department,
+              as: "department",
+              attributes: ["name", "department_code"],
+            },
+          ],
+        },
+      ],
+      where: {
+        id: ticket.id,
+      },
+      transaction,
+    });
+
     await transaction.commit();
     res.status(201).json({
       success: true,
       message: "Ticket created successfully!",
-      ticket,
+      ticket: createdTicketWithRelations,
     });
   } catch (err) {
     await transaction.rollback();

@@ -87,16 +87,26 @@ export const getAllTickets = async (req, res) => {
         },
       ],
       order: [
+        // priority first
         [
-          Sequelize.literal(
-            `
+          Sequelize.literal(`
+          CASE 
+            WHEN \`service\`.\`priority\` = 'High' THEN 1
+            WHEN \`service\`.\`priority\` = 'Medium' THEN 2
+            WHEN \`service\`.\`priority\` = 'Low' THEN 3
+            ELSE 4
+          END
+        `),
+          "ASC",
+        ],
+        [
+          Sequelize.literal(`
             CASE 
               WHEN \`ticket\`.\`status\` = 'Ongoing' THEN 1
               WHEN \`ticket\`.\`status\` = 'Resolved' THEN 2
               ELSE 0
             END
-            `
-          ),
+          `),
           "ASC",
         ],
         ["createdAt", "DESC"],

@@ -35,7 +35,9 @@ const TicketsTable = ({ initialFilters = {} }) => {
 
   const { pagination, setPagination } = usePagination();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState({
+    ...initialFilters,
+  });
 
   useEffect(() => {
     if (initialFilters.status && initialFilters.status !== filters.status) {
@@ -141,18 +143,7 @@ const TicketsTable = ({ initialFilters = {} }) => {
           return <PriorityBadge priority={priority} />;
         },
       },
-      {
-        accessorKey: "assignee",
-        header: "Assignee",
-        size: 150,
-        cell: (info) => {
-          const assignee = info.getValue();
-          const assigneeName = assignee
-            ? `${assignee.first_name} ${assignee.last_name}`
-            : "Unassigned";
-          return <div className="truncate">{assigneeName}</div>;
-        },
-      },
+
       {
         accessorKey: "status",
         header: "Status",
@@ -162,6 +153,18 @@ const TicketsTable = ({ initialFilters = {} }) => {
           return (
             <StatusBadge status={status} className="!px-2 !py-1 !text-xs" />
           );
+        },
+      },
+      {
+        accessorKey: "assignee",
+        header: "In Charge",
+        size: 100,
+        cell: (info) => {
+          const assignee = info.getValue();
+          const assigneeName = assignee
+            ? `${assignee.first_name} ${assignee.last_name}`
+            : "Unassigned";
+          return <div className="truncate">{assigneeName}</div>;
         },
       },
       {

@@ -14,7 +14,10 @@ export const TicketRequestList = () => {
     data: tickets,
     isLoading: isLatestTicketsLoading,
     refetch,
-  } = useTickets({ pageIndex: 0, pageSize: 6 }, "", { status: "In Queue" });
+  } = useTickets({ pageIndex: 0, pageSize: 6 }, "", {
+    status: "In Queue",
+    sortByPriority: "false",
+  });
 
   const { debouncedRefetch, isRefetching } = useDebouncedRefetch(() => {
     return refetch();

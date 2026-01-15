@@ -21,7 +21,9 @@ export const getAllTickets = async (req, res) => {
       department_id = "", // galing buildqueryparams
     } = req.query;
 
-    const sortByPriority = req.query.sortByPriority === "true";
+    const sortByPriority =
+      req.query.sortByPriority === undefined ||
+      req.query.sortByPriority === null;
 
     const user = req.user;
 

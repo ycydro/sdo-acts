@@ -18,6 +18,7 @@ export const getAllTickets = async (req, res) => {
       limit = 10,
       search = "",
       status = "", // galing buildqueryparams
+      priority = "",
       department_id = "", // galing buildqueryparams
     } = req.query;
 
@@ -47,6 +48,11 @@ export const getAllTickets = async (req, res) => {
     // status filter
     if (status) {
       whereConditions.status = status;
+    }
+
+    // priority filter
+    if (priority) {
+      whereConditions["$service.priority$"] = priority;
     }
 
     if (user.department_id) {
@@ -94,9 +100,11 @@ export const getAllTickets = async (req, res) => {
         [
           Sequelize.literal(`
             CASE 
-              WHEN \`ticket\`.\`status\` = 'Ongoing' THEN 1
-              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 2
-              ELSE 3
+              WHEN \`ticket\`.\`status\` = 'Unapproved' THEN 1
+              WHEN \`ticket\`.\`status\` = 'Ongoing' THEN 2
+              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 3
+              WHEN \`ticket\`.\`status\` = 'Declined' THEN 4
+              ELSE 5
             END
           `),
           "ASC",

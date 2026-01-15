@@ -74,6 +74,15 @@ const TicketsTable = ({ initialFilters = {} }) => {
           { value: "Resolved", label: "Resolved" },
         ],
       },
+      {
+        key: "priority",
+        label: "Priority",
+        options: [
+          { value: "High", label: "High" },
+          { value: "Medium", label: "Medium" },
+          { value: "Low", label: "Low" },
+        ],
+      },
     ];
 
     if (isAdmin) {

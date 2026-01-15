@@ -15,7 +15,7 @@ export const TicketRequestList = () => {
     isLoading: isLatestTicketsLoading,
     refetch,
   } = useTickets({ pageIndex: 0, pageSize: 6 }, "", {
-    status: "In Queue",
+    status: "Unapproved",
     sortByPriority: "false",
   });
 

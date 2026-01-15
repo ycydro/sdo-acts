@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   PlayCircle,
   Play,
+  CheckLine,
 } from "lucide-react";
 import { useTicketMutations } from "@/hooks/queries/ticket/useTicketMutations";
 
@@ -60,6 +61,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
 
   // Check if ticket is unstarted (In Queue)
   const isUnstartedTicket = ticket?.status === "In Queue";
+  const isUnapprovedTicket = ticket?.status === "Unapproved";
 
   // All possible status options
   const allStatusOptions = [
@@ -100,6 +102,16 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
       isStartAction: false,
     },
     {
+      value: "In Queue",
+      label: "Approve",
+      icon: <CheckLine className="h-5 w-5" />,
+      description: "Approve ticket",
+      color:
+        "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400",
+      hoverColor: "hover:bg-emerald-500/20 hover:border-emerald-500/50",
+      isStartAction: false,
+    },
+    {
       value: "Declined",
       label: "Decline",
       icon: <AlertCircle className="h-5 w-5" />,
@@ -117,10 +129,14 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
 
   // for unstarted tickets, show ongoing and decline options else dont show declined
   const finalStatusOptions = isUnstartedTicket
+    ? statusOptions.filter((option) => option.value === "Ongoing")
+    : isUnapprovedTicket
     ? statusOptions.filter(
-        (option) => option.value === "Ongoing" || option.value === "Declined"
+        (option) => option.value === "In Queue" || option.value === "Declined"
       )
-    : statusOptions.filter((option) => option.value !== "Declined");
+    : statusOptions.filter(
+        (option) => option.value !== "Declined" && option.value !== "In Queue"
+      );
 
   const selectedOption = finalStatusOptions.find(
     (option) => option.value === selectedStatus

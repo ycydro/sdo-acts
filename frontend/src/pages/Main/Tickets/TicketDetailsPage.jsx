@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import { ArrowLeft, Edit, Play, Save, X, Copy } from "lucide-react";
+import { ArrowLeft, Edit, Play, Save, X, Copy, CheckLine } from "lucide-react";
 import { addMinutes, format, formatDistanceToNow } from "date-fns";
 import { useNavigate, useParams } from "react-router";
 import { useSpecificTicket } from "@/hooks/queries/ticket/useSpecificTicket";
@@ -127,6 +127,7 @@ const TicketDetailsPage = () => {
   };
 
   const unstartedTicket = ticket?.status === "In Queue";
+  const isUnapprovedTicket = ticket?.status === "Unapproved";
 
   const onSubmit = async (data) => {
     console.log("Updating ticket with data:", { id, ...data });
@@ -471,7 +472,8 @@ const TicketDetailsPage = () => {
                           disabled={
                             !isEditMode ||
                             !user?.permissions.includes("update_tickets") ||
-                            unstartedTicket
+                            unstartedTicket ||
+                            isUnapprovedTicket
                           }
                         >
                           <SelectTrigger className="w-full">
@@ -510,6 +512,36 @@ const TicketDetailsPage = () => {
                         <Play className="h-4 w-4" />
                         Start this Ticket
                       </Button>
+                    )}
+
+                  {isUnapprovedTicket &&
+                    user?.permissions.includes("update_tickets") && (
+                      <div className="flex gap-1.5">
+                        <Button
+                          type="button"
+                          disabled={!isEditMode}
+                          onClick={() => {
+                            form.setValue("status", "In Queue");
+                            form.handleSubmit(onSubmit)();
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckLine className="h-4 w-4" />
+                          Approve
+                        </Button>
+                        <Button
+                          type="button"
+                          disabled={!isEditMode}
+                          onClick={() => {
+                            form.setValue("status", "Declined");
+                            form.handleSubmit(onSubmit)();
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                          Decline
+                        </Button>
+                      </div>
                     )}
 
                   {isEditMode && isDirty && (

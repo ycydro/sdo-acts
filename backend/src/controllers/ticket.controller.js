@@ -260,7 +260,7 @@ export const getUsersCurrentActiveTicket = async (req, res) => {
       where: {
         client_id: user.id,
         status: {
-          [Op.ne]: "Resolved",
+          [Op.notIn]: ["Resolved", "Declined"],
         },
       },
       order: [["updatedAt", "DESC"]],
@@ -426,11 +426,12 @@ export const createTicket = async (req, res) => {
       });
     }
 
+    const finalStatus = is_online ? "Unapproved" : "In Queue";
     // create ticket if no pending survey
     const ticket = await Ticket.create(
       {
         service_id,
-        status: "In Queue",
+        status: finalStatus,
         details,
         client_id,
         scheduled_date: scheduled_date || null,
@@ -509,7 +510,14 @@ export const updateTicketStatus = async (req, res) => {
       });
     }
 
-    const allowedStatuses = ["In Queue", "Ongoing", "Resolved", "On hold"];
+    const allowedStatuses = [
+      "In Queue",
+      "Ongoing",
+      "Resolved",
+      "On hold",
+      "Unapproved",
+      "Declined",
+    ];
     if (!allowedStatuses.includes(status)) {
       await transaction.rollback();
       return res.status(400).json({

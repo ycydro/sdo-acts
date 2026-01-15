@@ -66,6 +66,8 @@ const TicketsTable = ({ initialFilters = {} }) => {
         key: "status",
         label: "Status",
         options: [
+          { value: "Unapproved", label: "Unapproved" },
+          { value: "Declined", label: "Declined" },
           { value: "In Queue", label: "In Queue" },
           { value: "Ongoing", label: "Ongoing" },
           { value: "On hold", label: "On hold" },
@@ -188,18 +190,19 @@ const TicketsTable = ({ initialFilters = {} }) => {
                 View
               </Button>
 
-              {ticket.status !== "Resolved" && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-auto px-0.5 hover:text-primary"
-                  title="Change Status"
-                  onClick={() => handleOpenModal(ticket, "change-status")}
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Status
-                </Button>
-              )}
+              {ticket.status !== "Resolved" ||
+                (ticket.status !== "Declined" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-auto px-0.5 hover:text-primary"
+                    title="Change Status"
+                    onClick={() => handleOpenModal(ticket, "change-status")}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Status
+                  </Button>
+                ))}
             </div>
           );
         },

@@ -42,7 +42,7 @@ const TicketStatusCount = ({ status, count, onClick }) => {
       onClick={onClick}
     >
       <div className="flex justify-between">
-        <p className="truncate">{status} Tickets</p>
+        <p className="truncate">{status}</p>
         <Ticket className="mr-5" />
       </div>
       <div className="font-bold text-3xl truncate">{count}</div>

@@ -190,19 +190,18 @@ const TicketsTable = ({ initialFilters = {} }) => {
                 View
               </Button>
 
-              {ticket.status !== "Resolved" ||
-                (ticket.status !== "Declined" && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-auto px-0.5 hover:text-primary"
-                    title="Change Status"
-                    onClick={() => handleOpenModal(ticket, "change-status")}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                    Status
-                  </Button>
-                ))}
+              {!["Resolved", "Declined"].includes(ticket.status) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-auto px-0.5 hover:text-primary"
+                  title="Change Status"
+                  onClick={() => handleOpenModal(ticket, "change-status")}
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Status
+                </Button>
+              )}
             </div>
           );
         },

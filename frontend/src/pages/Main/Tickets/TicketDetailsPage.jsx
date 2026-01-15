@@ -410,7 +410,7 @@ const TicketDetailsPage = () => {
                   Ticket Fields
                 </h3>
                 {user?.permissions?.includes("update_tickets") &&
-                  ticket?.status !== "Resolved" && (
+                  !["Resolved", "Declined"].includes(ticket?.status) && (
                     <Button
                       type="button"
                       variant={isEditMode ? "destructive" : "outline"}

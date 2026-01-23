@@ -412,7 +412,7 @@ export const createTicket = async (req, res) => {
 
       const latestTicketService = await Service.findByPk(
         latestResolvedTicket.service_id,
-        { attributes: ["name"] }
+        { attributes: ["name"] },
       );
 
       return res.status(403).json({
@@ -445,7 +445,7 @@ export const createTicket = async (req, res) => {
         scheduled_date: scheduled_date || null,
         is_online,
       },
-      { transaction }
+      { transaction },
     );
 
     const createdTicketWithRelations = await Ticket.findOne({
@@ -530,13 +530,20 @@ export const updateTicketStatus = async (req, res) => {
       await transaction.rollback();
       return res.status(400).json({
         success: false,
-        message: `Invalid status. Allowed values: ${allowedStatuses.join(
-          ", "
-        )}`,
+        message: `Invalid status. Allowed values: ${allowedStatuses.join(", ")}`,
       });
     }
 
-    const ticket = await Ticket.findByPk(id, { transaction });
+    const ticket = await Ticket.findByPk(id, {
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["department_id"],
+        },
+      ],
+      transaction,
+    });
 
     if (!ticket) {
       await transaction.rollback();
@@ -546,6 +553,7 @@ export const updateTicketStatus = async (req, res) => {
       });
     }
 
+    const departmentId = ticket.service.department_id;
     const updatedTicketData = { status };
 
     // add start_date if status is being changed to 'Ongoing'
@@ -588,18 +596,17 @@ export const updateTicketStatus = async (req, res) => {
             total_score: null,
             comments: null,
           },
-          { transaction }
+          { transaction },
         );
 
         console.log(`Created unanswered survey for ticket ${id}`);
-      } else {
-        console.log(`Survey already exists for ticket ${id}`);
       }
-
-      // TODO: SEND EMAIL
     }
 
     await transaction.commit();
+
+    // Emit socket event AFTER successful commit
+    await emitQueueUpdate(req, departmentId);
 
     const updatedTicket = await Ticket.findByPk(id);
 
@@ -696,7 +703,7 @@ export const getTicketsWithNewComments = async (req, res) => {
       .map((ticket) => {
         const comments = ticket.comments || [];
         const otherUserComments = comments.filter(
-          (comment) => comment.user_id !== user.id
+          (comment) => comment.user_id !== user.id,
         );
         const userView = ticket.views?.[0];
 
@@ -704,7 +711,7 @@ export const getTicketsWithNewComments = async (req, res) => {
 
         if (userView && userView.last_comment_seen_id) {
           const lastSeenIndex = otherUserComments.findIndex(
-            (comment) => comment.id === userView.last_comment_seen_id
+            (comment) => comment.id === userView.last_comment_seen_id,
           );
           newCommentCount =
             lastSeenIndex === -1 ? otherUserComments.length : lastSeenIndex;
@@ -762,7 +769,7 @@ export const markTicketCommentsAsSeen = async (req, res) => {
 
     // Get the latest comment ID (if any comments exist)
     const otherUserComments = ticket?.comments.filter(
-      (comment) => comment.user_id !== userID
+      (comment) => comment.user_id !== userID,
     );
 
     const latestCommentId =
@@ -775,7 +782,7 @@ export const markTicketCommentsAsSeen = async (req, res) => {
         id: c.id,
         createdAt: c.createdAt,
         content: c.content,
-      }))
+      })),
     );
 
     // Check if user already has a view record for this ticket
@@ -922,7 +929,7 @@ export const checkTicketHasNewComments = async (req, res) => {
     const allComments = ticket.comments || [];
 
     const otherUserComments = allComments.filter(
-      (comment) => comment.user_id !== userID
+      (comment) => comment.user_id !== userID,
     );
 
     const userView = ticket.views?.[0];
@@ -933,7 +940,7 @@ export const checkTicketHasNewComments = async (req, res) => {
     if (otherUserComments.length > 0) {
       if (userView && userView.last_comment_seen_id) {
         const lastSeenIndex = otherUserComments.findIndex(
-          (comment) => comment.id === userView.last_comment_seen_id
+          (comment) => comment.id === userView.last_comment_seen_id,
         );
 
         if (lastSeenIndex === -1) {
@@ -968,6 +975,294 @@ export const checkTicketHasNewComments = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to check for new comments",
+      error: error.message,
+    });
+  }
+};
+
+// QUEUE
+export const getQueuedTicketsByDepartment = async (req, res) => {
+  try {
+    const { department_id } = req.query;
+    const user = req.user;
+
+    // Get today's date range (start and end of day)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const whereConditions = {
+      status: "In Queue", // Only get tickets in queue
+      scheduled_date: {
+        [Op.gte]: today,
+        [Op.lt]: tomorrow,
+      },
+    };
+
+    // Filter by department
+    if (user.department_id) {
+      whereConditions["$service.department_id$"] = user.department_id;
+    } else if (department_id) {
+      whereConditions["$service.department_id$"] = department_id;
+    }
+
+    const tickets = await Ticket.findAll({
+      where: whereConditions,
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["name", "processing_time_in_minutes"],
+          include: [
+            {
+              model: Department,
+              attributes: ["id", "name", "department_code"],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name"],
+        },
+      ],
+      order: [
+        ["scheduled_date", "ASC"], // Order by scheduled time
+        ["createdAt", "ASC"], // Then by creation time
+      ],
+    });
+
+    // Group tickets by department
+    const ticketsByDepartment = {};
+
+    tickets.forEach((ticket) => {
+      const deptCode = ticket.service.department.department_code;
+      if (!ticketsByDepartment[deptCode]) {
+        ticketsByDepartment[deptCode] = {
+          department: ticket.service.department,
+          tickets: [],
+        };
+      }
+      ticketsByDepartment[deptCode].tickets.push(ticket);
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: ticketsByDepartment,
+      message: "Queued tickets fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch queued tickets.",
+      error: error.message,
+    });
+  }
+};
+
+const emitQueueUpdate = async (req, departmentId) => {
+  const io = req.app.get("io");
+  if (!io) return;
+
+  try {
+    // Fetch updated queue for the department
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const queuedTickets = await Ticket.findAll({
+      where: {
+        status: "In Queue",
+        scheduled_date: {
+          [Op.gte]: today,
+          [Op.lt]: tomorrow,
+        },
+        "$service.department_id$": departmentId,
+      },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["name", "processing_time_in_minutes"],
+          include: [
+            {
+              model: Department,
+              attributes: ["id", "name", "department_code"],
+            },
+          ],
+        },
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name"],
+        },
+      ],
+      order: [
+        ["scheduled_date", "ASC"],
+        ["createdAt", "ASC"],
+      ],
+    });
+
+    // const servingTicket = await Ticket.findOne({
+    //   where: {
+    //     status: "Ongoing",
+    //     "$service.department_id$": departmentId,
+    //   },
+    //   include: [
+    //     {
+    //       model: Service,
+    //       as: "service",
+    //       attributes: ["name", "processing_time_in_minutes"],
+    //       include: [
+    //         {
+    //           model: Department,
+    //           attributes: ["id", "name", "department_code"],
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       model: User,
+    //       as: "client",
+    //       attributes: ["id", "first_name", "last_name"],
+    //     },
+    //   ],
+    //   order: [["start_date", "ASC"]],
+    // });
+
+    const departmentCode =
+      queuedTickets[0]?.service?.department?.department_code || "N/A";
+
+    // Emit to specific department room
+    io.to(`department-${departmentId}`).emit("queue-updated", {
+      departmentId,
+      departmentCode,
+      queuedTickets,
+      servingTicket: queuedTickets[0],
+    });
+
+    // Emit to all departments room (for the queue display monitor)
+    io.to("all-departments").emit("queue-updated", {
+      departmentId,
+      departmentCode,
+      queuedTickets,
+      servingTicket: queuedTickets[0],
+    });
+
+    console.log(`✅ Queue update emitted for department ${departmentId}`);
+  } catch (error) {
+    console.error("Error emitting queue update:", error);
+  }
+};
+
+export const getAllDepartmentsQueue = async (req, res) => {
+  try {
+    // Get today's date range
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Fetch all active departments
+    const departments = await Department.findAll({
+      where: { status: "active" },
+      attributes: ["id", "name", "department_code"],
+    });
+
+    // Build queue data for each department
+    const queueByDepartment = {};
+
+    for (const dept of departments) {
+      // Fetch queued tickets for this department
+      const queuedTickets = await Ticket.findAll({
+        where: {
+          status: "In Queue",
+          scheduled_date: {
+            [Op.gte]: today,
+            [Op.lt]: tomorrow,
+          },
+          "$service.department_id$": dept.id,
+        },
+        include: [
+          {
+            model: Service,
+            as: "service",
+            attributes: ["name", "processing_time_in_minutes"],
+            include: [
+              {
+                model: Department,
+                attributes: ["id", "name", "department_code"],
+              },
+            ],
+          },
+          {
+            model: User,
+            as: "client",
+            attributes: ["id", "first_name", "last_name"],
+          },
+        ],
+        order: [
+          ["scheduled_date", "ASC"],
+          ["createdAt", "ASC"],
+        ],
+      });
+
+      // Fetch currently serving ticket for this department
+      const servingTicket = await Ticket.findOne({
+        where: {
+          status: "Ongoing",
+          "$service.department_id$": dept.id,
+        },
+        include: [
+          {
+            model: Service,
+            as: "service",
+            attributes: ["name", "processing_time_in_minutes"],
+            include: [
+              {
+                model: Department,
+                attributes: ["id", "name", "department_code"],
+              },
+            ],
+          },
+          {
+            model: User,
+            as: "client",
+            attributes: ["id", "first_name", "last_name"],
+          },
+          {
+            model: User,
+            as: "assignee",
+            attributes: ["id", "first_name", "last_name"],
+          },
+        ],
+        order: [["start_date", "ASC"]],
+      });
+
+      // Store data using department_code as key
+      queueByDepartment[dept.department_code] = {
+        department: {
+          id: dept.id,
+          name: dept.name,
+          department_code: dept.department_code,
+        },
+        queuedTickets: queuedTickets,
+        servingTicket: queuedTickets[0] || "N/A",
+      };
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: queueByDepartment,
+      message: "All departments queue data fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch queue data.",
       error: error.message,
     });
   }

@@ -11,6 +11,8 @@ import {
   markTicketCommentsAsSeen,
   markMultipleTicketsCommentsAsSeen,
   checkTicketHasNewComments,
+  getQueuedTicketsByDepartment,
+  getAllDepartmentsQueue,
 } from "../controllers/ticket.controller.js";
 import {
   createComment,
@@ -36,5 +38,8 @@ router.get("/:ticketID/has-new-comments", checkTicketHasNewComments);
 router.post("/:ticketID/comments", createComment);
 router.post("/:ticketID/mark-comments-seen", markTicketCommentsAsSeen);
 router.post("/mark-multiple-comments-seen", markMultipleTicketsCommentsAsSeen);
+
+router.get("/queue/by-department", getQueuedTicketsByDepartment);
+router.get("/queue/queue-all-departments", getAllDepartmentsQueue);
 
 export default router;

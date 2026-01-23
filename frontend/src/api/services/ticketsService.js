@@ -38,7 +38,7 @@ export const ticketsService = {
   markCommentsAsSeen: async (ticketID) => {
     const response = await axios.post(
       `/ticket/${ticketID}/mark-comments-seen`,
-      {}
+      {},
     );
     return response.data;
   },
@@ -62,5 +62,29 @@ export const ticketsService = {
   changeTicketStatus: async (data) => {
     const response = await axios.put("/ticket/update-ticket-status", data);
     return response.data;
+  },
+
+  getCurrentServingTicket: async (departmentId) => {
+    const response = await axios.get("/ticket/current-serving", {
+      params: { department_id: departmentId },
+    });
+    return response.data.data;
+  },
+
+  getQueuedTicketsByDepartment: async (departmentId) => {
+    const response = await axios.get("/ticket/queue-by-department", {
+      params: { department_id: departmentId },
+    });
+
+    // Extract and flatten tickets from department groups
+    const allTickets = Object.values(response.data.data || {})
+      .flatMap((dept) => dept.tickets)
+      .sort((a, b) => {
+        const dateA = new Date(a.scheduled_date);
+        const dateB = new Date(b.scheduled_date);
+        return dateA - dateB;
+      });
+
+    return allTickets;
   },
 };

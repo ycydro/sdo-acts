@@ -18,6 +18,8 @@ export const useTicketMutations = () => {
     mutationFn: (data) => ticketsService.changeTicketStatus(data),
     onSuccess: () => {
       queryClient.invalidateQueries(["tickets"]);
+      queryClient.invalidateQueries({ queryKey: ["queued-tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["ticket-status-count"] });
     },
     onError: (error) => {
       console.error("Update Ticket Error:", error);

@@ -99,23 +99,21 @@ export const QueuePage = () => {
   const getLayoutConfig = () => {
     const count = visibleDepartments.length;
 
-    if (count === 0) return { gridCols: "grid-cols-1", cardClass: "h-[75vh]" };
-    if (count === 1) return { gridCols: "grid-cols-1", cardClass: "h-[75vh]" };
+    if (count <= 1) return { gridCols: "grid-cols-1", cardClass: "h-[75vh]" };
     if (count === 2) return { gridCols: "grid-cols-2", cardClass: "h-[75vh]" };
-    if (count === 3) return { gridCols: "grid-cols-3", cardClass: "h-[75vh]" };
-    if (count === 4)
+    if (count === 3 || count === 4)
       return {
-        gridCols: "grid-cols-2 lg:grid-cols-4",
+        gridCols: "grid-cols-2",
         cardClass: "h-[37.5vh]",
       };
     if (count === 5 || count === 6)
       return {
-        gridCols: "grid-cols-2 lg:grid-cols-3",
+        gridCols: "grid-cols-3",
         cardClass: "h-[37.5vh]",
       };
     if (count === 7 || count === 8)
       return {
-        gridCols: "grid-cols-2 lg:grid-cols-4",
+        gridCols: "grid-cols-4",
         cardClass: "h-[37.5vh]",
       };
     return { gridCols: "grid-cols-2 lg:grid-cols-4", cardClass: "h-[37.5vh]" };
@@ -176,7 +174,7 @@ export const QueuePage = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2"
               >
                 <Filter className="h-4 w-4" />
                 <span>Departments</span>
@@ -198,20 +196,17 @@ export const QueuePage = () => {
                         <h3 className="font-semibold text-gray-800 text-md">
                           Department Filter
                         </h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Show or hide departments from the queue display
-                        </p>
                       </div>
                       <div className="flex gap-2">
                         <button
                           onClick={selectAll}
-                          className="text-xs px-3 py-1.5 bg-green-100 text-green-800 hover:bg-green-200 rounded-md font-medium"
+                          className="text-xs px-3 py-1.5 bg-primary text-white hover:bg-primary/80 rounded-md font-medium cursor-pointer"
                         >
                           Select All
                         </button>
                         <button
                           onClick={clearAll}
-                          className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md font-medium"
+                          className="text-xs px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md font-medium cursor-pointer"
                         >
                           Clear All
                         </button>
@@ -235,10 +230,10 @@ export const QueuePage = () => {
                             key={dep.id}
                             onClick={() => toggleDepartment(dep.key)}
                             className={`
-                              flex items-center p-3 rounded-lg border transition-all
+                              flex items-center p-3 rounded-lg border transition-all cursor-pointer
                               ${
                                 isSelected
-                                  ? "bg-green-50 border-green-500 text-green-800"
+                                  ? "bg-green-50 border-primary text-green-800"
                                   : "border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700"
                               }
                             `}
@@ -247,7 +242,7 @@ export const QueuePage = () => {
                             <div
                               className={`w-5 h-5 rounded border flex items-center justify-center mr-3 flex-shrink-0 ${
                                 isSelected
-                                  ? "bg-green-500 border-green-500"
+                                  ? "bg-primary border-primary"
                                   : "border-gray-400"
                               }`}
                             >

@@ -14,8 +14,8 @@ export const queueService = {
     const allTickets = Object.values(response.data.data || {})
       .flatMap((dept) => dept.tickets)
       .sort((a, b) => {
-        const dateA = new Date(a.scheduled_date);
-        const dateB = new Date(b.scheduled_date);
+        const dateA = new Date(a.confirmation_date);
+        const dateB = new Date(b.confirmation_date);
         return dateA - dateB;
       });
 

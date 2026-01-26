@@ -1,4 +1,5 @@
 import sequelize from "../configs/sequelize.config.js";
+import { statusHandlers } from "../helpers/statusHandlers.js";
 
 import {
   Ticket,
@@ -102,9 +103,10 @@ export const getAllTickets = async (req, res) => {
             CASE 
               WHEN \`ticket\`.\`status\` = 'Unapproved' THEN 1
               WHEN \`ticket\`.\`status\` = 'Ongoing' THEN 2
-              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 3
-              WHEN \`ticket\`.\`status\` = 'Declined' THEN 4
-              ELSE 5
+              WHEN \`ticket\`.\`status\` = 'In Queue' THEN 3
+              WHEN \`ticket\`.\`status\` = 'Resolved' THEN 4
+              WHEN \`ticket\`.\`status\` = 'Declined' THEN 5
+              ELSE 6
             END
           `),
           "ASC",
@@ -556,14 +558,9 @@ export const updateTicketStatus = async (req, res) => {
     const departmentId = ticket.service.department_id;
     const updatedTicketData = { status };
 
-    // add start_date if status is being changed to 'Ongoing'
-    if (status === "Ongoing" && ticket.status === "In Queue") {
-      updatedTicketData.start_date = new Date();
-    }
-
-    // add end_date if status is being changed to 'Resolved'
-    if (status === "Resolved" && ticket.status !== "Resolved") {
-      updatedTicketData.end_date = new Date();
+    const statusHandler = statusHandlers[status];
+    if (statusHandler) {
+      await statusHandler(ticket, updatedTicketData, transaction);
     }
 
     const [updatedCount] = await Ticket.update(updatedTicketData, {
@@ -577,30 +574,6 @@ export const updateTicketStatus = async (req, res) => {
         success: false,
         message: "Ticket not found or no changes made",
       });
-    }
-
-    if (status === "Resolved") {
-      const existingSurvey = await ClientSurveyResponse.findOne({
-        where: { ticket_id: id },
-        transaction,
-      });
-
-      if (!existingSurvey) {
-        await ClientSurveyResponse.create(
-          {
-            client_id: ticket.client_id,
-            ticket_id: id,
-            survey_date: new Date(),
-            status: "Pending",
-            overall_rating: null,
-            total_score: null,
-            comments: null,
-          },
-          { transaction },
-        );
-
-        console.log(`Created unanswered survey for ticket ${id}`);
-      }
     }
 
     await transaction.commit();
@@ -1028,6 +1001,7 @@ export const getQueuedTicketsByDepartment = async (req, res) => {
         },
       ],
       order: [
+        ["confirmation_date", "ASC"], // Order by confirmation time
         ["scheduled_date", "ASC"], // Order by scheduled time
         ["createdAt", "ASC"], // Then by creation time
       ],
@@ -1101,6 +1075,7 @@ const emitQueueUpdate = async (req, departmentId) => {
         },
       ],
       order: [
+        ["confirmation_date", "ASC"],
         ["scheduled_date", "ASC"],
         ["createdAt", "ASC"],
       ],
@@ -1204,6 +1179,7 @@ export const getAllDepartmentsQueue = async (req, res) => {
           },
         ],
         order: [
+          ["confirmation_date", "ASC"],
           ["scheduled_date", "ASC"],
           ["createdAt", "ASC"],
         ],

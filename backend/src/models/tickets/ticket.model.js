@@ -31,6 +31,9 @@ const Ticket = sequelize.define("ticket", {
   scheduled_date: {
     type: DataTypes.DATE,
   },
+  confirmation_date: {
+    type: DataTypes.DATE,
+  },
   is_online: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
@@ -75,7 +78,7 @@ Ticket.beforeCreate(async (ticket, options) => {
   if (!counter) {
     counter = await TicketCounter.create(
       { department_id: deptId, next_number: 1 },
-      { transaction }
+      { transaction },
     );
   }
 

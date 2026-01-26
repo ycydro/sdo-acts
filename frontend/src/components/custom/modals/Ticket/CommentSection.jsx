@@ -195,11 +195,11 @@ export const CommentSection = ({ ticketID, ticketStatus }) => {
                             <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap">
                               {formatDistanceToNow(
                                 new Date(
-                                  comment.timestamp || comment.createdAt
+                                  comment.timestamp || comment.createdAt,
                                 ),
                                 {
                                   addSuffix: true,
-                                }
+                                },
                               )}
                             </span>
                           </div>
@@ -285,7 +285,7 @@ export const CommentSection = ({ ticketID, ticketStatus }) => {
               <div className="flex-1 space-y-1.5 sm:space-y-2">
                 <Textarea
                   placeholder={
-                    ticketStatus === "Resolved"
+                    ["Resolved", "Declined"].includes(ticketStatus)
                       ? "Comments are disabled"
                       : "Type your comment here..."
                   }
@@ -298,7 +298,10 @@ export const CommentSection = ({ ticketID, ticketStatus }) => {
                       handleAddComment();
                     }
                   }}
-                  disabled={isCreating || ticketStatus === "Resolved"}
+                  disabled={
+                    isCreating ||
+                    ["Resolved", "Declined"].includes(ticketStatus)
+                  }
                 />
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                   <p className="hidden lg:inline text-[10px] sm:text-xs text-muted-foreground order-2 sm:order-1">

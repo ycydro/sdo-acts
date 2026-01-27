@@ -21,4 +21,16 @@ export const queueService = {
 
     return allTickets;
   },
+
+  getQueueSession: async (departmentId) => {
+    const response = await axios.get("/ticket/queue/session/by-department", {
+      params: { department_id: departmentId },
+    });
+    return response.data.data;
+  },
+
+  updateQueueSession: async (data) => {
+    const response = await axios.post("/ticket/queue/session", data);
+    return response.data.data;
+  },
 };

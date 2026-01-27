@@ -20,7 +20,13 @@ export const QueuePage = () => {
   const { socket, isConnected, joinAllDepartments } = useSocket();
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // fetch departments
+  // Store queue states for each department
+  const [departmentQueueStates, setDepartmentQueueStates] = useState({});
+
+  useEffect(() => {
+    console.log("Current state of queue: ", departmentQueueStates);
+  }, [departmentQueueStates]);
+
   const { data: departmentsData, isLoading: isLoadingDepartments } =
     useDepartments();
 
@@ -36,7 +42,6 @@ export const QueuePage = () => {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [departmentsData]);
 
-  // Initialize visible departments after departments are loaded
   const [visibleDepartments, setVisibleDepartments] = useState([]);
 
   useEffect(() => {
@@ -45,7 +50,6 @@ export const QueuePage = () => {
     }
   }, [departments]);
 
-  // Fetch queue data
   const {
     data: queueData = {},
     refetch,
@@ -57,20 +61,41 @@ export const QueuePage = () => {
     refetchInterval: 30000,
   });
 
-  // Join all departments room on mount
+  // Initialize queue states from queue data
+  useEffect(() => {
+    if (queueData.data && Object.keys(queueData.data).length > 0) {
+      console.log("Initializing queue states from queue data...");
+
+      const initialStates = {};
+
+      Object.values(queueData.data).forEach((deptData) => {
+        const deptId = deptData.department?.id;
+        if (deptId && deptData.queueSession) {
+          initialStates[deptId] = {
+            isActive: deptData.queueSession.is_active,
+            currentServingTicketId:
+              deptData.queueSession.current_serving_ticket_id,
+            timestamp: new Date().toISOString(), // You can add actual timestamp if available
+          };
+        }
+      });
+
+      setDepartmentQueueStates(initialStates);
+      console.log("Initial queue states loaded:", initialStates);
+    }
+  }, [queueData]);
+
   useEffect(() => {
     if (socket) {
       joinAllDepartments();
     }
   }, [socket]);
 
-  // Listen for real-time queue updates
   useEffect(() => {
     if (!socket) return;
 
     const handleQueueUpdate = (data) => {
       console.log("Queue update received on monitor:", data);
-      // Refetch all queue data when any department updates
       refetch();
     };
 
@@ -80,6 +105,30 @@ export const QueuePage = () => {
       socket.off("queue-updated", handleQueueUpdate);
     };
   }, [socket, refetch]);
+
+  // Listen for queue state updates
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleQueueStateUpdate = (data) => {
+      console.log("Queue state update received on QueuePage:", data);
+
+      setDepartmentQueueStates((prev) => ({
+        ...prev,
+        [data.departmentId]: {
+          isActive: data.isActive,
+          currentServingTicketId: data.currentServingTicketId,
+          timestamp: data.timestamp,
+        },
+      }));
+    };
+
+    socket.on("queue-state-updated", handleQueueStateUpdate);
+
+    return () => {
+      socket.off("queue-state-updated", handleQueueStateUpdate);
+    };
+  }, [socket]);
 
   const toggleDepartment = (key) => {
     setVisibleDepartments((prev) =>
@@ -95,7 +144,6 @@ export const QueuePage = () => {
     setVisibleDepartments([]);
   };
 
-  // Get grid columns and card size based on number of visible departments
   const getLayoutConfig = () => {
     const count = visibleDepartments.length;
 
@@ -119,14 +167,72 @@ export const QueuePage = () => {
     return { gridCols: "grid-cols-2 lg:grid-cols-4", cardClass: "h-[37.5vh]" };
   };
 
-  // Get department queue info
   const getDepartmentQueue = (deptKey) => {
-    const dept = queueData[deptKey];
-    if (!dept) return { serving: null, queue: [] };
+    const dept = queueData?.[deptKey];
+
+    // Add debug logging
+    console.log(`getDepartmentQueue for ${deptKey}:`, {
+      queueData: queueData,
+      dept: dept,
+      queueSession: dept?.queueSession,
+      is_active: dept?.queueSession?.is_active,
+      current_serving_ticket_id: dept?.queueSession?.current_serving_ticket_id,
+      queuedTicketsCount: dept?.queuedTickets?.length,
+    });
+
+    if (!dept) return { serving: null, queue: [], isActive: false };
+
+    const deptId = dept.department?.id;
+    const queueState = deptId ? departmentQueueStates[deptId] : null;
+
+    // Check if queue is active - first check queueState, then fallback to API response
+    const isActive =
+      (queueState && queueState.isActive) ||
+      (dept.queueSession && dept.queueSession.is_active);
+
+    console.log(`Queue active check for ${deptKey}:`, {
+      queueStateIsActive: queueState?.isActive,
+      apiIsActive: dept.queueSession?.is_active,
+      finalIsActive: isActive,
+    });
+
+    // If queue is not active, show no serving ticket
+    if (!isActive) {
+      return {
+        serving: null,
+        queue: dept.queuedTickets || [],
+        isActive: false,
+      };
+    }
+
+    // Get current serving ticket ID from multiple sources
+    const currentServingTicketId =
+      (queueState && queueState.currentServingTicketId) ||
+      dept.queueSession?.current_serving_ticket_id;
+
+    console.log(
+      `Current serving ticket for ${deptKey}:`,
+      currentServingTicketId,
+    );
+
+    // If queue is active, find the ticket matching currentServingTicketId
+    const servingTicket =
+      dept.queuedTickets?.find((t) => t.id === currentServingTicketId) || null;
+
+    // Remaining queue excludes the serving ticket
+    const remainingQueue =
+      dept.queuedTickets?.filter((t) => t.id !== currentServingTicketId) || [];
+
+    console.log(`Result for ${deptKey}:`, {
+      servingTicket: servingTicket?.ticket_code,
+      remainingQueueCount: remainingQueue.length,
+      isActive: true,
+    });
 
     return {
-      serving: dept.servingTicket,
-      queue: dept.queuedTickets.slice(1) || [],
+      serving: servingTicket,
+      queue: remainingQueue,
+      isActive: true,
     };
   };
 
@@ -137,7 +243,6 @@ export const QueuePage = () => {
   const visibleCount = visibleDepartments.length;
   const { gridCols, cardClass } = getLayoutConfig();
 
-  // Loading state
   if (isLoadingDepartments) {
     return (
       <div className="min-w-full h-full flex items-center justify-center">
@@ -156,7 +261,6 @@ export const QueuePage = () => {
           <h1 className="text-xl font-bold">PROCESSING NOW</h1>
 
           <div className="flex items-center gap-4">
-            {/* Connection Status */}
             {isConnected ? (
               <div className="flex items-center gap-2 text-green-600 text-sm">
                 <Wifi className="w-4 h-4" />
@@ -169,7 +273,6 @@ export const QueuePage = () => {
               </div>
             )}
 
-            {/* Department Filter */}
             <div className="relative">
               <Button
                 variant="outline"
@@ -213,7 +316,6 @@ export const QueuePage = () => {
                       </div>
                     </div>
 
-                    {/* Dynamic grid based on number of departments */}
                     <div
                       className={`grid ${
                         departments.length <= 4
@@ -280,35 +382,50 @@ export const QueuePage = () => {
         ) : (
           <div className={`grid ${gridCols} gap-2`}>
             {getVisibleDepartmentsInOrder().map((dep) => {
-              const { serving, queue } = getDepartmentQueue(dep.key);
+              const { serving, queue, isActive } = getDepartmentQueue(dep.key);
 
               return (
                 <Card key={dep.id} className={`${cardClass} flex flex-col`}>
                   <CardHeader className="bg-green-700 text-white font-bold py-4 px-4 flex-shrink-0">
-                    <div className="text-2xl">{dep.key}</div>
-                    <div className="text-x; font-normal opacity-90 truncate">
-                      {dep.name}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl">{dep.key}</div>
+                        <div className="text-xl font-normal opacity-90 truncate">
+                          {dep.name}
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 flex-grow flex flex-col justify-center">
                     <div className="flex h-full items-center">
-                      {/* Now Processing */}
                       <div className="flex-1 pr-3 border-r border-gray-200 flex flex-col justify-center">
                         <div className="text-xs text-gray-500 mb-2">
                           NOW PROCESSING
                         </div>
-                        <div className="text-5xl font-bold text-gray-800 leading-none">
-                          {serving?.ticket_code || "---"}
-                        </div>
-                        {serving && (
-                          <div className="text-sm text-gray-600 mt-2 truncate">
-                            {serving.client?.first_name}{" "}
-                            {serving.client?.last_name}
-                          </div>
+                        {serving ? (
+                          <>
+                            <div className="text-5xl font-bold text-gray-800 leading-none">
+                              {serving.ticket_code}
+                            </div>
+                            <div className="text-sm text-gray-600 mt-2 truncate">
+                              {serving.client?.first_name}{" "}
+                              {serving.client?.last_name}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-5xl font-bold text-gray-400 leading-none">
+                              ---
+                            </div>
+                            <div className="text-sm text-gray-400 mt-2 italic">
+                              {queue.length > 0
+                                ? "Queue not started"
+                                : "No tickets"}
+                            </div>
+                          </>
                         )}
                       </div>
 
-                      {/* Next in Line */}
                       <div className="flex-1 pl-3 flex flex-col justify-center">
                         <div className="text-md text-gray-500 mb-1">
                           NEXT IN LINE
@@ -338,7 +455,6 @@ export const QueuePage = () => {
           </div>
         )}
 
-        {/* Empty State */}
         {visibleCount === 0 && !isLoadingQueue && (
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
@@ -356,7 +472,6 @@ export const QueuePage = () => {
           </div>
         )}
 
-        {/* No Departments Available State */}
         {departments.length === 0 && !isLoadingDepartments && (
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">

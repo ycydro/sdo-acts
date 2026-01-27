@@ -15,6 +15,9 @@ import {
   XCircle,
   Wifi,
   WifiOff,
+  PhoneCall,
+  Play,
+  Square,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router";
@@ -23,6 +26,8 @@ import { useQueuedTicketsByDepartment } from "@/hooks/queries/ticket/queue/useQu
 import { useSocket } from "@/context/SocketContext";
 import { toast } from "sonner";
 import ConfirmationModal from "@/components/custom/modals/ConfirmationModal";
+import { useQueueSession } from "@/hooks/queries/ticket/queue/useQueueSession";
+import { useQueueMutations } from "@/hooks/queries/ticket/queue/useQueueMutations";
 
 export const QueueControllerPage = () => {
   const navigate = useNavigate();
@@ -32,39 +37,51 @@ export const QueueControllerPage = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const departmentId = user?.department_id;
+
+  const [isCallConfirmModalOpen, setIsCallConfirmModalOpen] = useState(false);
+  const [ticketToCall, setTicketToCall] = useState(null);
+
+  const departmentID = user?.department_id;
 
   const {
     data: queueTickets = [],
     isLoading: isLoadingQueue,
     refetch: refetchQueue,
-  } = useQueuedTicketsByDepartment(departmentId);
+  } = useQueuedTicketsByDepartment(departmentID);
+
+  // Fetch queue session from backend
+  const {
+    data: queueSession,
+    isLoading: isLoadingSession,
+    refetch: refetchSession,
+  } = useQueueSession(departmentID);
+
+  const { updateQueueSession } = useQueueMutations();
 
   const { updateTicketStatus } = useTicketMutations();
 
   // Join department room on mount
   useEffect(() => {
-    if (departmentId && socket) {
-      joinDepartment(departmentId);
+    if (departmentID && socket) {
+      joinDepartment(departmentID);
     }
 
     return () => {
-      if (departmentId) {
-        leaveDepartment(departmentId);
+      if (departmentID) {
+        leaveDepartment(departmentID);
       }
     };
-  }, [departmentId, socket]);
+  }, [departmentID, socket]);
 
-  // LISTEN for queue updates
+  // Listen for queue updates from backend (ticket status changes)
   useEffect(() => {
     if (!socket) return;
 
     const handleQueueUpdate = (data) => {
       console.log("Queue update received:", data);
-
-      // only refetch if it's for our department
-      if (data.departmentId === departmentId) {
+      if (data.departmentID === departmentID) {
         refetchQueue();
+        refetchSession();
       }
     };
 
@@ -73,15 +90,40 @@ export const QueueControllerPage = () => {
     return () => {
       socket.off("queue-updated", handleQueueUpdate);
     };
-  }, [socket, departmentId, refetchQueue]);
+  }, [socket, departmentID, refetchQueue, refetchSession]);
 
-  // CURRENT ticket is the FIRST ticket in the queue
-  const currentTicket = queueTickets.length > 0 ? queueTickets[0] : null;
+  // Listen for queue state updates from other users
+  useEffect(() => {
+    if (!socket) return;
 
-  // Remaining tickets (di kasama first one since siya current ticket)
-  const remainingTickets = queueTickets.slice(1);
+    const handleQueueStateUpdate = (data) => {
+      console.log("Queue state update received:", data);
+      if (data.departmentID === departmentID) {
+        refetchSession();
+      }
+    };
 
-  // Filtered tickets based on search (only for the remaining queue)
+    socket.on("queue-state-updated", handleQueueStateUpdate);
+
+    return () => {
+      socket.off("queue-state-updated", handleQueueStateUpdate);
+    };
+  }, [socket, departmentID, refetchSession]);
+
+  const isQueueActive = queueSession?.is_active || false;
+  const currentServingTicketID = queueSession?.current_serving_ticket_id;
+
+  // Current ticket is the one being served
+  const currentTicket = currentServingTicketID
+    ? queueTickets.find((t) => t.id === currentServingTicketID)
+    : null;
+
+  // Remaining tickets exclude the currently serving one
+  const remainingTickets = currentServingTicketID
+    ? queueTickets.filter((t) => t.id !== currentServingTicketID)
+    : queueTickets;
+
+  // Filtered tickets based on search
   const filteredTickets = useMemo(() => {
     if (!searchTerm.trim()) return remainingTickets;
 
@@ -95,6 +137,103 @@ export const QueueControllerPage = () => {
     );
   }, [remainingTickets, searchTerm]);
 
+  // Start the queue
+  const handleStartQueue = async () => {
+    if (queueTickets.length === 0) {
+      toast.error("No tickets in queue to start");
+      return;
+    }
+
+    try {
+      const firstTicket = queueTickets[0];
+      await updateQueueSession.mutateAsync({
+        department_id: departmentID,
+        is_active: true,
+        current_serving_ticket_id: firstTicket.id,
+      });
+      toast.success("Queue started! First ticket is now being served.");
+    } catch (error) {
+      console.error("Error starting queue:", error);
+      toast.error("Failed to start queue");
+    }
+  };
+
+  // Call next ticket
+  const handleCallNext = async () => {
+    if (!isQueueActive) {
+      toast.error("Please start the queue first");
+      return;
+    }
+
+    if (remainingTickets.length === 0) {
+      toast.info("No more tickets in queue");
+      await updateQueueSession.mutateAsync({
+        department_id: departmentID,
+        is_active: false,
+        current_serving_ticket_id: null,
+      });
+      return;
+    }
+
+    try {
+      const nextTicket = remainingTickets[0];
+      await updateQueueSession.mutateAsync({
+        department_id: departmentID,
+        is_active: true,
+        current_serving_ticket_id: nextTicket.id,
+      });
+      toast.success(`Now serving: ${nextTicket.ticket_code}`);
+    } catch (error) {
+      console.error("Error calling next ticket:", error);
+      toast.error("Failed to call next ticket");
+    }
+  };
+
+  // Show confirmation modal
+  const handleCallSpecificTicket = (ticket) => {
+    if (!isQueueActive) {
+      toast.error("Please start the queue first");
+      return;
+    }
+
+    setTicketToCall(ticket);
+    setIsCallConfirmModalOpen(true);
+  };
+
+  const confirmCallSpecificTicket = async () => {
+    if (!ticketToCall) return;
+
+    try {
+      await updateQueueSession.mutateAsync({
+        department_id: departmentID,
+        is_active: true,
+        current_serving_ticket_id: ticketToCall.id,
+      });
+      toast.success(`Now serving: ${ticketToCall.ticket_code}`);
+    } catch (error) {
+      console.error("Error calling specific ticket:", error);
+      toast.error("Failed to call ticket");
+    } finally {
+      setIsCallConfirmModalOpen(false);
+      setTicketToCall(null);
+    }
+  };
+
+  // End queue manually
+  const handleEndQueue = async () => {
+    try {
+      await updateQueueSession.mutateAsync({
+        department_id: departmentID,
+        is_active: false,
+        current_serving_ticket_id: null,
+      });
+      toast.info("Queue ended");
+    } catch (error) {
+      console.error("Error ending queue:", error);
+      toast.error("Failed to end queue");
+    }
+  };
+
   const handleStatusChange = async (ticket, newStatus) => {
     try {
       await updateTicketStatus.mutateAsync({
@@ -105,20 +244,28 @@ export const QueueControllerPage = () => {
       let message = "";
       switch (newStatus) {
         case "Resolved":
-          message = "Ticket resolved! Next person in queue can now be called.";
+          message = "Ticket resolved!";
           break;
         case "Ongoing":
-          message =
-            "Ticket approved and set to Ongoing! Next person in queue can now be called.";
+          message = "Ticket set to Ongoing!";
           break;
         case "Declined":
-          message = "Ticket declined! Next person in queue can now be called.";
+          message = "Ticket declined!";
           break;
         default:
           message = "Ticket status updated!";
       }
 
       toast.success(message);
+
+      // Clear current serving ticket after processing
+      if (isQueueActive) {
+        await updateQueueSession.mutateAsync({
+          department_id: departmentID,
+          is_active: true,
+          current_serving_ticket_id: null,
+        });
+      }
     } catch (error) {
       console.error(`Error updating ticket to ${newStatus}:`, error);
       toast.error(`Error updating ticket. Please try again.`);
@@ -152,6 +299,7 @@ export const QueueControllerPage = () => {
 
   const handleRefresh = () => {
     refetchQueue();
+    refetchSession();
   };
 
   const handlePreview = (ticket) => {
@@ -190,16 +338,16 @@ export const QueueControllerPage = () => {
 
     if (pendingAction) {
       const action = pendingAction.toString();
-      // Mark decline as destructive action
       return action.includes("Declined");
     }
     return false;
   };
 
+  const isLoading = isLoadingQueue || isLoadingSession;
+
   return (
     <>
       <main className="min-w-full h-full">
-        {/* MAIN AREA */}
         <div className="grid grid-cols-4 gap-6 h-full">
           <Card className="col-span-3 border shadow-lg py-4 justify-center">
             <CardHeader className="text-center border-b pb-4">
@@ -217,19 +365,61 @@ export const QueueControllerPage = () => {
                 )}
               </div>
               <h2 className="text-2xl font-bold">Currently Serving</h2>
+
+              {isQueueActive && (
+                <div className="mt-2 flex items-center justify-center gap-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    Queue Active
+                  </div>
+                  <Button
+                    onClick={handleEndQueue}
+                    variant="outline"
+                    size="sm"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    disabled={updateQueueSession.isPending}
+                  >
+                    <Square className="w-3 h-3 mr-1" />
+                    End Queue
+                  </Button>
+                </div>
+              )}
             </CardHeader>
 
             <CardContent>
-              {isLoadingQueue ? (
+              {isLoading ? (
                 <div className="flex items-center justify-center min-h-[400px]">
                   <div className="text-center">
                     <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-400" />
                     <p className="text-gray-500">Loading queue...</p>
                   </div>
                 </div>
+              ) : !isQueueActive ? (
+                <div className="flex flex-col items-center justify-center min-h-[400px]">
+                  <div className="text-6xl mb-4">🎫</div>
+                  <h3 className="text-2xl font-bold text-gray-700 mb-2">
+                    {queueTickets.length === 0
+                      ? "No Tickets in Queue"
+                      : "Queue Ready to Start"}
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    {queueTickets.length === 0
+                      ? "No tickets scheduled for today"
+                      : `${queueTickets.length} ticket${queueTickets.length !== 1 ? "s" : ""} waiting to be served`}
+                  </p>
+                  {queueTickets.length > 0 && (
+                    <Button
+                      onClick={handleStartQueue}
+                      className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-xl"
+                      disabled={updateQueueSession.isPending}
+                    >
+                      <Play className="mr-3 w-5 h-5" />
+                      Start Queue
+                    </Button>
+                  )}
+                </div>
               ) : currentTicket ? (
                 <>
-                  {/* TICKET NUMBER DISPLAY */}
                   <div className="flex flex-col items-center justify-center py-9">
                     <p className="text-8xl font-bold text-green-700 leading-none">
                       {currentTicket.ticket_code || "---"}
@@ -241,7 +431,6 @@ export const QueueControllerPage = () => {
 
                   <Separator className="my-4" />
 
-                  {/* USER DETAILS */}
                   <div className="flex justify-between gap-6 px-2 py-4">
                     <div className="space-y-2 flex-1">
                       <label className="flex items-center gap-2 text-sm font-semibold">
@@ -276,11 +465,13 @@ export const QueueControllerPage = () => {
                     </div>
                   </div>
 
-                  {/* ACTION BUTTONS */}
                   <div className="flex justify-center gap-4 pt-6">
                     <Button
                       onClick={handleResolveImmediately}
-                      disabled={updateTicketStatus.isPending}
+                      disabled={
+                        updateTicketStatus.isPending ||
+                        updateQueueSession.isPending
+                      }
                       className="bg-primary text-white px-8 py-6 text-lg rounded-xl flex-1"
                     >
                       <CheckCircle className="mr-3 w-5 h-5" />
@@ -288,7 +479,10 @@ export const QueueControllerPage = () => {
                     </Button>
                     <Button
                       onClick={handleApprove}
-                      disabled={updateTicketStatus.isPending}
+                      disabled={
+                        updateTicketStatus.isPending ||
+                        updateQueueSession.isPending
+                      }
                       variant="outline"
                       className="bg-blue-500/10 border-blue-500 text-blue-700 hover:bg-blue-500/20 hover:border-blue-500/50 hover:text-blue-800 px-8 py-6 text-lg rounded-xl flex-1"
                     >
@@ -298,7 +492,10 @@ export const QueueControllerPage = () => {
 
                     <Button
                       onClick={handleDecline}
-                      disabled={updateTicketStatus.isPending}
+                      disabled={
+                        updateTicketStatus.isPending ||
+                        updateQueueSession.isPending
+                      }
                       variant="outline"
                       className="border-2 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 px-8 py-6 text-lg rounded-xl flex-1"
                     >
@@ -308,7 +505,10 @@ export const QueueControllerPage = () => {
 
                     <Button
                       onClick={() => handlePreview(currentTicket)}
-                      disabled={updateTicketStatus.isPending}
+                      disabled={
+                        updateTicketStatus.isPending ||
+                        updateQueueSession.isPending
+                      }
                       variant="outline"
                       className="border-2 px-8 py-6 text-lg rounded-xl flex-1"
                     >
@@ -321,17 +521,26 @@ export const QueueControllerPage = () => {
                 <div className="flex flex-col items-center justify-center min-h-[400px]">
                   <div className="text-6xl mb-4">📋</div>
                   <h3 className="text-2xl font-bold text-gray-700 mb-2">
-                    No Tickets in Queue
+                    No Active Ticket
                   </h3>
-                  <p className="text-gray-500">
-                    No tickets scheduled for discussion today
+                  <p className="text-gray-500 mb-6">
+                    Current ticket was processed
                   </p>
+                  {remainingTickets.length > 0 && (
+                    <Button
+                      onClick={handleCallNext}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg rounded-xl"
+                      disabled={updateQueueSession.isPending}
+                    >
+                      <PhoneCall className="mr-3 w-5 h-5" />
+                      Call Next Ticket
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* NEXT QUEUE LIST */}
           <Card className="col-span-1 border shadow-lg justify-center">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -342,21 +551,22 @@ export const QueueControllerPage = () => {
                     {remainingTickets.length !== 1 ? "s" : ""} waiting
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRefresh}
-                  disabled={isLoadingQueue}
-                >
-                  <RefreshCw
-                    className={`w-4 h-4 ${isLoadingQueue ? "animate-spin" : ""}`}
-                  />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRefresh}
+                    disabled={isLoading}
+                  >
+                    <RefreshCw
+                      className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                    />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
 
             <CardContent className="flex flex-col justify-center py-3">
-              {/* SEARCH */}
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -367,9 +577,8 @@ export const QueueControllerPage = () => {
                 />
               </div>
 
-              {/* QUEUE ITEMS LIST */}
               <div className="flex-1 overflow-y-auto pr-3 space-y-3 max-h-[500px]">
-                {isLoadingQueue ? (
+                {isLoading ? (
                   <div className="text-center py-8">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-gray-400" />
                     <p className="text-sm text-gray-500">Loading queue...</p>
@@ -380,6 +589,7 @@ export const QueueControllerPage = () => {
                       key={ticket.id}
                       ticket={ticket}
                       onPreview={handlePreview}
+                      onCallTicket={handleCallSpecificTicket}
                     />
                   ))
                 ) : (
@@ -416,11 +626,21 @@ export const QueueControllerPage = () => {
         }
         isLoading={updateTicketStatus.isPending}
       />
+      <ConfirmationModal
+        open={isCallConfirmModalOpen}
+        onOpenChange={setIsCallConfirmModalOpen}
+        onConfirm={confirmCallSpecificTicket}
+        title={`Call ${ticketToCall?.ticket_code}?`}
+        description={`Call ${ticketToCall?.client?.first_name} ${ticketToCall?.client?.last_name} for service: ${ticketToCall?.service?.name}`}
+        confirmText="Call Ticket"
+        cancelText="Cancel"
+        isLoading={updateQueueSession.isPending}
+      />
     </>
   );
 };
 
-const NextQueueItem = ({ ticket, onPreview }) => {
+const NextQueueItem = ({ ticket, onPreview, onCallTicket }) => {
   return (
     <div className="p-3 border border-gray-500 rounded-lg hover:bg-gray-50 transition-colors">
       <div className="flex items-start justify-between gap-3">
@@ -445,14 +665,26 @@ const NextQueueItem = ({ ticket, onPreview }) => {
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-auto px-0.5 hover:text-primary"
-          onClick={() => onPreview(ticket)}
-        >
-          <Eye className="w-4 h-4" />
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-auto px-0.5 hover:text-green-600"
+            onClick={() => onCallTicket(ticket)}
+            title="Call this ticket"
+          >
+            <PhoneCall className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-auto px-0.5 hover:text-primary"
+            onClick={() => onPreview(ticket)}
+            title="View details"
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

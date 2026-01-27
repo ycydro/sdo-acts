@@ -7,17 +7,21 @@ import {
   getUsersTransactionHistory,
   updateTicketStatus,
   getTicketByID,
-  getTicketsWithNewComments,
-  markTicketCommentsAsSeen,
-  markMultipleTicketsCommentsAsSeen,
-  checkTicketHasNewComments,
-  getQueuedTicketsByDepartment,
-  getAllDepartmentsQueue,
 } from "../controllers/ticket.controller.js";
 import {
   createComment,
   getCommentsByTicket,
+  getTicketsWithNewComments,
+  markTicketCommentsAsSeen,
+  markMultipleTicketsCommentsAsSeen,
+  checkTicketHasNewComments,
 } from "../controllers/ticket-comment.controller.js";
+import {
+  getQueuedTicketsByDepartment,
+  getAllDepartmentsQueue,
+  getQueueSessionByDepartment,
+  updateQueueSession,
+} from "../controllers/queue.controller.js";
 
 const router = express.Router();
 
@@ -39,6 +43,8 @@ router.post("/:ticketID/comments", createComment);
 router.post("/:ticketID/mark-comments-seen", markTicketCommentsAsSeen);
 router.post("/mark-multiple-comments-seen", markMultipleTicketsCommentsAsSeen);
 
+router.get("/queue/session/by-department", getQueueSessionByDepartment);
+router.post("/queue/session", updateQueueSession);
 router.get("/queue/by-department", getQueuedTicketsByDepartment);
 router.get("/queue/queue-all-departments", getAllDepartmentsQueue);
 

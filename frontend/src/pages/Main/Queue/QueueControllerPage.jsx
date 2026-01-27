@@ -376,7 +376,7 @@ export const QueueControllerPage = () => {
                     onClick={handleEndQueue}
                     variant="outline"
                     size="sm"
-                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
                     disabled={updateQueueSession.isPending}
                   >
                     <Square className="w-3 h-3 mr-1" />
@@ -410,7 +410,7 @@ export const QueueControllerPage = () => {
                   {queueTickets.length > 0 && (
                     <Button
                       onClick={handleStartQueue}
-                      className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg rounded-xl"
+                      className="px-8 py-6 text-lg rounded-xl"
                       disabled={updateQueueSession.isPending}
                     >
                       <Play className="mr-3 w-5 h-5" />

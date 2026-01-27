@@ -75,7 +75,7 @@ const TicketDetailsPage = () => {
 
     const expectedCompletion = addMinutes(
       ticket.start_date,
-      ticket.service.processing_time_in_minutes
+      ticket.service.processing_time_in_minutes,
     );
     const now = new Date();
     const minutesLate = Math.floor((now - expectedCompletion) / (1000 * 60));
@@ -346,7 +346,7 @@ const TicketDetailsPage = () => {
                         {formatTimeDisplay(
                           processing_time.days,
                           processing_time.hours,
-                          processing_time.minutes
+                          processing_time.minutes,
                         ) || "N/A"}
                       </span>
                     </div>
@@ -361,9 +361,9 @@ const TicketDetailsPage = () => {
                             ? format(
                                 addMinutes(
                                   ticket.start_date,
-                                  ticket.service.processing_time_in_minutes
+                                  ticket.service.processing_time_in_minutes,
                                 ),
-                                "MMMM dd, yyyy h:mm a"
+                                "MMMM dd, yyyy h:mm a",
                               )
                             : "N/A"}
                         </span>
@@ -489,7 +489,7 @@ const TicketDetailsPage = () => {
                                 >
                                   {status}
                                 </SelectItem>
-                              )
+                              ),
                             )}
                           </SelectContent>
                         </Select>
@@ -524,7 +524,7 @@ const TicketDetailsPage = () => {
                             form.setValue("status", "In Queue");
                             form.handleSubmit(onSubmit)();
                           }}
-                          className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700"
+                          className="flex-1 flex items-center justify-center gap-2"
                         >
                           <CheckLine className="h-4 w-4" />
                           Approve

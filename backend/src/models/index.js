@@ -18,6 +18,7 @@ import ClientSurveyResponse from "./client-satisfaction/client-survey-response.m
 import ClientSurveyDimensionRating from "./client-satisfaction/client-survey-dimension-rating.model.js";
 import ServiceQualityDimension from "./client-satisfaction/service-quality-dimension.model.js";
 import TicketView from "./tickets/ticket-view.model.js";
+import QueueSession from "./tickets/queue/queue-session.model.js";
 
 // USER
 User.belongsTo(Role, {
@@ -194,6 +195,37 @@ ClientSurveyDimensionRating.belongsTo(ServiceQualityDimension, {
   as: "dimension",
 });
 
+// QUEUE SESSION ASSOCIATIONS
+Department.hasMany(QueueSession, {
+  foreignKey: "department_id",
+  as: "queueSessions",
+});
+
+QueueSession.belongsTo(Department, {
+  foreignKey: "department_id",
+  as: "department",
+});
+
+User.hasMany(QueueSession, {
+  foreignKey: "started_by_user_id",
+  as: "startedQueueSessions",
+});
+
+QueueSession.belongsTo(User, {
+  foreignKey: "started_by_user_id",
+  as: "startedBy",
+});
+
+Ticket.hasMany(QueueSession, {
+  foreignKey: "current_serving_ticket_id",
+  as: "queueSessions",
+});
+
+QueueSession.belongsTo(Ticket, {
+  foreignKey: "current_serving_ticket_id",
+  as: "currentServingTicket",
+});
+
 export {
   // USER
   User,
@@ -215,4 +247,7 @@ export {
   ServiceQualityDimension,
   ClientSurveyResponse,
   ClientSurveyDimensionRating,
+
+  // QUEUE
+  QueueSession,
 };

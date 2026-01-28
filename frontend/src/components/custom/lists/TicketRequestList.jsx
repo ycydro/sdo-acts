@@ -46,7 +46,7 @@ export const TicketRequestList = () => {
         </div>
         <button
           onClick={() =>
-            navigate(`/main/tickets?status=${encodeURIComponent("In Queue")}`)
+            navigate(`/main/tickets?status=${encodeURIComponent("Unapproved")}`)
           }
           className="flex gap-0.5 items-center text-sm cursor-pointer hover:text-blue-700 transition-colors"
         >

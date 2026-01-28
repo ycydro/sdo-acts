@@ -28,6 +28,8 @@ import { toast } from "sonner";
 import ConfirmationModal from "@/components/custom/modals/ConfirmationModal";
 import { useQueueSession } from "@/hooks/queries/ticket/queue/useQueueSession";
 import { useQueueMutations } from "@/hooks/queries/ticket/queue/useQueueMutations";
+import { Switch } from "@/components/ui/switch";
+import { Field, FieldLabel } from "@/components/ui/field";
 
 export const QueueControllerPage = () => {
   const navigate = useNavigate();
@@ -40,6 +42,8 @@ export const QueueControllerPage = () => {
 
   const [isCallConfirmModalOpen, setIsCallConfirmModalOpen] = useState(false);
   const [ticketToCall, setTicketToCall] = useState(null);
+
+  const [isAutoCallNext, setIsAutoCallNext] = useState(false);
 
   const departmentID = user?.department_id;
 
@@ -138,18 +142,19 @@ export const QueueControllerPage = () => {
   }, [remainingTickets, searchTerm]);
 
   // Start the queue
-  const handleStartQueue = async () => {
+  const handleStartQueue = async (ticket = null) => {
     if (queueTickets.length === 0) {
       toast.error("No tickets in queue to start");
       return;
     }
 
+    const startingTicket = ticket === null ? queueTickets[0] : ticket;
+
     try {
-      const firstTicket = queueTickets[0];
       await updateQueueSession.mutateAsync({
         department_id: departmentID,
         is_active: true,
-        current_serving_ticket_id: firstTicket.id,
+        current_serving_ticket_id: startingTicket.id,
       });
       toast.success("Queue started! First ticket is now being served.");
     } catch (error) {
@@ -172,6 +177,9 @@ export const QueueControllerPage = () => {
         is_active: false,
         current_serving_ticket_id: null,
       });
+      if (isAutoCallNext) {
+        setIsAutoCallNext(false);
+      }
       return;
     }
 
@@ -191,11 +199,6 @@ export const QueueControllerPage = () => {
 
   // Show confirmation modal
   const handleCallSpecificTicket = (ticket) => {
-    if (!isQueueActive) {
-      toast.error("Please start the queue first");
-      return;
-    }
-
     setTicketToCall(ticket);
     setIsCallConfirmModalOpen(true);
   };
@@ -209,6 +212,10 @@ export const QueueControllerPage = () => {
         is_active: true,
         current_serving_ticket_id: ticketToCall.id,
       });
+      if (!isQueueActive) {
+        handleStartQueue(ticketToCall);
+        return;
+      }
       toast.success(`Now serving: ${ticketToCall.ticket_code}`);
     } catch (error) {
       console.error("Error calling specific ticket:", error);
@@ -265,6 +272,10 @@ export const QueueControllerPage = () => {
           is_active: true,
           current_serving_ticket_id: null,
         });
+      }
+
+      if (isAutoCallNext) {
+        handleCallNext();
       }
     } catch (error) {
       console.error(`Error updating ticket to ${newStatus}:`, error);
@@ -409,7 +420,7 @@ export const QueueControllerPage = () => {
                   </p>
                   {queueTickets.length > 0 && (
                     <Button
-                      onClick={handleStartQueue}
+                      onClick={() => handleStartQueue()}
                       className="px-8 py-6 text-lg rounded-xl"
                       disabled={updateQueueSession.isPending}
                     >
@@ -608,6 +619,19 @@ export const QueueControllerPage = () => {
                     {queueTickets.length || 0}
                   </span>
                 </div>
+                {isQueueActive && (
+                  <Field orientation="horizontal">
+                    <Switch
+                      className="cursor-pointer"
+                      id="auto-call-next"
+                      checked={isAutoCallNext}
+                      onCheckedChange={setIsAutoCallNext}
+                    />
+                    <FieldLabel htmlFor="auto-call-next">
+                      Auto Call Next
+                    </FieldLabel>
+                  </Field>
+                )}
               </div>
             </CardContent>
           </Card>

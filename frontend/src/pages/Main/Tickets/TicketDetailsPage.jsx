@@ -51,6 +51,8 @@ const TicketDetailsPage = () => {
     },
   });
 
+  const { isSubmitting } = form.formState;
+
   const { updateTicketStatus } = useTicketMutations();
 
   useEffect(() => {
@@ -142,6 +144,7 @@ const TicketDetailsPage = () => {
       toast.success("Ticket changed status successfully!");
       setIsEditMode(false);
       setIsDirty(false);
+      form.reset({ status: ticketData.status });
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to update ticket.");
@@ -417,6 +420,7 @@ const TicketDetailsPage = () => {
                       size="sm"
                       onClick={handleEditToggle}
                       className="flex items-center gap-2"
+                      disabled={isSubmitting}
                     >
                       {isEditMode ? (
                         <>
@@ -473,7 +477,8 @@ const TicketDetailsPage = () => {
                             !isEditMode ||
                             !user?.permissions.includes("update_tickets") ||
                             unstartedTicket ||
-                            isUnapprovedTicket
+                            isUnapprovedTicket ||
+                            isSubmitting
                           }
                         >
                           <SelectTrigger className="w-full">
@@ -519,7 +524,7 @@ const TicketDetailsPage = () => {
                       <div className="flex gap-1.5">
                         <Button
                           type="button"
-                          disabled={!isEditMode}
+                          disabled={!isEditMode || isSubmitting}
                           onClick={() => {
                             form.setValue("status", "In Queue");
                             form.handleSubmit(onSubmit)();
@@ -527,11 +532,14 @@ const TicketDetailsPage = () => {
                           className="flex-1 flex items-center justify-center gap-2"
                         >
                           <CheckLine className="h-4 w-4" />
-                          Approve
+                          {isSubmitting &&
+                          form.getValues("status") === "In Queue"
+                            ? "Approving..."
+                            : "Approve"}
                         </Button>
                         <Button
                           type="button"
-                          disabled={!isEditMode}
+                          disabled={!isEditMode || isSubmitting}
                           onClick={() => {
                             form.setValue("status", "Declined");
                             form.handleSubmit(onSubmit)();
@@ -539,18 +547,22 @@ const TicketDetailsPage = () => {
                           className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
                         >
                           <X className="h-4 w-4" />
-                          Decline
+                          {isSubmitting &&
+                          form.getValues("status") === "Declined"
+                            ? "Declining..."
+                            : "Decline"}
                         </Button>
                       </div>
                     )}
 
-                  {isEditMode && isDirty && (
+                  {isEditMode && isDirty && !isUnapprovedTicket && (
                     <Button
                       type="submit"
                       className="w-full mt-4 flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
                     >
                       <Save className="h-4 w-4" />
-                      Update Ticket
+                      {isSubmitting ? "Updating..." : "Update Ticket"}
                     </Button>
                   )}
                 </div>

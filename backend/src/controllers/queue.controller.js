@@ -14,14 +14,13 @@ export const getQueuedTicketsByDepartment = async (req, res) => {
     const { department_id } = req.query;
     const user = req.user;
 
-    // Get today's date range (start and end of day)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const whereConditions = {
-      status: "In Queue", // Only get tickets in queue
+      status: "In Queue",
       scheduled_date: {
         [Op.gte]: today,
         [Op.lt]: tomorrow,
@@ -291,7 +290,6 @@ export const updateQueueSession = async (req, res) => {
       });
     }
 
-    // Get today's date
     const today = new Date();
     const sessionDate = today.toISOString().split("T")[0];
 

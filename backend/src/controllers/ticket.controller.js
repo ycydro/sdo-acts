@@ -10,6 +10,9 @@ import {
 } from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
 import { emitQueueUpdate } from "./queue.controller.js";
+import { sendEmail } from "../helpers/emails/sendEmail.js";
+import ticketCreatedEmailTemplate from "../helpers/emails/templates/ticketCreatedEmailTemplate.js";
+import { sendEmailBasedOnTicketStatus } from "../helpers/emails/sendEmailBasedOnTicketStatus.js";
 
 export const getAllTickets = async (req, res) => {
   try {
@@ -452,6 +455,11 @@ export const createTicket = async (req, res) => {
     const createdTicketWithRelations = await Ticket.findOne({
       include: [
         {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "email"],
+        },
+        {
           model: Service,
           as: "service",
           attributes: ["name"],
@@ -471,6 +479,28 @@ export const createTicket = async (req, res) => {
     });
 
     await transaction.commit();
+
+    if (is_online) {
+      try {
+        // send email
+        if (createdTicketWithRelations.client?.email) {
+          await sendEmail({
+            to: createdTicketWithRelations.client?.email,
+            subject: "Your SDO ticket request has been received!",
+            html: ticketCreatedEmailTemplate({
+              customerName: client.first_name || "there",
+              ticketCode: ticket.ticket_code,
+              serviceName: createdTicketWithRelations.service?.name || "N/A",
+              departmentName:
+                createdTicketWithRelations.service?.department?.name || "N/A",
+            }),
+          });
+        }
+      } catch (emailError) {
+        console.error("Ticket created but email failed:", emailError);
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: "Ticket created successfully!",
@@ -557,6 +587,7 @@ export const updateTicketStatus = async (req, res) => {
     const departmentId = ticket.service.department_id;
     const updatedTicketData = { status };
 
+    // custom function for each available ticket status
     const statusHandler = statusHandlers[status];
     if (statusHandler) {
       await statusHandler(ticket, updatedTicketData, transaction);
@@ -580,7 +611,34 @@ export const updateTicketStatus = async (req, res) => {
     // Emit socket event AFTER successful commit
     await emitQueueUpdate(req, departmentId);
 
-    const updatedTicket = await Ticket.findByPk(id);
+    const updatedTicket = await Ticket.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: "client",
+          attributes: ["id", "first_name", "last_name", "email"],
+        },
+        {
+          model: Service,
+          as: "service",
+          attributes: ["name", "department_id"],
+          include: [
+            {
+              model: Department,
+              as: "department",
+              attributes: ["name", "department_code"],
+            },
+          ],
+        },
+      ],
+    });
+
+    // custom email templates for each ticket status
+    const sendEmailBasedOnStatus =
+      sendEmailBasedOnTicketStatus[updatedTicket.status];
+    if (sendEmailBasedOnStatus) {
+      await sendEmailBasedOnStatus(updatedTicket);
+    }
 
     res.status(200).json({
       success: true,

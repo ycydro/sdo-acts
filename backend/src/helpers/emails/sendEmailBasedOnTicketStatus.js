@@ -1,5 +1,6 @@
 import { sendEmail } from "./sendEmail.js";
 import ticketApprovedEmailTemplate from "./templates/ticketApprovedEmailTemplate.js";
+import ticketResolvedEmailTemplate from "./templates/ticketResolvedEmailTemplate.js";
 
 const sendInQueueEmail = async (ticket) => {
   try {
@@ -28,6 +29,23 @@ const sendOngoingEmail = async (ticket) => {
 };
 
 const sendResolvedEmail = async (ticket) => {
+  try {
+    // send email
+    if (ticket.client?.email) {
+      await sendEmail({
+        to: ticket.client?.email,
+        subject: "Your SDO ticket request has been resolved!",
+        html: ticketResolvedEmailTemplate({
+          customerName: ticket.client?.first_name || "there",
+          ticketCode: ticket.ticket_code,
+          serviceName: ticket.service?.name || "N/A",
+          surveyLink: `http://localhost:3000/ticket/survey/${ticket.id}`,
+        }),
+      });
+    }
+  } catch (emailError) {
+    console.error("Ticket created but email failed:", emailError);
+  }
   console.log(`Ticket ${ticket.ticket_code} email sent (Resolved)`);
 };
 

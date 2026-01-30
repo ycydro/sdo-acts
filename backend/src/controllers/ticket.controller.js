@@ -488,7 +488,8 @@ export const createTicket = async (req, res) => {
             to: createdTicketWithRelations.client?.email,
             subject: "Your SDO ticket request has been received!",
             html: ticketCreatedEmailTemplate({
-              customerName: client.first_name || "there",
+              customerName:
+                createdTicketWithRelations.client?.first_name || "there",
               ticketCode: ticket.ticket_code,
               serviceName: createdTicketWithRelations.service?.name || "N/A",
               departmentName:

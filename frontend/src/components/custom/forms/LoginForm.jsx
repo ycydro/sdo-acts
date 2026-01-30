@@ -33,7 +33,7 @@ const LoginForm = () => {
     try {
       await login(
         { email: data.email, password: data.password },
-        data.remember
+        data.remember,
       );
     } catch (error) {
       form.setError("root", {

@@ -50,7 +50,7 @@ const handleResolvedStatus = async (ticket, updatedTicketData, transaction) => {
   // create survey for resolved tickets
   if (ticket.status !== "Resolved") {
     const existingSurvey = await ClientSurveyResponse.findOne({
-      where: { ticket_id: ticket.ticket_code },
+      where: { ticket_id: ticket.id },
       transaction,
     });
 
@@ -58,7 +58,7 @@ const handleResolvedStatus = async (ticket, updatedTicketData, transaction) => {
       await ClientSurveyResponse.create(
         {
           client_id: ticket.client_id,
-          ticket_id: ticket.ticket_code,
+          ticket_id: ticket.id,
           survey_date: new Date(),
           status: "Pending",
           overall_rating: null,

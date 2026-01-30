@@ -32,6 +32,7 @@ import QueuePage from "@/pages/Main/Queue/QueuePage";
 import OverallClientSatisfactionPage from "@/pages/Main/ClientSatisfaction/OverallClientSatisfactionPage";
 import ServiceQualityDimensionsPage from "@/pages/Main/ClientSatisfaction/ServiceQualityDimensionsPage";
 import ClientSatisfactorySurveyPage from "@/pages/Client/ClientSatisfactorySurvey/ClientSatisfactorySurveyPage";
+import ClientQueuePage from "@/pages/Client/Tickets/Queue/ClientQueuePage";
 
 const AppRoutes = () => {
   return (
@@ -165,6 +166,7 @@ const AppRoutes = () => {
           path="ticket/survey/:id"
           element={<ClientSatisfactorySurveyPage />}
         />
+        <Route path="queue" element={<ClientQueuePage />} />
       </Route>
 
       {/* -------- CATCH-ALL -------- */}

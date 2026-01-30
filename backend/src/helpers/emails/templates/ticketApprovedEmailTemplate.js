@@ -5,7 +5,7 @@ const ticketApprovedEmailTemplate = ({
   ticketCode,
   serviceName,
   scheduledDate,
-  queueLink = "http://localhost:3000/dashboard/", // Placeholder for your future queue page
+  queueLink = "http://localhost:3000/queue/",
 }) => {
   const primary = "#006b44";
   const success = "#10b981";

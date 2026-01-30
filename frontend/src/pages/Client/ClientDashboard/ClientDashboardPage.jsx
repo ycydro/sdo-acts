@@ -234,7 +234,7 @@ const ClientDashboardPage = () => {
                   <p className="text-sm text-foreground">
                     {format(
                       new Date(surveyData.ticket.updatedAt),
-                      "MMM dd, yyyy"
+                      "MMM dd, yyyy",
                     )}
                   </p>
                 </div>
@@ -295,13 +295,17 @@ const ClientDashboardPage = () => {
                 <History className="text-green-800 w-8 h-8" />
               </div>
               <div className="space-y-1.5">
-                <p className="text-xl font-bold">Ticket History</p>
+                <p className="text-xl font-bold">View Queue</p>
                 <p className="text-gray-600 text-sm">
-                  View all your previous service requests
+                  Check your position in the queue
                 </p>
               </div>
-              <Button className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full">
-                View History
+              <Button
+                onClick={() => navigate("/queue")}
+                disabled={!ticket}
+                className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {ticket ? "View Queue" : "No Active Ticket"}
               </Button>
             </CardContent>
           </Card>
@@ -349,13 +353,17 @@ const ClientDashboardPage = () => {
                       <History className="text-green-800 w-8 h-8" />
                     </div>
                     <div className="space-y-1.5">
-                      <p className="text-xl font-bold">Ticket History</p>
+                      <p className="text-xl font-bold">View Queue</p>
                       <p className="text-gray-600 text-sm">
-                        View all your previous service requests
+                        Check your position in the queue
                       </p>
                     </div>
-                    <Button className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full">
-                      View History
+                    <Button
+                      onClick={() => navigate("/queue")}
+                      disabled={!ticket}
+                      className="bg-green-700 hover:bg-green-800 text-white font-semibold text-base px-5 py-2 rounded-full w-full disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {ticket ? "View Queue" : "No Active Ticket"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -500,7 +508,7 @@ const ClientDashboardPage = () => {
                           {formatTimeDisplay(
                             processing_time.days,
                             processing_time.hours,
-                            processing_time.minutes
+                            processing_time.minutes,
                           ) || "N/A"}
                         </span>
                       </div>
@@ -516,9 +524,9 @@ const ClientDashboardPage = () => {
                               ? format(
                                   addMinutes(
                                     ticket.start_date,
-                                    ticket.service.processing_time_in_minutes
+                                    ticket.service.processing_time_in_minutes,
                                   ),
-                                  "MMMM dd, yyyy h:mm a"
+                                  "MMMM dd, yyyy h:mm a",
                                 )
                               : "N/A"}
                           </span>

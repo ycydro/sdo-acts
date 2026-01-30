@@ -29,6 +29,13 @@ export const queueService = {
     return response.data.data;
   },
 
+  getClientQueue: async (ticketId) => {
+    const response = await axios.get("/ticket/queue/client-queue", {
+      params: { ticket_id: ticketId },
+    });
+    return response.data;
+  },
+
   updateQueueSession: async (data) => {
     const response = await axios.post("/ticket/queue/session", data);
     return response.data.data;

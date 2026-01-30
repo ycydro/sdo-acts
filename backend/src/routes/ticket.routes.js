@@ -21,6 +21,7 @@ import {
   getAllDepartmentsQueue,
   getQueueSessionByDepartment,
   updateQueueSession,
+  getClientQueue,
 } from "../controllers/queue.controller.js";
 
 const router = express.Router();
@@ -43,9 +44,11 @@ router.post("/:ticketID/comments", createComment);
 router.post("/:ticketID/mark-comments-seen", markTicketCommentsAsSeen);
 router.post("/mark-multiple-comments-seen", markMultipleTicketsCommentsAsSeen);
 
+// queue routes
 router.get("/queue/session/by-department", getQueueSessionByDepartment);
 router.post("/queue/session", updateQueueSession);
 router.get("/queue/by-department", getQueuedTicketsByDepartment);
 router.get("/queue/queue-all-departments", getAllDepartmentsQueue);
+router.get("/queue/client-queue", getClientQueue);
 
 export default router;

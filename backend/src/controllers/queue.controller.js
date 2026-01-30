@@ -378,6 +378,88 @@ export const updateQueueSession = async (req, res) => {
   }
 };
 
+export const getClientQueue = async (req, res) => {
+  try {
+    const user = req.user;
+    const { ticket_id } = req.query;
+
+    if (!ticket_id) {
+      return res.status(400).json({
+        success: false,
+        message: "Ticket ID is required",
+      });
+    }
+
+    // find department and scheduled_date
+    const userTicket = await Ticket.findOne({
+      where: {
+        id: ticket_id,
+        client_id: user.id,
+      },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: ["department_id"],
+        },
+      ],
+    });
+
+    if (!userTicket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
+    const departmentId = userTicket.service.department_id;
+    const scheduledDate = userTicket.scheduled_date;
+
+    // get all queued tickets for the same department and scheduled date
+    const queuedTickets = await Ticket.findAll({
+      where: {
+        "$service.department_id$": departmentId,
+        scheduled_date: scheduledDate,
+        status: "In Queue",
+      },
+      include: [
+        {
+          model: Service,
+          as: "service",
+          attributes: [],
+        },
+      ],
+      attributes: ["id", "ticket_code", "confirmation_date", "client_id"],
+      order: [["confirmation_date", "ASC"]],
+    });
+
+    // find position in queue
+    const userPosition = queuedTickets.findIndex((t) => t.id === ticket_id) + 1;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        queue: queuedTickets.map((ticket) => ({
+          id: ticket.id,
+          ticket_code: ticket.ticket_code,
+          is_current_user: ticket.client_id === user.id,
+        })),
+        userPosition,
+        totalInQueue: queuedTickets.length,
+        userTicketId: ticket_id,
+      },
+      message: "Client queue fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Internal Server Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch queue.",
+      error: error.message,
+    });
+  }
+};
+
 // emit queue state updates via socket
 const emitQueueStateUpdate = async (req, departmentId, queueState) => {
   const io = req.app.get("io");

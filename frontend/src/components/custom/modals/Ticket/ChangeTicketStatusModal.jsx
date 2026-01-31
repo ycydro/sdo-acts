@@ -82,16 +82,6 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
       isStartAction: isUnstartedTicket,
     },
     {
-      label: "On hold",
-      value: "On hold",
-      icon: <AlertCircle className="h-5 w-5" />,
-      description: "Paused temporarily",
-      color:
-        "bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-400",
-      hoverColor: "hover:bg-orange-500/20 hover:border-orange-500/50",
-      isStartAction: false,
-    },
-    {
       value: "Resolved",
       label: "Resolve",
       icon: <CheckCircle2 className="h-5 w-5" />,
@@ -99,6 +89,16 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
       color:
         "bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400",
       hoverColor: "hover:bg-green-500/20 hover:border-green-500/50",
+      isStartAction: false,
+    },
+    {
+      label: "On hold",
+      value: "On hold",
+      icon: <AlertCircle className="h-5 w-5" />,
+      description: "Paused temporarily",
+      color:
+        "bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-400",
+      hoverColor: "hover:bg-orange-500/20 hover:border-orange-500/50",
       isStartAction: false,
     },
     {
@@ -124,22 +124,24 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
 
   // dont show current status on the options
   const statusOptions = allStatusOptions.filter(
-    (option) => option.value !== ticket?.status
+    (option) => option.value !== ticket?.status,
   );
 
   // for unstarted tickets, show ongoing and decline options else dont show declined
   const finalStatusOptions = isUnstartedTicket
     ? statusOptions.filter((option) => option.value === "Ongoing")
     : isUnapprovedTicket
-    ? statusOptions.filter(
-        (option) => option.value === "In Queue" || option.value === "Declined"
-      )
-    : statusOptions.filter(
-        (option) => option.value !== "Declined" && option.value !== "In Queue"
-      );
+      ? statusOptions.filter(
+          (option) =>
+            option.value === "In Queue" || option.value === "Declined",
+        )
+      : statusOptions.filter(
+          (option) =>
+            option.value !== "Declined" && option.value !== "In Queue",
+        );
 
   const selectedOption = finalStatusOptions.find(
-    (option) => option.value === selectedStatus
+    (option) => option.value === selectedStatus,
   );
 
   return (
@@ -163,6 +165,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
               <button
                 key={option.value}
                 onClick={() => setSelectedStatus(option.value)}
+                disabled={updateTicketStatus.isPending}
                 className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                   selectedStatus === option.value
                     ? `${option.color} border-2 ring-2 ring-offset-2 ring-offset-background`
@@ -206,6 +209,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
           <Button
             variant="outline"
             onClick={handleClose}
+            disabled={updateTicketStatus.isPending}
             className="flex-1 bg-transparent"
           >
             Cancel
@@ -217,7 +221,7 @@ const ChangeTicketStatusModal = ({ ticket, open, onOpenChange }) => {
                 handleClose();
               }
             }}
-            disabled={!selectedStatus}
+            disabled={!selectedStatus || updateTicketStatus.isPending}
             className={`flex-1 gap-2 ${
               selectedOption?.isStartAction
                 ? "bg-blue-600 hover:bg-blue-700"

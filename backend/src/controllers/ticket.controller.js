@@ -51,6 +51,8 @@ export const getAllTickets = async (req, res) => {
     // status filter
     if (status) {
       whereConditions.status = status;
+    } else {
+      whereConditions.status = { [Op.notIn]: ["Resolved", "In Queue"] };
     }
 
     // priority filter

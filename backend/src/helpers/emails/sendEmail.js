@@ -3,7 +3,7 @@ import { mailTransporter } from "../../configs/mail.config.js";
 
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
-    const sendEmailEnabled = true;
+    const sendEmailEnabled = false;
     if (!sendEmailEnabled) {
       console.log("Email sending is disabled");
       return;

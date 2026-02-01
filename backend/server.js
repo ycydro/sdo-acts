@@ -16,6 +16,7 @@ import serviceRoutes from "./src/routes/service.routes.js";
 import ticketRoutes from "./src/routes/ticket.routes.js";
 import clientSatisfactionRoutes from "./src/routes/client-satisfaction.routes.js";
 import roleRoutes from "./src/routes/role.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
 
 // MIDDLEWARE IMPORTS
 import authenticate from "./src/middleware/authMiddleware.js";
@@ -26,7 +27,7 @@ const httpServer = createServer(app);
 
 // MIDDLEWARES
 const corsOptions = {
-  origin: env.FRONTEND_URL,
+  origin: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -84,21 +85,22 @@ app.use("/api/department", departmentRoutes);
 app.use("/api/service", serviceRoutes);
 app.use("/api/ticket", authenticate, ticketRoutes);
 app.use("/api/client-satisfaction", authenticate, clientSatisfactionRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/role", roleRoutes);
 
 app.get("/", async (req, res) => {
   res.send("<h1>Hello, World! (from server)</h1>");
 });
 
-httpServer.listen(PORT, () => {
-  console.log(`Listening on port: ${PORT}`);
-  console.log(`Socket.IO ready`);
-});
-
-// SAME NETWORK
-// httpServer.listen(PORT, "0.0.0.0", () => {
-//   console.log(` Hosting through network! Listening on port: ${PORT}`);
+// httpServer.listen(PORT, () => {
+//   console.log(`Listening on port: ${PORT}`);
 //   console.log(`Socket.IO ready`);
 // });
+
+// SAME NETWORK
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(` Hosting through network! Listening on port: ${PORT}`);
+  console.log(`Socket.IO ready`);
+});
 
 export { io };

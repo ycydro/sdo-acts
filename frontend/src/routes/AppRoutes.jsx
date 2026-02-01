@@ -33,6 +33,7 @@ import OverallClientSatisfactionPage from "@/pages/Main/ClientSatisfaction/Overa
 import ServiceQualityDimensionsPage from "@/pages/Main/ClientSatisfaction/ServiceQualityDimensionsPage";
 import ClientSatisfactorySurveyPage from "@/pages/Client/ClientSatisfactorySurvey/ClientSatisfactorySurveyPage";
 import ClientQueuePage from "@/pages/Client/Tickets/Queue/ClientQueuePage";
+import UsersPage from "@/pages/Main/Users/UsersPage";
 
 const AppRoutes = () => {
   return (
@@ -105,7 +106,14 @@ const AppRoutes = () => {
             </PermissionRoute>
           }
         />
-
+        <Route
+          path="users"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <UsersPage />
+            </PermissionRoute>
+          }
+        />
         <Route
           path="access-control"
           element={

@@ -8,6 +8,9 @@ import {
   Building2,
   UsersRound,
   Gamepad2,
+  UserCog2Icon,
+  UserStarIcon,
+  UsersIcon,
 } from "lucide-react";
 
 export const overviewItems = [
@@ -56,6 +59,12 @@ export const queueItems = [
 ];
 
 export const userManagementItems = [
+  {
+    title: "Users",
+    url: "/users",
+    icon: UsersIcon,
+    permission: "view_main",
+  },
   {
     title: "Access Control",
     url: "/access-control",

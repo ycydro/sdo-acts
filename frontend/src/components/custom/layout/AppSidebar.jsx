@@ -100,7 +100,7 @@ const AppSidebar = () => {
 const SidebarSection = ({ label, items, permissions, basePath, location }) => {
   // filter items based on individual permissions
   const filteredItems = items.filter(
-    (item) => !item.permission || permissions?.includes(item.permission)
+    (item) => !item.permission || permissions?.includes(item.permission),
   );
 
   if (filteredItems.length === 0) return null;
@@ -117,13 +117,10 @@ const SidebarSection = ({ label, items, permissions, basePath, location }) => {
             return (
               <SidebarMenuItem
                 key={item.title}
-                className={clsx(
-                  "py-0.5 rounded-md transition-[border] duration-150",
-                  {
-                    "bg-white text-primary font-bold border-l-7 border-[var(--sdo-secondary)]":
-                      isActive,
-                  }
-                )}
+                className={clsx("rounded-md transition-[border] duration-150", {
+                  "bg-white text-primary font-bold border-l-7 border-[var(--sdo-secondary)]":
+                    isActive,
+                })}
               >
                 <SidebarMenuButton asChild>
                   <Link to={path} className="flex items-center gap-2">

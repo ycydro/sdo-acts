@@ -383,8 +383,14 @@ export const getUsersTransactionHistory = async (req, res) => {
 export const createTicket = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { service_id, details, client_id, scheduled_date, is_online } =
-      req.body;
+    const {
+      service_id,
+      details,
+      client_id,
+      scheduled_date,
+      confirmation_date,
+      is_online,
+    } = req.body;
 
     const latestResolvedTicket = await Ticket.findOne({
       where: {
@@ -449,6 +455,7 @@ export const createTicket = async (req, res) => {
         details,
         client_id,
         scheduled_date: scheduled_date || null,
+        confirmation_date: confirmation_date || null,
         is_online,
       },
       { transaction },
@@ -469,7 +476,7 @@ export const createTicket = async (req, res) => {
             {
               model: Department,
               as: "department",
-              attributes: ["name", "department_code"],
+              attributes: ["id", "name", "department_code"],
             },
           ],
         },
@@ -502,6 +509,12 @@ export const createTicket = async (req, res) => {
       } catch (emailError) {
         console.error("Ticket created but email failed:", emailError);
       }
+    } else {
+      // update the queue realtime if ticket is created onsite
+      await emitQueueUpdate(
+        req,
+        createdTicketWithRelations.service?.department?.id,
+      );
     }
 
     res.status(201).json({

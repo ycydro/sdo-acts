@@ -414,12 +414,18 @@ export const getClientQueue = async (req, res) => {
 
     const departmentId = userTicket.service.department_id;
     const scheduledDate = userTicket.scheduled_date;
+    scheduledDate.setHours(0, 0, 0, 0);
+    const dayAfterScheduledDate = new Date(scheduledDate);
+    dayAfterScheduledDate.setDate(dayAfterScheduledDate.getDate() + 1);
 
     // get all queued tickets for the same department and scheduled date
     const queuedTickets = await Ticket.findAll({
       where: {
         "$service.department_id$": departmentId,
-        scheduled_date: scheduledDate,
+        scheduled_date: {
+          [Op.gte]: scheduledDate,
+          [Op.lt]: dayAfterScheduledDate,
+        },
         status: "In Queue",
       },
       include: [

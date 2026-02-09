@@ -52,9 +52,10 @@ const TicketsTable = ({ initialFilters = {} }) => {
     const searchParams = new URLSearchParams(location.search);
     const urlFilters = {};
 
-    searchParams.forEach((value, key) => {
+    for (const [key, value] of searchParams.entries()) {
+      if (key.endsWith("_id")) continue;
       urlFilters[key] = value;
-    });
+    }
 
     setFilters((prev) => {
       const newFilters = { ...initialFilters, ...urlFilters };

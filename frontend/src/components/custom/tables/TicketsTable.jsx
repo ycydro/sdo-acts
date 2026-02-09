@@ -35,15 +35,35 @@ const TicketsTable = ({ initialFilters = {} }) => {
 
   const { pagination, setPagination } = usePagination();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({
-    ...initialFilters,
+  const [filters, setFilters] = useState(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const urlFilters = {};
+
+    // read all filter params from URL
+    searchParams.forEach((value, key) => {
+      urlFilters[key] = value;
+    });
+
+    return { ...initialFilters, ...urlFilters };
   });
 
+  // update filters when URL changes
   useEffect(() => {
-    if (initialFilters.status && initialFilters.status !== filters.status) {
-      setFilters((prev) => ({ ...prev, status: initialFilters.status }));
-    }
-  }, [initialFilters.status]);
+    const searchParams = new URLSearchParams(location.search);
+    const urlFilters = {};
+
+    searchParams.forEach((value, key) => {
+      urlFilters[key] = value;
+    });
+
+    setFilters((prev) => {
+      const newFilters = { ...initialFilters, ...urlFilters };
+      if (JSON.stringify(prev) !== JSON.stringify(newFilters)) {
+        return newFilters;
+      }
+      return prev;
+    });
+  }, [location.search, initialFilters]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -101,8 +121,8 @@ const TicketsTable = ({ initialFilters = {} }) => {
     return filters;
   }, [departments, isDepartmentsLoading, user?.role]);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const baseColumns = [
       {
         accessorKey: "ticket_code",
         header: "Code",
@@ -155,17 +175,24 @@ const TicketsTable = ({ initialFilters = {} }) => {
         },
       },
 
-      {
-        accessorKey: "status",
-        header: "Status",
-        size: 100,
-        cell: (info) => {
-          const status = info.getValue();
-          return (
-            <StatusBadge status={status} className="!px-2 !py-1 !text-xs" />
-          );
-        },
-      },
+      ...(!initialFilters.status
+        ? [
+            {
+              accessorKey: "status",
+              header: "Status",
+              size: 100,
+              cell: (info) => {
+                const status = info.getValue();
+                return (
+                  <StatusBadge
+                    status={status}
+                    className="!px-2 !py-1 !text-xs"
+                  />
+                );
+              },
+            },
+          ]
+        : []),
       {
         accessorKey: "assignee",
         header: "In Charge",
@@ -215,9 +242,10 @@ const TicketsTable = ({ initialFilters = {} }) => {
           );
         },
       },
-    ],
-    [navigate, handleOpenModal]
-  );
+    ];
+
+    return baseColumns;
+  }, [navigate, handleOpenModal, initialFilters.status]);
 
   const {
     data: ticketsData,

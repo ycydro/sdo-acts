@@ -34,6 +34,7 @@ import {
   Trash2,
   Search,
 } from "lucide-react";
+import { useNavigate } from "react-router";
 
 const DataTable = ({
   columns,
@@ -51,6 +52,7 @@ const DataTable = ({
   rowSelection = {}, // Current selected rows state
   onRowSelectionChange, // Function to update selected rows
 }) => {
+  const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
 
   const table = useReactTable({
@@ -143,15 +145,56 @@ const DataTable = ({
     if (onFiltersChange) {
       onFiltersChange(newFilters);
       tableInstance.setPageIndex(0);
+
+      // Update URL search params when filter changes
+      const currentUrl = new URL(window.location.href);
+      const searchParams = new URLSearchParams(currentUrl.search);
+
+      // Remove the filter if it's set to "all" or empty, otherwise update it
+      if (
+        value === "all" ||
+        value === "" ||
+        value === null ||
+        value === undefined
+      ) {
+        searchParams.delete(filterKey);
+      } else {
+        searchParams.set(filterKey, value);
+      }
+
+      if (filterKey.endsWith("_id")) return;
+
+      // If no params left, navigate without query string
+      if (searchParams.toString() === "") {
+        navigate(currentUrl.pathname, { replace: true });
+      } else {
+        navigate(`${currentUrl.pathname}?${searchParams.toString()}`, {
+          replace: true,
+        });
+      }
     }
   };
 
   const removeFilter = (filterKey) => {
     const newFilters = { ...filters };
     delete newFilters[filterKey];
+
     if (onFiltersChange) {
       onFiltersChange(newFilters);
       tableInstance.setPageIndex(0);
+
+      const currentUrl = new URL(window.location.href);
+      const searchParams = new URLSearchParams(currentUrl.search);
+      searchParams.delete(filterKey);
+
+      // if no params left, navigate without query string
+      if (searchParams.toString() === "") {
+        navigate(currentUrl.pathname, { replace: true });
+      } else {
+        navigate(`${currentUrl.pathname}?${searchParams.toString()}`, {
+          replace: true,
+        });
+      }
     }
   };
 
@@ -159,6 +202,9 @@ const DataTable = ({
     if (onFiltersChange) {
       onFiltersChange({});
       tableInstance.setPageIndex(0);
+
+      // navigate to current path without any query params
+      navigate(window.location.pathname, { replace: true });
     }
   };
 
@@ -262,7 +308,7 @@ const DataTable = ({
           {Object.entries(filters).map(([key, value]) => {
             const filterConfigItem = filterConfig.find((f) => f.key === key);
             const option = filterConfigItem?.options?.find(
-              (opt) => opt.value === value
+              (opt) => opt.value === value,
             );
             return (
               <Badge
@@ -304,7 +350,7 @@ const DataTable = ({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -342,7 +388,7 @@ const DataTable = ({
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -458,7 +504,7 @@ const DataTable = ({
               >
                 {pageNumber + 1}
               </Button>
-            )
+            ),
           )}
 
           {/* Next Page */}

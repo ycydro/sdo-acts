@@ -78,6 +78,8 @@ const RequestTicketForm = () => {
     },
   });
 
+  const { isSubmitting } = form.formState;
+
   const selectedServiceId = form.watch("service_id");
   const [open, setOpen] = useState(false);
 
@@ -89,7 +91,7 @@ const RequestTicketForm = () => {
 
   // Find the selected service object
   const selectedService = services?.data?.find(
-    (service) => service.id === selectedServiceId
+    (service) => service.id === selectedServiceId,
   );
 
   // calculate processing time when service is selected
@@ -145,16 +147,16 @@ const RequestTicketForm = () => {
           className={cn(
             "w-full justify-between border-input hover:bg-inherit hover:text-muted-foreground",
             !field.value && "text-muted-foreground",
-            isServicesLoading && "opacity-50 cursor-not-allowed"
+            isServicesLoading && "opacity-50 cursor-not-allowed",
           )}
           disabled={isServicesLoading}
         >
           {isServicesLoading
             ? "Loading services..."
             : field.value
-            ? services?.data?.find((service) => service.id === field.value)
-                ?.name || "Select a service"
-            : "Select a service"}
+              ? services?.data?.find((service) => service.id === field.value)
+                  ?.name || "Select a service"
+              : "Select a service"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -176,16 +178,16 @@ const RequestTicketForm = () => {
           className={cn(
             "w-full justify-between truncate border-input hover:bg-inherit hover:text-muted-foreground",
             !field.value && "text-muted-foreground",
-            isServicesLoading && "opacity-50 cursor-not-allowed"
+            isServicesLoading && "opacity-50 cursor-not-allowed",
           )}
           disabled={isServicesLoading}
         >
           {isServicesLoading
             ? "Loading services..."
             : field.value
-            ? services?.data?.find((service) => service.id === field.value)
-                ?.name || "Select a service"
-            : "Select a service"}
+              ? services?.data?.find((service) => service.id === field.value)
+                  ?.name || "Select a service"
+              : "Select a service"}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DrawerTrigger>
@@ -245,7 +247,9 @@ const RequestTicketForm = () => {
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4 text-primary",
-                        field.value === service.id ? "opacity-100" : "opacity-0"
+                        field.value === service.id
+                          ? "opacity-100"
+                          : "opacity-0",
                       )}
                     />
                     <div className="flex flex-col items-start flex-1">
@@ -261,14 +265,14 @@ const RequestTicketForm = () => {
                         Est. time:{" "}
                         {formatTimeDisplay(
                           convertMinutesToTimeParts(
-                            service.processing_time_in_minutes
+                            service.processing_time_in_minutes,
                           ).days,
                           convertMinutesToTimeParts(
-                            service.processing_time_in_minutes
+                            service.processing_time_in_minutes,
                           ).hours,
                           convertMinutesToTimeParts(
-                            service.processing_time_in_minutes
-                          ).minutes
+                            service.processing_time_in_minutes,
+                          ).minutes,
                         )}
                       </div>
                     )}
@@ -319,7 +323,7 @@ const RequestTicketForm = () => {
                 {formatTimeDisplay(
                   processingTime.days,
                   processingTime.hours,
-                  processingTime.minutes
+                  processingTime.minutes,
                 )}
               </span>
             </div>
@@ -411,11 +415,11 @@ const RequestTicketForm = () => {
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
-                    disabled={(date) =>
-                      date <= new Date(addDays(new Date(), 3)) ||
-                      isSunday(date) ||
-                      isSaturday(date)
-                    }
+                    // disabled={(date) =>
+                    //   date <= new Date(addDays(new Date(), 3)) ||
+                    //   isSunday(date) ||
+                    //   isSaturday(date)
+                    // }
                     initialFocus
                   />
                 </PopoverContent>
@@ -438,9 +442,23 @@ const RequestTicketForm = () => {
 
           <Button
             type="submit"
-            className="w-full sm:w-40 bg-green-700 hover:bg-green-800 text-white rounded-full flex items-center justify-center gap-2"
+            disabled={isSubmitting}
+            className={cn(
+              "w-full sm:w-40 rounded-full flex items-center justify-center gap-2",
+              isSubmitting && "opacity-60 cursor-not-allowed",
+            )}
           >
-            <Send className="w-4 h-4" /> Submit
+            {isSubmitting ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Submit
+              </>
+            )}
           </Button>
         </div>
       </FieldGroup>

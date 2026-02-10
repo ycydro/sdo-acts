@@ -10,6 +10,7 @@ import {
   User,
 } from "../models/index.js";
 import { Op, Sequelize } from "sequelize";
+import { parseISO, startOfDay, endOfDay, subDays } from "date-fns";
 
 export const getAllClientSurveyResponses = async (req, res) => {
   try {
@@ -548,6 +549,29 @@ export const submitSurvey = async (req, res) => {
 
 export const getDepartmentSatisfactionOverview = async (req, res) => {
   try {
+    const { startDate, endDate } = req.query;
+
+    let dateFilter = {};
+    if (startDate && endDate) {
+      const start = startOfDay(parseISO(startDate));
+      const end = endOfDay(parseISO(endDate));
+
+      dateFilter = {
+        createdAt: {
+          [Op.between]: [start, end],
+        },
+      };
+    } else {
+      // default to past week if no dates provided
+      const end = new Date();
+      const start = subDays(end, 7);
+      dateFilter = {
+        createdAt: {
+          [Op.between]: [start, end],
+        },
+      };
+    }
+
     // Get all active departments
     const departments = await Department.findAll({
       where: { status: "active" },
@@ -557,7 +581,7 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
     // For each department, calculate average rating and response count
     const departmentStats = await Promise.all(
       departments.map(async (dept) => {
-        // Get all dimension ratings for this department's completed surveys
+        // Get all dimension ratings for this department's completed surveys within date range
         const ratings = await ClientSurveyDimensionRating.findAll({
           attributes: [
             [
@@ -573,7 +597,10 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
             {
               model: ClientSurveyResponse,
               as: "response",
-              where: { status: "completed" },
+              where: {
+                status: "completed",
+                ...dateFilter,
+              },
               required: true,
               attributes: [],
               include: [
@@ -606,7 +633,10 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
             {
               model: ClientSurveyResponse,
               as: "response",
-              where: { status: "completed" },
+              where: {
+                status: "completed",
+                ...dateFilter,
+              },
               required: true,
               attributes: [],
               include: [
@@ -641,6 +671,10 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
             ? parseInt(ratings[0].response_count)
             : 0,
           dimension_count: dimensionCount,
+          date_range: {
+            start_date: startDate,
+            end_date: endDate,
+          },
         };
       }),
     );
@@ -654,6 +688,13 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
       success: true,
       data: departmentsWithRatings,
       message: "Department satisfaction overview fetched successfully!",
+      meta: {
+        date_filter: {
+          start_date: startDate,
+          end_date: endDate,
+          applied: !!(startDate && endDate),
+        },
+      },
     });
   } catch (error) {
     console.error("Error fetching department satisfaction overview:", error);

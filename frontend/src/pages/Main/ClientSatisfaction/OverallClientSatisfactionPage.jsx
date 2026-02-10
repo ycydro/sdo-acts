@@ -1,38 +1,61 @@
+import { useState, useEffect } from "react";
 import ClientFeedbackTable from "@/components/custom/tables/ClientFeedbackTable";
 import BackgroundWrapper from "@/components/custom/BackgroundWrapper";
 import { DimensionRatingList } from "@/components/custom/lists/DimensionRatingList";
 import { DepartmentSatisfactionList } from "@/components/custom/lists/DepartmentSatisfactionList";
 import { useDepartmentSatisfactionOverview } from "@/hooks/queries/department/useDepartmentSatisfactionOverview";
 import { useAuth } from "@/context/AuthContext";
+import { format, subDays, subMonths } from "date-fns";
 
 export default function OverallClientSatisfactionPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "Superadmin";
 
-  const { data: departmentData, isLoading } =
-    useDepartmentSatisfactionOverview();
+  const [dateRange, setDateRange] = useState(null);
+
+  // init with default date range (past week)
+  useEffect(() => {
+    const endDate = new Date();
+    const startDate = subDays(endDate, 7);
+    setDateRange({
+      startDate: format(startDate, "yyyy-MM-dd"),
+      endDate: format(endDate, "yyyy-MM-dd"),
+      preset: "week",
+    });
+  }, []);
+
+  const {
+    data: departmentData,
+    isLoading,
+    refetch,
+  } = useDepartmentSatisfactionOverview(dateRange);
   const departments = departmentData?.data || [];
+
+  const handleDateRangeChange = (newDateRange) => {
+    setDateRange(newDateRange);
+  };
+
+  if (!dateRange) {
+    return <div>Loading...</div>;
+  }
 
   if (isAdmin) {
     return (
       <main className="min-w-full">
         <BackgroundWrapper>
-          <div className="mb-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Department Satisfaction Overview
-            </h2>
+          <div className="max-w-full">
+            <DepartmentSatisfactionList
+              departments={departments}
+              isLoading={isLoading}
+              dateRange={dateRange}
+              onDateRangeChange={handleDateRangeChange}
+            />
           </div>
-
-          <DepartmentSatisfactionList
-            departments={departments}
-            isLoading={isLoading}
-          />
         </BackgroundWrapper>
       </main>
     );
   }
 
-  // staff view
   return (
     <main className="min-w-full">
       <DimensionRatingList />

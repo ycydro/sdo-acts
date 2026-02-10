@@ -5,8 +5,19 @@ export const departmentsService = {
     const response = await axios.get("/department");
     return response.data;
   },
-  getDepartmentSatisfactionOverview: async () => {
-    const response = await axios.get("/department/satisfaction-overview");
+  getDepartmentSatisfactionOverview: async (dateRange) => {
+    let url = "/department/satisfaction-overview";
+
+    // add query parameters for dateRange
+    if (dateRange) {
+      const params = new URLSearchParams({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+      });
+      url += `?${params.toString()}`;
+    }
+
+    const response = await axios.get(url);
     return response.data;
   },
 

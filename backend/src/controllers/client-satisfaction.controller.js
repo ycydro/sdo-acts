@@ -57,9 +57,9 @@ export const getAllClientSurveyResponses = async (req, res) => {
             "concat",
             Sequelize.col("client.first_name"),
             " ",
-            Sequelize.col("client.last_name")
+            Sequelize.col("client.last_name"),
           ),
-          { [Op.like]: `%${searchText}%` }
+          { [Op.like]: `%${searchText}%` },
         ),
 
         // by overall rating (exact number)
@@ -186,10 +186,17 @@ export const getAllSQDs = async (req, res) => {
 
 export const getSQDsWithRatings = async (req, res) => {
   try {
+    const { departmentID = "" } = req.query;
     const user = req.user;
 
     // where clause for dimensions
     const dimensionWhere = { is_active: true };
+
+    // where clause for department_id of service
+    const targetDepartmentId = user.department_id || departmentID;
+    const serviceWhere = targetDepartmentId
+      ? { department_id: targetDepartmentId }
+      : {};
 
     // include clause for ratings with department filtering
     const ratingInclude = {
@@ -210,9 +217,7 @@ export const getSQDsWithRatings = async (req, res) => {
               as: "service",
               required: true,
               attributes: [],
-              where: user.department_id
-                ? { department_id: user.department_id }
-                : {},
+              where: serviceWhere,
             },
           ],
         },
@@ -244,7 +249,7 @@ export const getSQDsWithRatings = async (req, res) => {
     const dimensionsWithRatings = dimensions.map((dimension) => {
       const dimensionData = dimension.toJSON();
       const ratingData = dimensionRatings.find(
-        (r) => r.dimension_id === dimension.dimension_id
+        (r) => r.dimension_id === dimension.dimension_id,
       );
 
       return {
@@ -504,7 +509,7 @@ export const submitSurvey = async (req, res) => {
     // calculate scores
     const scores = await calculateSurveyScores(
       existingSurvey.survey_response_id,
-      transaction
+      transaction,
     );
 
     // update survey with calculated scores
@@ -516,7 +521,7 @@ export const submitSurvey = async (req, res) => {
         completed_date: new Date(),
         comment,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -536,6 +541,125 @@ export const submitSurvey = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to submit survey",
+      error: error.message,
+    });
+  }
+};
+
+export const getDepartmentSatisfactionOverview = async (req, res) => {
+  try {
+    // Get all active departments
+    const departments = await Department.findAll({
+      where: { status: "active" },
+      attributes: ["id", "name", "department_code"],
+    });
+
+    // For each department, calculate average rating and response count
+    const departmentStats = await Promise.all(
+      departments.map(async (dept) => {
+        // Get all dimension ratings for this department's completed surveys
+        const ratings = await ClientSurveyDimensionRating.findAll({
+          attributes: [
+            [
+              sequelize.fn("AVG", sequelize.col("rating_value")),
+              "average_rating",
+            ],
+            [
+              sequelize.fn("COUNT", sequelize.col("rating_value")),
+              "response_count",
+            ],
+          ],
+          include: [
+            {
+              model: ClientSurveyResponse,
+              as: "response",
+              where: { status: "completed" },
+              required: true,
+              attributes: [],
+              include: [
+                {
+                  model: Ticket,
+                  as: "ticket",
+                  required: true,
+                  attributes: [],
+                  include: [
+                    {
+                      model: Service,
+                      as: "service",
+                      required: true,
+                      attributes: [],
+                      where: { department_id: dept.id },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          raw: true,
+        });
+
+        // Get count of unique dimensions rated
+        const dimensionCount = await ClientSurveyDimensionRating.count({
+          distinct: true,
+          col: "dimension_id",
+          include: [
+            {
+              model: ClientSurveyResponse,
+              as: "response",
+              where: { status: "completed" },
+              required: true,
+              attributes: [],
+              include: [
+                {
+                  model: Ticket,
+                  as: "ticket",
+                  required: true,
+                  attributes: [],
+                  include: [
+                    {
+                      model: Service,
+                      as: "service",
+                      required: true,
+                      attributes: [],
+                      where: { department_id: dept.id },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        });
+
+        return {
+          department_id: dept.id,
+          department_name: dept.name,
+          department_code: dept.department_code,
+          average_rating: ratings[0]?.average_rating
+            ? parseFloat(ratings[0].average_rating).toFixed(1)
+            : "0.0",
+          response_count: ratings[0]?.response_count
+            ? parseInt(ratings[0].response_count)
+            : 0,
+          dimension_count: dimensionCount,
+        };
+      }),
+    );
+
+    // Filter out departments with no ratings
+    const departmentsWithRatings = departmentStats.filter(
+      (dept) => dept.response_count > 0,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: departmentsWithRatings,
+      message: "Department satisfaction overview fetched successfully!",
+    });
+  } catch (error) {
+    console.error("Error fetching department satisfaction overview:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch department satisfaction overview.",
       error: error.message,
     });
   }
@@ -566,7 +690,7 @@ const calculateSurveyScores = async (responseId, transaction) => {
   const averageScore = totalWeightedScore / totalWeight;
   const totalScore = dimensionResponses.reduce(
     (sum, r) => sum + r.rating_value,
-    0
+    0,
   );
 
   return { averageScore, totalScore };

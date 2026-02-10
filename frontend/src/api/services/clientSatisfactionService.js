@@ -18,14 +18,17 @@ export const clientSatisfactionService = {
 
   getAllSQDs: async () => {
     const response = await axios.get(
-      "/client-satisfaction/service-quality-dimensions"
+      "/client-satisfaction/service-quality-dimensions",
     );
     return response.data;
   },
 
-  getSQDsWithRatings: async () => {
+  getSQDsWithRatings: async (departmentID) => {
     const response = await axios.get(
-      "/client-satisfaction/service-quality-dimensions/with-ratings"
+      "/client-satisfaction/service-quality-dimensions/with-ratings",
+      {
+        params: { departmentID },
+      },
     );
     return response.data;
   },

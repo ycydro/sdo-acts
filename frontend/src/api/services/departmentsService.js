@@ -5,6 +5,10 @@ export const departmentsService = {
     const response = await axios.get("/department");
     return response.data;
   },
+  getDepartmentSatisfactionOverview: async () => {
+    const response = await axios.get("/department/satisfaction-overview");
+    return response.data;
+  },
 
   create: async (data) => {
     const response = await axios.post("/department", data);

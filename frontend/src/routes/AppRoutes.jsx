@@ -34,6 +34,7 @@ import ServiceQualityDimensionsPage from "@/pages/Main/ClientSatisfaction/Servic
 import ClientSatisfactorySurveyPage from "@/pages/Client/ClientSatisfactorySurvey/ClientSatisfactorySurveyPage";
 import ClientQueuePage from "@/pages/Client/Tickets/Queue/ClientQueuePage";
 import UsersPage from "@/pages/Main/Users/UsersPage";
+import DepartmentSpecificSatisfactionPage from "@/pages/Main/ClientSatisfaction/DepartmentSpecificSatisfactionPage";
 
 const AppRoutes = () => {
   return (
@@ -143,6 +144,14 @@ const AppRoutes = () => {
           element={
             <PermissionRoute requiredPermission="view_main">
               <OverallClientSatisfactionPage />
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="client-feedbacks/department/:departmentID"
+          element={
+            <PermissionRoute requiredPermission="view_main">
+              <DepartmentSpecificSatisfactionPage />
             </PermissionRoute>
           }
         />

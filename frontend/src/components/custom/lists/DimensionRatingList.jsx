@@ -2,8 +2,8 @@ import { Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSQDsWithRatings } from "@/hooks/queries/client-satisfaction/useSQDsWithRatings";
 
-export const DimensionRatingList = () => {
-  const { data: response, isLoading } = useSQDsWithRatings();
+export const DimensionRatingList = ({ departmentID = "" }) => {
+  const { data: response, isLoading } = useSQDsWithRatings(departmentID);
 
   // Access the data array from the response
   const dimensionsWithRatings = response?.data || [];

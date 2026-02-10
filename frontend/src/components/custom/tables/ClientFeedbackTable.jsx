@@ -29,13 +29,10 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
 
   const { pagination, setPagination } = usePagination();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState(initialFilters);
-
-  useEffect(() => {
-    if (initialFilters.status && initialFilters.status !== filters.status) {
-      setFilters((prev) => ({ ...prev, status: initialFilters.status }));
-    }
-  }, [initialFilters.status]);
+  const [filters, setFilters] = useState(() => {
+    const { department_id, ...otherFilters } = initialFilters;
+    return otherFilters;
+  });
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -44,7 +41,14 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
   };
 
   const handleFiltersChange = (newFilters) => {
-    setFilters(newFilters);
+    // prevent department_id from being changed
+    if (initialFilters.department_id) {
+      const { department_id, ...filteredFilters } = newFilters;
+      setFilters(filteredFilters);
+    } else {
+      setFilters(newFilters);
+    }
+
     // reset to first page when filtering
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   };
@@ -55,7 +59,7 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
   const filterConfig = useMemo(() => {
     const filters = [];
 
-    if (isAdmin) {
+    if (isAdmin && !initialFilters.department_id) {
       filters.push({
         key: "department_id",
         label: "Departments",
@@ -69,7 +73,12 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
     }
 
     return filters;
-  }, [departments, isDepartmentsLoading, user?.role]);
+  }, [
+    departments,
+    isDepartmentsLoading,
+    user?.role,
+    initialFilters.department_id,
+  ]);
 
   const columns = useMemo(
     () => [
@@ -167,14 +176,19 @@ const ClientFeedbackTable = ({ initialFilters = {} }) => {
         },
       },
     ],
-    []
+    [],
   );
 
   const {
     data: surveyResponsesData,
     isLoading: loading,
     error,
-  } = useClientSurveyResponses(pagination, searchQuery, filters);
+  } = useClientSurveyResponses(pagination, searchQuery, {
+    ...filters,
+    ...(initialFilters.department_id && {
+      department_id: initialFilters.department_id,
+    }),
+  });
 
   // Extract data from response
   const surveyResponses = surveyResponsesData?.data || [];

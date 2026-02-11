@@ -8,6 +8,7 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  Fullscreen,
 } from "lucide-react";
 import { useSocket } from "@/context/SocketContext";
 import { useQuery } from "@tanstack/react-query";
@@ -144,28 +145,61 @@ export const QueuePage = () => {
     setVisibleDepartments([]);
   };
 
-  const getLayoutConfig = () => {
-    const count = visibleDepartments.length;
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isApiFullscreen = !!document.fullscreenElement;
 
-    if (count <= 1) return { gridCols: "grid-cols-1", cardClass: "h-[75vh]" };
-    if (count === 2) return { gridCols: "grid-cols-2", cardClass: "h-[75vh]" };
+      const isDisplayFullscreen = window.matchMedia(
+        "(display-mode: fullscreen)",
+      ).matches;
+
+      setIsFullscreen(isApiFullscreen || isDisplayFullscreen);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+    window.addEventListener("resize", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("resize", handleFullscreenChange);
+    };
+  }, []);
+
+  const getLayoutConfig = (count, isFullscreen = false) => {
+    if (count <= 1)
+      return {
+        gridCols: "grid-cols-1",
+        cardClass: isFullscreen ? "h-[88vh]" : "h-[75vh]",
+      };
+    if (count === 2)
+      return {
+        gridCols: "grid-cols-2",
+        cardClass: isFullscreen ? "h-[88vh]" : "h-[75vh]",
+      };
     if (count === 3 || count === 4)
       return {
         gridCols: "grid-cols-2",
-        cardClass: "h-[37.5vh]",
+        cardClass: isFullscreen ? "h-[43.5vh]" : "h-[37.5vh]",
       };
     if (count === 5 || count === 6)
       return {
         gridCols: "grid-cols-3",
-        cardClass: "h-[37.5vh]",
+        cardClass: isFullscreen ? "h-[43.5vh]" : "h-[37.5vh]",
       };
     if (count === 7 || count === 8)
       return {
         gridCols: "grid-cols-4",
-        cardClass: "h-[37.5vh]",
+        cardClass: isFullscreen ? "h-[43.5vh]" : "h-[37.5vh]",
       };
-    return { gridCols: "grid-cols-2 lg:grid-cols-4", cardClass: "h-[37.5vh]" };
+    return {
+      gridCols: "grid-cols-2 lg:grid-cols-4",
+      cardClass: isFullscreen ? "h-[43.5vh]" : "h-[37.5vh]",
+    };
   };
+
+  const layout = getLayoutConfig(visibleDepartments.length, isFullscreen);
 
   const getDepartmentQueue = (deptKey) => {
     const dept = queueData?.[deptKey];
@@ -241,7 +275,7 @@ export const QueuePage = () => {
   };
 
   const visibleCount = visibleDepartments.length;
-  const { gridCols, cardClass } = getLayoutConfig();
+  const { gridCols, cardClass } = layout;
 
   if (isLoadingDepartments) {
     return (
@@ -258,7 +292,24 @@ export const QueuePage = () => {
     <div className="min-w-full">
       <div className="h-full">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-bold">PROCESSING NOW</h1>
+          <div className="flex justify-center items-center">
+            <h1 className="text-xl font-bold">PROCESSING NOW</h1>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0 border-0 hover:bg-inherit hover:text-primary"
+              onClick={() => {
+                if (!document.fullscreenElement) {
+                  document.documentElement.requestFullscreen();
+                } else {
+                  document.exitFullscreen();
+                }
+              }}
+              title="Toggle Fullscreen"
+            >
+              <Fullscreen className="h-9 w-9" />
+            </Button>
+          </div>
 
           <div className="flex items-center gap-4">
             {isConnected ? (

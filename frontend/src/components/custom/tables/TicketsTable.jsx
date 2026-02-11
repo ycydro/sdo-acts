@@ -14,6 +14,7 @@ import { statusColors } from "@/lib/constants/statusColors";
 import { useNavigate } from "react-router-dom";
 import PriorityBadge from "../badges/PriorityBadge";
 import StatusBadge from "../badges/StatusBadge";
+import { format } from "date-fns";
 
 const TicketsTable = ({ initialFilters = {} }) => {
   const navigate = useNavigate();
@@ -195,15 +196,33 @@ const TicketsTable = ({ initialFilters = {} }) => {
           ]
         : []),
       {
-        accessorKey: "assignee",
-        header: "In Charge",
+        accessorKey: "createdAt",
+        header: "Submitted on",
         size: 100,
         cell: (info) => {
-          const assignee = info.getValue();
-          const assigneeName = assignee
-            ? `${assignee.first_name} ${assignee.last_name}`
-            : "Unassigned";
-          return <div className="truncate">{assigneeName}</div>;
+          const submittedDate = info.getValue();
+
+          return (
+            <div className="truncate">
+              {format(submittedDate, "MMMM dd, yyyy")}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "end_date",
+        header: "Resolved at",
+        size: 100,
+        cell: (info) => {
+          const resolvedDate = info.getValue();
+
+          return (
+            <div className="truncate">
+              {resolvedDate
+                ? format(resolvedDate, "MMMM dd, yyyy h:mm:a")
+                : "N/A"}
+            </div>
+          );
         },
       },
       {

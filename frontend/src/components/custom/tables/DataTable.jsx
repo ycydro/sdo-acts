@@ -247,46 +247,50 @@ const DataTable = ({
       {/* Search and Filters Row */}
       <div className="flex flex-col sm:flex-row gap-4 items-start justify-between sm:items-center">
         {/* Filters */}
-        <div className="flex flex-wrap gap-2 items-center">
-          {filterConfig.map((filter) => (
-            <div key={filter.key} className="flex items-center gap-2">
-              <label className="text-sm font-medium whitespace-nowrap">
-                {filter.label}:
-              </label>
-              <Select
-                value={filters[filter.key] || "all"}
-                onValueChange={(value) => handleFilterChange(filter.key, value)}
+        {Object.keys(filterConfig).length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center">
+            {filterConfig.map((filter) => (
+              <div key={filter.key} className="flex items-center gap-2">
+                <label className="text-sm font-medium whitespace-nowrap">
+                  {filter.label}:
+                </label>
+                <Select
+                  value={filters[filter.key] || "all"}
+                  onValueChange={(value) =>
+                    handleFilterChange(filter.key, value)
+                  }
+                >
+                  <SelectTrigger className="max-w-[220px] h-8">
+                    <SelectValue placeholder={`All ${filter.label}`} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All {filter.label}</SelectItem>
+                    {filter.options.map((option) => (
+                      <SelectItem
+                        className="truncate"
+                        key={option.value}
+                        value={option.value}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllFilters}
+                className="h-8"
               >
-                <SelectTrigger className="max-w-[220px] h-8">
-                  <SelectValue placeholder={`All ${filter.label}`} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All {filter.label}</SelectItem>
-                  {filter.options.map((option) => (
-                    <SelectItem
-                      className="truncate"
-                      key={option.value}
-                      value={option.value}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearAllFilters}
-              className="h-8"
-            >
-              <Trash2 />
-              Clear Filters
-            </Button>
-          )}
-        </div>
+                <Trash2 />
+                Clear Filters
+              </Button>
+            )}
+          </div>
+        )}
         {/* Search Input */}
         {onSearch && (
           <div className="relative flex items-center w-sm max-w-md">

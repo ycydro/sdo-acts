@@ -207,6 +207,7 @@ export const DepartmentSatisfactionList = ({
                         initialFocus
                         captionLayout="dropdown" // dropdown for year/month
                         fromYear={2020}
+                        disabled={(date) => date >= new Date()}
                       />
                     </PopoverContent>
                   </Popover>
@@ -233,6 +234,7 @@ export const DepartmentSatisfactionList = ({
                         initialFocus
                         captionLayout="dropdown"
                         fromYear={2020}
+                        disabled={(date) => date >= new Date()}
                       />
                     </PopoverContent>
                   </Popover>
@@ -335,6 +337,7 @@ export const DepartmentSatisfactionList = ({
                       initialFocus
                       captionLayout="dropdown" // dropdown for year/month
                       fromYear={2020}
+                      disabled={(date) => date >= new Date()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -361,6 +364,7 @@ export const DepartmentSatisfactionList = ({
                       initialFocus
                       captionLayout="dropdown"
                       fromYear={2020}
+                      disabled={(date) => date >= new Date()}
                     />
                   </PopoverContent>
                 </Popover>

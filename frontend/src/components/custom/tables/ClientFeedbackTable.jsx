@@ -448,6 +448,7 @@ const ClientFeedbackTable = ({
                         initialFocus
                         captionLayout="dropdown"
                         fromYear={2020}
+                        disabled={(date) => date >= new Date()}
                       />
                     </PopoverContent>
                   </Popover>
@@ -474,6 +475,7 @@ const ClientFeedbackTable = ({
                         initialFocus
                         captionLayout="dropdown"
                         fromYear={2020}
+                        disabled={(date) => date >= new Date()}
                       />
                     </PopoverContent>
                   </Popover>

@@ -84,7 +84,7 @@ const DimensionRatingCard = ({
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm truncate">{code}</span>
+            <span className="text-sm truncate">{dimension}</span>
           </div>
         </div>
         <Star className="h-5 w-5 text-yellow-500" />

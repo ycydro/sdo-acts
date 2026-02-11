@@ -35,7 +35,7 @@ const ticketResolvedEmailTemplate = ({
                 <tr>
                   <td>
                     <h1 style="margin:0; font-size:22px; color:${primary}; font-weight:800; letter-spacing:-0.01em;">
-                      Your request has been resolved.
+                      Your ticket request has been resolved.
                     </h1>
                     <p style="margin:20px 0 0; font-size:16px; line-height:1.6; color:${textColor};">
                       Hello ${customerName},
@@ -44,7 +44,7 @@ const ticketResolvedEmailTemplate = ({
                       We are pleased to inform you that your request for <strong>${serviceName}</strong> has been successfully processed and marked as resolved.
                     </p>
                     <p style="margin:16px 0 0; font-size:15px; line-height:1.6; color:#4b5563;">
-                      Your feedback is invaluable to us. To help us maintain the quality of our service and better assist you in the future, we would appreciate it if you could spare a moment to complete our brief satisfaction survey.
+                      Please take a moment to complete our brief satisfaction survey to help us maintain and improve our services.
                     </p>
                   </td>
                 </tr>

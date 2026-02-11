@@ -1,11 +1,12 @@
 import { format } from "date-fns";
+import getBaseURL from "../../getBaseURL.js";
 
 const ticketApprovedEmailTemplate = ({
   customerName,
   ticketCode,
   serviceName,
   scheduledDate,
-  queueLink = "http://localhost:3000/queue/",
+  queueLink = `${getBaseURL()}/queue/`,
 }) => {
   const primary = "#006b44";
   const success = "#10b981";
@@ -41,7 +42,7 @@ const ticketApprovedEmailTemplate = ({
                       Hello ${customerName},
                     </p>
                     <p style="margin:8px 0 0; font-size:15px; line-height:1.6; color:#4b5563;">
-                      Your ticket has been reviewed and is now officially <strong>In Queue</strong>. Please take note of your schedule and visit our office to proceed with your request.
+                      Your ticket has been reviewed and is now officially <strong>In Queue</strong>. Please visit our office to proceed with your request.
                     </p>
                   </td>
                 </tr>

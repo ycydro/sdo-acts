@@ -1,3 +1,4 @@
+import getBaseURL from "../getBaseURL.js";
 import { sendEmail } from "./sendEmail.js";
 import ticketApprovedEmailTemplate from "./templates/ticketApprovedEmailTemplate.js";
 import ticketResolvedEmailTemplate from "./templates/ticketResolvedEmailTemplate.js";
@@ -8,7 +9,7 @@ const sendInQueueEmail = async (ticket) => {
     if (ticket.client?.email) {
       await sendEmail({
         to: ticket.client?.email,
-        subject: "Your SDO ticket request has been approved!",
+        subject: `[${ticket.ticket_code}] SDO Ticket Request has been approved!`,
         html: ticketApprovedEmailTemplate({
           customerName: ticket.client?.first_name || "there",
           ticketCode: ticket.ticket_code,
@@ -18,10 +19,10 @@ const sendInQueueEmail = async (ticket) => {
         }),
       });
     }
+    console.log(`Ticket ${ticket.ticket_code} email sent (In Queue)`);
   } catch (emailError) {
     console.error("Ticket created but email failed:", emailError);
   }
-  console.log(`Ticket ${ticket.ticket_code} email sent (In Queue)`);
 };
 
 const sendOngoingEmail = async (ticket) => {
@@ -34,19 +35,19 @@ const sendResolvedEmail = async (ticket) => {
     if (ticket.client?.email) {
       await sendEmail({
         to: ticket.client?.email,
-        subject: "Your SDO ticket request has been resolved!",
+        subject: `[${ticket.ticket_code}] SDO Ticket Request has been resolved!`,
         html: ticketResolvedEmailTemplate({
           customerName: ticket.client?.first_name || "there",
           ticketCode: ticket.ticket_code,
           serviceName: ticket.service?.name || "N/A",
-          surveyLink: `http://localhost:3000/ticket/survey/${ticket.id}`,
+          surveyLink: `${getBaseURL()}/ticket/survey/${ticket.id}`,
         }),
       });
     }
+    console.log(`Ticket ${ticket.ticket_code} email sent (Resolved)`);
   } catch (emailError) {
     console.error("Ticket created but email failed:", emailError);
   }
-  console.log(`Ticket ${ticket.ticket_code} email sent (Resolved)`);
 };
 
 const sendOnHoldEmail = async (ticket) => {

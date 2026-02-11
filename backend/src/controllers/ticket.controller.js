@@ -495,7 +495,7 @@ export const createTicket = async (req, res) => {
         if (createdTicketWithRelations.client?.email) {
           await sendEmail({
             to: createdTicketWithRelations.client?.email,
-            subject: "Your SDO ticket request has been received!",
+            subject: `[${createdTicketWithRelations.ticket_code}] SDO Ticket Request has been received!`,
             html: ticketCreatedEmailTemplate({
               customerName:
                 createdTicketWithRelations.client?.first_name || "there",

@@ -53,7 +53,7 @@ const ticketCreatedEmailTemplate = ({
                       <tr>
                         <td style="padding-bottom:16px;">
                           <span style="font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:0.05em;">Ticket Code</span><br/>
-                          <span style="font-size:18px; font-weight:700; color:${primary}; font-family: 'Courier New', Courier, monospace;">${ticketCode}</span>
+                          <span style="font-size:18px; font-weight:700; color:${primary}; text-transform:uppercase;">${ticketCode}</span>
                         </td>
                       </tr>
                       <tr>

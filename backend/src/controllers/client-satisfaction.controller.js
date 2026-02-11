@@ -19,6 +19,8 @@ export const getAllClientSurveyResponses = async (req, res) => {
       limit = 10,
       search = "",
       department_id = "", // galing buildqueryparams
+      startDate = "",
+      endDate = "",
     } = req.query;
 
     const user = req.user;
@@ -33,6 +35,26 @@ export const getAllClientSurveyResponses = async (req, res) => {
         [Op.ne]: null,
       },
     };
+
+    const start = startOfDay(parseISO(startDate));
+    const end = endOfDay(parseISO(endDate));
+
+    if (startDate && endDate) {
+      whereConditions.completed_date = {
+        ...whereConditions.completed_date,
+        [Op.between]: [start, end],
+      };
+    } else if (startDate) {
+      whereConditions.completed_date = {
+        ...whereConditions.completed_date,
+        [Op.gte]: start,
+      };
+    } else if (endDate) {
+      whereConditions.completed_date = {
+        ...whereConditions.completed_date,
+        [Op.lte]: end,
+      };
+    }
 
     // search
     if (search && search.trim() != "") {
@@ -142,7 +164,7 @@ export const getAllClientSurveyResponses = async (req, res) => {
             ],
           },
         ],
-        order: [["createdAt", "DESC"]],
+        order: [["completed_date", "DESC"]],
         offset: offset,
         limit: limitNum,
         distinct: true,

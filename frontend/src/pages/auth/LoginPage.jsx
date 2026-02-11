@@ -70,12 +70,12 @@ const LoginPage = () => {
           "
         >
           <LoginForm />
-          <p className="mb-2 text-base text-center">
+          {/* <p className="mb-2 text-base text-center">
             New here?
             <Link to="/register" className="text-primary ml-1 hover:underline">
               Create an account
             </Link>
-          </p>
+          </p> */}
         </CardContent>
       </Card>
     </div>

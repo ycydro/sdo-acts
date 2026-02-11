@@ -3,11 +3,17 @@ import { mailTransporter } from "../../configs/mail.config.js";
 
 export const sendEmail = async ({ to, subject, html, text }) => {
   try {
-    const sendEmailEnabled = false;
+    const sendEmailEnabled = true;
     if (!sendEmailEnabled) {
       console.log("Email sending is disabled");
       return;
     }
+
+    if (to.endsWith("email.com")) {
+      console.log(`${to} is a test email, cancelling sending of email...`);
+      return;
+    }
+
     await mailTransporter.sendMail({
       from: env.EMAIL_FROM,
       to,
@@ -15,7 +21,6 @@ export const sendEmail = async ({ to, subject, html, text }) => {
       text,
       html,
     });
-
     console.log("Email sent to:", to);
   } catch (error) {
     console.error("Email sending failed:", error);

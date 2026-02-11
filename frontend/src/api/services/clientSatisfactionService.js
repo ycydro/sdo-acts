@@ -23,11 +23,15 @@ export const clientSatisfactionService = {
     return response.data;
   },
 
-  getSQDsWithRatings: async (departmentID) => {
+  getSQDsWithRatings: async (departmentID, startDate, endDate) => {
     const response = await axios.get(
       "/client-satisfaction/service-quality-dimensions/with-ratings",
       {
-        params: { departmentID },
+        params: {
+          departmentID,
+          ...(startDate && { startDate }),
+          ...(endDate && { endDate }),
+        },
       },
     );
     return response.data;

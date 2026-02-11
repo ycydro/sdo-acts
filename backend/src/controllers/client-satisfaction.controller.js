@@ -209,7 +209,7 @@ export const getAllSQDs = async (req, res) => {
 
 export const getSQDsWithRatings = async (req, res) => {
   try {
-    const { departmentID = "" } = req.query;
+    const { departmentID = "", startDate, endDate } = req.query;
     const user = req.user;
 
     // where clause for dimensions
@@ -221,11 +221,24 @@ export const getSQDsWithRatings = async (req, res) => {
       ? { department_id: targetDepartmentId }
       : {};
 
-    // include clause for ratings with department filtering
+    // date range filter
+    const dateFilter = {};
+    if (startDate && endDate) {
+      const start = startOfDay(parseISO(startDate));
+      const end = endOfDay(parseISO(endDate));
+      dateFilter.createdAt = {
+        [Op.between]: [start, end],
+      };
+    }
+
+    // include clause for ratings with department and date filtering
     const ratingInclude = {
       model: ClientSurveyResponse,
       as: "response",
-      where: { status: "completed" },
+      where: {
+        status: "completed",
+        ...dateFilter,
+      },
       required: true,
       attributes: [],
       include: [
@@ -254,7 +267,7 @@ export const getSQDsWithRatings = async (req, res) => {
     });
 
     // get average ratings and response counts for each dimension
-    // now filtered by user department if staff si user (may department_id)
+    // now filtered by user department and date range
     const dimensionRatings = await ClientSurveyDimensionRating.findAll({
       attributes: [
         "dimension_id",
@@ -603,16 +616,12 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
     // For each department, calculate average rating and response count
     const departmentStats = await Promise.all(
       departments.map(async (dept) => {
-        // Get all dimension ratings for this department's completed surveys within date range
+        // Get average rating for this department's completed surveys within date range
         const ratings = await ClientSurveyDimensionRating.findAll({
           attributes: [
             [
               sequelize.fn("AVG", sequelize.col("rating_value")),
               "average_rating",
-            ],
-            [
-              sequelize.fn("COUNT", sequelize.col("rating_value")),
-              "response_count",
             ],
           ],
           include: [
@@ -645,6 +654,39 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
             },
           ],
           raw: true,
+        });
+
+        // Get COUNT of DISTINCT survey responses (not ratings)
+        const responseCount = await ClientSurveyResponse.count({
+          distinct: true,
+          col: "survey_response_id",
+          where: {
+            status: "completed",
+            ...dateFilter,
+          },
+          include: [
+            {
+              model: ClientSurveyDimensionRating,
+              as: "dimensionRatings",
+              required: true,
+              attributes: [],
+            },
+            {
+              model: Ticket,
+              as: "ticket",
+              required: true,
+              attributes: [],
+              include: [
+                {
+                  model: Service,
+                  as: "service",
+                  required: true,
+                  attributes: [],
+                  where: { department_id: dept.id },
+                },
+              ],
+            },
+          ],
         });
 
         // Get count of unique dimensions rated
@@ -689,9 +731,7 @@ export const getDepartmentSatisfactionOverview = async (req, res) => {
           average_rating: ratings[0]?.average_rating
             ? parseFloat(ratings[0].average_rating).toFixed(1)
             : "0.0",
-          response_count: ratings[0]?.response_count
-            ? parseInt(ratings[0].response_count)
-            : 0,
+          response_count: responseCount,
           dimension_count: dimensionCount,
           date_range: {
             start_date: startDate,

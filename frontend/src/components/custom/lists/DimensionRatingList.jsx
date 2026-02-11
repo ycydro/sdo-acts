@@ -2,8 +2,14 @@ import { Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSQDsWithRatings } from "@/hooks/queries/client-satisfaction/useSQDsWithRatings";
 
-export const DimensionRatingList = ({ departmentID = "" }) => {
-  const { data: response, isLoading } = useSQDsWithRatings(departmentID);
+export const DimensionRatingList = ({
+  departmentID = "",
+  dateRange = null,
+}) => {
+  const { data: response, isLoading } = useSQDsWithRatings(
+    departmentID,
+    dateRange,
+  );
 
   // Access the data array from the response
   const dimensionsWithRatings = response?.data || [];
@@ -24,7 +30,11 @@ export const DimensionRatingList = ({ departmentID = "" }) => {
       <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white shadow-md p-5 rounded-3xl flex-1 space-y-4 border text-center">
           <Star className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-          <p className="text-sm text-muted-foreground">No dimensions found</p>
+          <p className="text-sm text-muted-foreground">
+            {dateRange
+              ? "No ratings found for selected period"
+              : "No dimensions found"}
+          </p>
         </div>
       </div>
     );

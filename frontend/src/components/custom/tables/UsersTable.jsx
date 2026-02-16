@@ -8,14 +8,16 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useUsers } from "@/hooks/queries/users/useUsers";
 import { useRoles } from "@/hooks/queries/role/useRoles";
+import EditUserModal from "../modals/Users/EditUserModal";
+import { Edit } from "lucide-react";
 
 const UsersTable = ({ initialFilters = {} }) => {
   const navigate = useNavigate();
   const [activeModal, setActiveModal] = useState(null);
-  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleOpenModal = (ticket, modalType) => {
-    setSelectedTicket(ticket);
+  const handleOpenModal = (user, modalType) => {
+    setSelectedUser(user);
     setActiveModal(modalType);
   };
 
@@ -106,7 +108,7 @@ const UsersTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "role",
         header: "Role",
-        maxSize: 220,
+        maxSize: 100,
         cell: (info) => {
           const role = info.getValue();
           const roleName = role?.name || "N/A";
@@ -116,11 +118,35 @@ const UsersTable = ({ initialFilters = {} }) => {
       {
         accessorKey: "department",
         header: "Department",
-        maxSize: 80,
+        maxSize: 100,
         cell: (info) => {
           const department = info.getValue();
           const departmentCode = department?.department_code || "N/A";
           return <div className="truncate">{departmentCode}</div>;
+        },
+      },
+      {
+        accessorKey: "id",
+        header: "Actions",
+        size: 120,
+        cell: (info) => {
+          const user = info.row.original;
+          const id = info.getValue();
+
+          return (
+            <div className="flex justify-center items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-auto px-0.5 hover:text-primary"
+                title="View Details"
+                onClick={() => handleOpenModal(user, "edit-user")}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            </div>
+          );
         },
       },
     ],
@@ -174,12 +200,22 @@ const UsersTable = ({ initialFilters = {} }) => {
         pagination={pagination}
         onPaginationChange={setPagination}
         onSearch={handleSearch}
-        searchPlaceholder="Search by full name or department_code..."
+        searchPlaceholder="Search by full name or email..."
         filters={filters}
         onFiltersChange={handleFiltersChange}
         filterConfig={filterConfig}
         loading={loading}
       />
+      {selectedUser && (
+        <EditUserModal
+          selectedUser={selectedUser}
+          open={activeModal === "edit-user"}
+          onOpenChange={(open) => {
+            if (!open) handleCloseModal();
+          }}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </div>
   );
 };

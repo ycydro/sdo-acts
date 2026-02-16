@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
-
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,7 +20,9 @@ import {
 } from "@/components/ui/select";
 
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-
+import { useUserMutations } from "@/hooks/queries/users/useUserMutations";
+import { useRoles } from "@/hooks/queries/role/useRoles";
+import { useDepartments } from "@/hooks/queries/department/useDepartments";
 import {
   Eye,
   EyeClosed,
@@ -33,51 +34,25 @@ import {
   ShieldCheck,
   Building,
 } from "lucide-react";
-import { useRoles } from "@/hooks/queries/role/useRoles";
-import { useDepartments } from "@/hooks/queries/department/useDepartments"; // Assuming you have this hook
-import { useUserMutations } from "@/hooks/queries/users/useUserMutations";
 
-const AddUserModal = ({ open, onOpenChange }) => {
+const EditUserModal = ({ open, onOpenChange, selectedUser }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedRoleName, setSelectedRoleName] = useState("");
-
   const form = useForm({
     defaultValues: {
       first_name: "",
       last_name: "",
       gender: "",
-      role_id: "", // Default value
-      department_id: "", // New field
+      role_id: "",
+      department_id: "",
       email: "",
       phone_no: "",
-      password: "",
-      confirmPassword: "",
     },
   });
 
-  const { data: roles, isLoading: isRolesLoading } = useRoles();
-  const { data: departments, isLoading: isDepartmentsLoading } =
-    useDepartments();
-
-  const selectedRoleId = form.watch("role_id");
-
-  useEffect(() => {
-    if (selectedRoleId && roles?.data) {
-      const role = roles.data.find((r) => r.id === selectedRoleId);
-      setSelectedRoleName(role?.name || "");
-
-      // Clear department_id if role is not Staff
-      if (role?.name.toLowerCase() !== "staff") {
-        form.setValue("department_id", "");
-      }
-    } else {
-      setSelectedRoleName("");
-    }
-  }, [selectedRoleId, roles, form]);
-
-  // Check if the selected role is "Staff"
-  const isStaffRole = selectedRoleName.toLowerCase() === "staff";
+  const { updateUser } = useUserMutations();
+  const isSubmitting = updateUser.isPending;
 
   useEffect(() => {
     if (!open) {
@@ -85,20 +60,62 @@ const AddUserModal = ({ open, onOpenChange }) => {
       setShowPassword(false);
       setSelectedRoleName("");
     }
-  }, [open, form]);
+    if (selectedUser) {
+      console.log(selectedUser, "user in edit");
+      form.reset({
+        first_name: selectedUser.first_name || "",
+        last_name: selectedUser.last_name || "",
+        gender: selectedUser.sex || "other",
+        role_id: selectedUser.role?.id || "",
+        department_id: selectedUser.department?.id || "",
+        email: selectedUser.email || "",
+        phone_no: selectedUser.mobile_number || "",
+      });
+    }
+  }, [open, selectedUser, form]);
 
-  const { registerUser } = useUserMutations();
+  const { data: roles, isLoading: isRolesLoading } = useRoles();
+  const { data: departments, isLoading: isDepartmentsLoading } =
+    useDepartments();
 
-  const onSubmit = async (data) => {
+  useEffect(() => {
+    if (selectedUser?.role?.id && roles?.data) {
+      const role = roles.data.find((r) => r.id === selectedUser.role.id);
+      setSelectedRoleName(role?.name || "");
+
+      // Set department_id in form if user is staff
+      if (role?.name.toLowerCase() === "staff" && selectedUser.department?.id) {
+        form.setValue("department_id", selectedUser.department.id);
+      } else {
+        form.setValue("department_id", "");
+      }
+    } else {
+      setSelectedRoleName("");
+    }
+  }, [selectedUser?.role?.id, roles, form, selectedUser?.department?.id]);
+
+  // Check if the selected role is "Staff"
+  const isStaffRole = selectedRoleName.toLowerCase() === "staff";
+
+  const onSubmit = async (formData) => {
+    if (isSubmitting) {
+      return;
+    }
+
+    console.log(formData, "submitting this data");
+    console.log(selectedUser.id, "submitting this id");
+
     try {
-      // extract confirm pass
-      const { confirmPassword, ...userData } = data;
-      await registerUser.mutateAsync(userData);
-      toast.success("User created successfully!");
+      await updateUser.mutateAsync({
+        id: selectedUser.id,
+        user: formData,
+      });
+
+      toast.success("User updated successfully!");
       onOpenChange(false);
     } catch (error) {
       console.error(error);
-      toast.error(error.response?.data?.message || "Failed to create user.");
+      toast.error(error.response?.data?.message || "Failed to update user.");
     }
   };
 
@@ -106,9 +123,9 @@ const AddUserModal = ({ open, onOpenChange }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-[40rem]">
         <DialogHeader>
-          <DialogTitle className="text-lg">Add User</DialogTitle>
+          <DialogTitle className="text-lg">Edit User</DialogTitle>
           <DialogDescription>
-            Create a new user. Fill in all the required information below.
+            Modify the user information below.
           </DialogDescription>
         </DialogHeader>
 
@@ -166,9 +183,9 @@ const AddUserModal = ({ open, onOpenChange }) => {
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="male">Male</SelectItem>
-                        <SelectItem value="female">Female</SelectItem>
-                        <SelectItem value="other">Others</SelectItem>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                        <SelectItem value="Others">Others</SelectItem>
                       </SelectContent>
                     </Select>
                     {error && <FieldError>{error.message}</FieldError>}
@@ -310,93 +327,19 @@ const AddUserModal = ({ open, onOpenChange }) => {
                 </Field>
               )}
             />
-
-            {/* Password */}
-            <Controller
-              control={form.control}
-              name="password"
-              rules={{
-                required: "Password is required",
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <Field>
-                  <FieldLabel className="flex items-center gap-2">
-                    <ShieldCheck size={16} /> Password
-                  </FieldLabel>
-                  <div className="relative">
-                    <Input
-                      placeholder="Enter Password"
-                      type={showPassword ? "text" : "password"}
-                      {...field}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <Eye size={18} />
-                      ) : (
-                        <EyeClosed size={18} />
-                      )}
-                    </button>
-                  </div>
-                  {error && <FieldError>{error.message}</FieldError>}
-                </Field>
-              )}
-            />
-            {/* Confirm Password */}
-            <Controller
-              control={form.control}
-              name="confirmPassword"
-              rules={{
-                required: "Please confirm your password",
-                validate: (value) =>
-                  value === form.getValues("password") ||
-                  "Passwords do not match",
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <Field>
-                  <FieldLabel className="flex items-center gap-2">
-                    <ShieldCheck size={16} /> Confirm Password
-                  </FieldLabel>
-                  <div className="relative">
-                    <Input
-                      placeholder="Confirm Password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      {...field}
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <Eye size={18} />
-                      ) : (
-                        <EyeClosed size={18} />
-                      )}
-                    </button>
-                  </div>
-                  {error && <FieldError>{error.message}</FieldError>}
-                </Field>
-              )}
-            />
           </div>
 
           <DialogFooter className="mt-5">
             <Button
               type="button"
               variant="outline"
-              disabled={registerUser.isPending}
+              disabled={isSubmitting}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={registerUser.isPending}>
-              Add User
+            <Button type="submit" disabled={isSubmitting}>
+              Edit User
             </Button>
           </DialogFooter>
         </form>
@@ -405,4 +348,4 @@ const AddUserModal = ({ open, onOpenChange }) => {
   );
 };
 
-export default AddUserModal;
+export default EditUserModal;

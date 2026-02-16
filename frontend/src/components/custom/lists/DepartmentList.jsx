@@ -31,12 +31,12 @@ export const DepartmentList = ({ departments }) => {
     try {
       await deleteDepartment.mutateAsync(departmentID);
       toast.success(
-        `${departmentName} department has been deleted successfully!`
+        `${departmentName} department has been deleted successfully!`,
       );
     } catch (error) {
       console.error(error);
       toast.error(
-        error.response?.data?.message || "Failed to delete department."
+        error.response?.data?.message || "Failed to delete department.",
       );
     }
   };

@@ -1,20 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import BackgroundWrapper from "../../../components/custom/BackgroundWrapper";
-import { useDepartments } from "../../../hooks/queries/department/useDepartments";
 import UsersTable from "@/components/custom/tables/UsersTable";
 import AddUserModal from "@/components/custom/modals/Users/AddUserModal";
 
 const UsersPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
-
-  const { data, isLoading } = useDepartments();
-  const departments = data?.data ?? [];
-
-  if (isLoading) return <div>Still Loading</div>;
-
   return (
     <BackgroundWrapper>
       <main className="min-w-full flex flex-col">

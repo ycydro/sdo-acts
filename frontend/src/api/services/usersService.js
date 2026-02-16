@@ -9,6 +9,11 @@ export const usersService = {
     return response.data;
   },
 
+  update: async (id, user) => {
+    const response = await axios.put(`/user/${id}`, user);
+    return response.data;
+  },
+
   //   getTicketByID: async (ticketID) => {
   //     const response = await axios.get(`/ticket/${ticketID}`);
   //     return response.data.data;

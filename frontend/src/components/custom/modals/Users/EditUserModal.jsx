@@ -207,12 +207,16 @@ const EditUserModal = ({ open, onOpenChange, selectedUser }) => {
                       onValueChange={(value) => {
                         field.onChange(value);
 
-                        // Clear department_id if role is changed to non-staff
                         const selectedRole = roles?.data?.find(
                           (r) => r.id === value,
                         );
-                        if (selectedRole?.name.toLowerCase() !== "staff") {
-                          form.setValue("department_id", "");
+                        if (selectedRole) {
+                          setSelectedRoleName(selectedRole.name);
+
+                          // Clear department_id if role is changed to non-staff
+                          if (selectedRole.name.toLowerCase() !== "staff") {
+                            form.setValue("department_id", "");
+                          }
                         }
                       }}
                       value={field.value}

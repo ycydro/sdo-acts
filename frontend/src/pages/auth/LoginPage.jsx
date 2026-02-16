@@ -33,29 +33,27 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#f4f4f4]">
-      <Card
+    <main className="flex items-center justify-center min-h-screen">
+      <div
         className="
           grid
           w-full h-screen 
           rounded-none shadow-none
           overflow-hidden
-          lg:grid-cols-[1.75fr_1fr] 
-          lg:w-[65rem] lg:h-[40rem]
-          lg:rounded-[2.25rem] lg:shadow-[0px_9px_13px_rgba(0,0,0,0.25)]
+          lg:grid-cols-[2fr_1fr] 
         "
       >
         {/* LEFT */}
         <div className="relative hidden lg:flex text-white min-h-full">
-          <div className="absolute inset-0 bg-green-600/50 z-10 rounded-l-[2.25rem]" />
+          <div className="absolute inset-0 bg-green-600/50 z-10" />
           <img
             src={SDO}
             alt="company"
-            className="w-full h-full object-cover rounded-l-[2.25rem] object-left"
+            className="w-full h-full object-cover object-left"
           />
           <div className="absolute bottom-6 left-6 z-20">
-            <h1 className="font-bold text-7xl leading-none">SDO-ACTS</h1>
-            <p className="text-base lg:text-[1.2rem]">
+            <h1 className="font-bold text-9xl leading-none">SDO-ACTS</h1>
+            <p className="text-base lg:text-4xl">
               A Centralized Ticketing System for SDO Meycauayan
             </p>
           </div>
@@ -65,7 +63,7 @@ const LoginPage = () => {
         <CardContent
           className="
             flex flex-col justify-center items-center gap-4 bg-[whitesmoke]
-            rounded-none lg:rounded-r-[2.25rem]
+            rounded-none
             p-6 sm:p-10
           "
         >
@@ -77,8 +75,8 @@ const LoginPage = () => {
             </Link>
           </p> */}
         </CardContent>
-      </Card>
-    </div>
+      </div>
+    </main>
   );
 };
 

@@ -50,10 +50,10 @@ const LoginForm = () => {
     >
       {/* Logo */}
       <div className="flex justify-center w-full">
-        <img src={Logo} alt="logo" className="w-20 h-20 sm:w-24 sm:h-24" />
+        <img src={Logo} alt="logo" className="w-24 h-24 sm:w-34 sm:h-34" />
       </div>
 
-      <h2 className="text-center text-xl sm:text-2xl font-semibold">
+      <h2 className="text-center text-2xl sm:text-4xl font-semibold">
         Welcome!
       </h2>
 
@@ -71,7 +71,7 @@ const LoginForm = () => {
               <Input
                 {...field}
                 placeholder="Enter Email Address"
-                className="rounded-[1rem] py-4 pl-12"
+                className="rounded-[0.75rem] py-4 pl-12"
               />
             </div>
             {error && (
@@ -97,7 +97,7 @@ const LoginForm = () => {
               <Input
                 {...field}
                 placeholder="Enter Password"
-                className="rounded-[1rem] py-4 pl-12"
+                className="rounded-[0.75rem] py-4 pl-12"
                 type={!showPassword ? "password" : "text"}
               />
               <div

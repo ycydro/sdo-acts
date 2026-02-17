@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -82,12 +82,25 @@ const RequestTicketForm = () => {
 
   const selectedServiceId = form.watch("service_id");
   const [open, setOpen] = useState(false);
+  const [departmentFilter, setDepartmentFilter] = useState("all"); // Add this line
 
   const {
     data: services,
     isLoading: isServicesLoading,
     isError: isServicesError,
   } = useServices();
+
+  // Extract unique departments from services
+  const departments = useMemo(() => {
+    if (!services?.data) return [];
+    const deptMap = new Map();
+    services.data.forEach((service) => {
+      if (service.department) {
+        deptMap.set(service.department.id, service.department);
+      }
+    });
+    return Array.from(deptMap.values());
+  }, [services]);
 
   // Find the selected service object
   const selectedService = services?.data?.find(
@@ -200,6 +213,22 @@ const RequestTicketForm = () => {
   );
 
   const ServiceCommandList = ({ setOpen, field }) => {
+    // Filter services based on selected department
+    const filteredServices = useMemo(() => {
+      if (!services?.data) return [];
+
+      let filtered = services.data;
+
+      // Apply department filter
+      if (departmentFilter !== "all") {
+        filtered = filtered.filter(
+          (service) => service.department?.id === departmentFilter,
+        );
+      }
+
+      return filtered;
+    }, [services?.data, departmentFilter]);
+
     return (
       <Command
         shouldFilter={true}
@@ -216,30 +245,53 @@ const RequestTicketForm = () => {
           return matches ? 1 : 0;
         }}
       >
-        <CommandInput
-          placeholder={
-            services?.data?.length
-              ? `Search within ${services.data.length} available services...`
-              : "Search services..."
-          }
-        />
+        <div className="flex items-center gap-2 p-2 border-b">
+          <div className="flex-2">
+            <CommandInput
+              placeholder={
+                filteredServices.length
+                  ? `Search within ${filteredServices.length} service${filteredServices.length > 1 ? "s" : ""}...`
+                  : "Search services..."
+              }
+            />
+          </div>
+
+          {/* Department Filter Dropdown */}
+          <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <SelectTrigger className="w-[120px] h-9">
+              <SelectValue placeholder="All" className="truncate" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {departments.map((dept) => (
+                <SelectItem key={dept.id} value={dept.id}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <CommandList>
           <CommandEmpty>
             {isServicesError
               ? "Failed to load services"
-              : "No matching services found"}
+              : departmentFilter !== "all"
+                ? "No services in this department"
+                : "No matching services found"}
           </CommandEmpty>
           <CommandGroup>
             {isServicesLoading ? (
               <CommandItem disabled>Loading services...</CommandItem>
-            ) : services?.data && services.data.length > 0 ? (
-              services.data.map((service) => (
+            ) : filteredServices.length > 0 ? (
+              filteredServices.map((service) => (
                 <CommandItem
                   key={service.id}
                   value={service.id}
                   onSelect={() => {
                     field.onChange(service.id);
                     setOpen(false);
+                    setDepartmentFilter("all");
                   }}
                   className="flex flex-col items-start py-3"
                 >
@@ -450,7 +502,7 @@ const RequestTicketForm = () => {
           >
             {isSubmitting ? (
               <>
-                <Clock className="w-4 h-4 animate-spin" />
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
                 Submitting...
               </>
             ) : (

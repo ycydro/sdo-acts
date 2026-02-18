@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { servicesService } from "../../../api/services/servicesService";
 
-export const useServices = () => {
+export const useServices = ({ search = "", filters = {} }) => {
   return useQuery({
-    queryKey: ["services"],
-    queryFn: () => servicesService.getAll(),
+    queryKey: ["services", search, filters],
+    queryFn: () => servicesService.getAll({ search, filters }),
     staleTime: 1000 * 60 * 1,
   });
 };

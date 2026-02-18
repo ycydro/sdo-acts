@@ -1,10 +1,41 @@
-import { Sequelize } from "sequelize";
+import { Op, Sequelize, where } from "sequelize";
 import { Department, Service } from "../models/index.js";
 import sequelize from "../configs/sequelize.config.js";
 
 export const getAllServices = async (req, res) => {
   try {
+    const {
+      search = "",
+      department_id = "", // galing buildqueryparams
+      priority = "", // galing buildqueryparams
+      classification = "", // galing buildqueryparams
+    } = req.query;
+
+    const whereConditions = {};
+
+    if (search && search.trim() != "") {
+      const searchText = search.trim();
+      whereConditions[Op.or] = [
+        { name: { [Op.like]: `%${searchText}%` } },
+        { "$department.name$": { [Op.like]: `%${searchText}%` } },
+        { "$department.department_code$": { [Op.like]: `%${searchText}%` } },
+      ];
+    }
+
+    if (priority) {
+      whereConditions.priority = priority;
+    }
+
+    if (classification) {
+      whereConditions.classification = classification;
+    }
+
+    if (department_id) {
+      whereConditions.department_id = department_id;
+    }
+
     const services = await Service.findAll({
+      where: whereConditions,
       include: [
         {
           model: Department,
@@ -93,7 +124,7 @@ export const updateService = async (req, res) => {
       {
         ...service,
       },
-      { where: { id }, transaction }
+      { where: { id }, transaction },
     );
 
     await transaction.commit();

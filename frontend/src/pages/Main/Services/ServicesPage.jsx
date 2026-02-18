@@ -90,7 +90,7 @@ const ServicesPage = () => {
         </div>
       </main>
       {/* Service Modal */}
-      <ServiceList services={services} />
+      <ServiceList services={services} isLoading={isLoading} />
 
       <AddServiceModal open={showAddModal} onOpenChange={setShowAddModal} />
     </BackgroundWrapper>

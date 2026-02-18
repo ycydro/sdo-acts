@@ -14,13 +14,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Building, Clock, EllipsisVertical } from "lucide-react";
+import { Building, Clock, EllipsisVertical, Hammer } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import EditServiceModal from "../modals/Services/EditServiceModal";
 import PriorityBadge from "../badges/PriorityBadge";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const ServiceList = ({ services }) => {
+export const ServiceList = ({ services, isLoading }) => {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -36,6 +37,63 @@ export const ServiceList = ({ services }) => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        {Array.from({ length: 4 }).map((_, idx) => (
+          <Card key={idx} className="flex flex-col shadow-sm">
+            {/* Header Skeleton */}
+            <div className="px-4 py-4 flex justify-between items-start gap-2">
+              <div className="space-y-2 flex-1">
+                {/* Title skeleton */}
+                <Skeleton className="h-5 w-3/4" />
+
+                {/* Badges skeleton */}
+                <div className="flex flex-wrap gap-1.5">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+              </div>
+
+              {/* Actions skeleton */}
+              <Skeleton className="h-8 w-8 rounded-md" />
+            </div>
+
+            {/* Body Skeleton */}
+            <div className="px-4 pb-4 flex-1">
+              <div className="flex gap-2 justify-between border-t pt-3">
+                {/* Department skeleton */}
+                <div className="flex-1">
+                  <Skeleton className="h-3 w-16 mb-2" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+
+                {/* Processing Time skeleton */}
+                <div className="flex-1">
+                  <Skeleton className="h-3 w-20 mb-2" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-4 w-4 rounded" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!isLoading && services.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-muted-foreground">No services available.</p>
+      </div>
+    );
+  }
   return (
     <>
       <div className="grid grid-cols-2 gap-4">

@@ -79,8 +79,12 @@ const TicketDetailsPage = () => {
       ticket.start_date,
       ticket.service.processing_time_in_minutes,
     );
+
+    const completionDate = ticket.end_date || null;
     const now = new Date();
-    const minutesLate = Math.floor((now - expectedCompletion) / (1000 * 60));
+    const minutesLate = Math.floor(
+      (ticket.end_date - expectedCompletion) / (1000 * 60),
+    );
 
     if (minutesLate < 0) {
       setLateStatus("ON SCHEDULE");
@@ -334,7 +338,7 @@ const TicketDetailsPage = () => {
                     {ticket.end_date && (
                       <div className="flex flex-col sm:flex-row sm:justify-between">
                         <span className="text-sm text-gray-600">
-                          Resolve Date
+                          Completion Date
                         </span>
                         <span className="font-semibold text-gray-800 text-sm sm:text-base">
                           {format(ticket.end_date, "MMMM dd, yyyy h:mm a")}
@@ -373,7 +377,7 @@ const TicketDetailsPage = () => {
                       </div>
                     )}
 
-                    {lateStatus && !unstartedTicket && (
+                    {/* {lateStatus && !unstartedTicket && (
                       <div className="flex justify-start gap-1.5 sm:justify-between items-center pt-2 border-t">
                         <span className="text-sm text-gray-600">Status</span>
                         <Badge
@@ -389,7 +393,7 @@ const TicketDetailsPage = () => {
                           {lateStatus}
                         </Badge>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>

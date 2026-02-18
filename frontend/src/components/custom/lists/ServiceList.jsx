@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Clock, EllipsisVertical } from "lucide-react";
+import { Building, Clock, EllipsisVertical } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import EditServiceModal from "../modals/Services/EditServiceModal";
@@ -63,7 +63,7 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
   };
 
   const processing_time = convertMinutesToTimeParts(
-    service.processing_time_in_minutes
+    service.processing_time_in_minutes,
   );
 
   return (
@@ -119,18 +119,32 @@ const ServiceCard = ({ service, onEdit, onDelete }) => {
 
       {/* Body */}
       <div className="px-4 pb-4 flex-1">
-        {/* Processing Time - Clear and Simple */}
-        <div className="mt-4 pt-4 border-t">
-          <p className="text-xs text-muted-foreground mb-1">Processing Time:</p>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">
-              {formatTimeDisplay(
-                processing_time.days,
-                processing_time.hours,
-                processing_time.minutes
-              )}
-            </span>
+        <div className="flex gap-2 justify-between border-t">
+          {/* Department */}
+          <div className="mt-1 pt-2">
+            <p className="text-xs text-muted-foreground mb-1">Department:</p>
+            <div className="flex items-center gap-2">
+              <Building className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {service.department?.name}
+              </span>
+            </div>
+          </div>
+          {/* Processing Time */}
+          <div className="mt-1 pt-2">
+            <p className="text-xs text-muted-foreground mb-1">
+              Processing Time:
+            </p>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">
+                {formatTimeDisplay(
+                  processing_time.days,
+                  processing_time.hours,
+                  processing_time.minutes,
+                )}
+              </span>
+            </div>
           </div>
         </div>
       </div>

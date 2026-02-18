@@ -264,7 +264,7 @@ const DataTable = ({
                     <SelectValue placeholder={`All ${filter.label}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All {filter.label}</SelectItem>
+                    <SelectItem value="all">All</SelectItem>
                     {filter.options.map((option) => (
                       <SelectItem
                         className="truncate"
@@ -296,10 +296,11 @@ const DataTable = ({
           <div className="relative flex items-center w-sm max-w-md">
             <Search className="absolute left-3 h-4 w-4 text-gray-400" />
             <Input
+              type="search"
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 pr-13"
+              className="pl-10"
             />
           </div>
         )}

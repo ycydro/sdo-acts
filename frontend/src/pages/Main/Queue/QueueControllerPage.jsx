@@ -581,6 +581,7 @@ export const QueueControllerPage = () => {
               <div className="relative mb-4">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
+                  type="search"
                   placeholder="Search tickets..."
                   className="pl-9"
                   value={searchTerm}

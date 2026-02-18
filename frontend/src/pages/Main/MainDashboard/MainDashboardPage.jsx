@@ -8,10 +8,10 @@ import { TicketsWithNewCommentsList } from "@/components/custom/lists/TicketsWit
 const MainDashboardPage = () => {
   const navigate = useNavigate();
   return (
-    <main className="min-w-full space-y-5">
+    <main className="min-w-full h-full space-y-5 flex flex-col">
       <TicketStatusCountList />
       {/* CHARTS */}
-      <div className="flex gap-5 w-full justify-between">
+      <div className="flex gap-5 w-full flex-1 min-h-0">
         <TicketRequestList />
         <TicketsWithNewCommentsList />
       </div>

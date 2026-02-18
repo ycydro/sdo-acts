@@ -9,11 +9,10 @@ import { useDepartments } from "../../../hooks/queries/department/useDepartments
 
 const DepartmentsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const { data, isLoading } = useDepartments();
+  const { data, isLoading } = useDepartments({ search });
   const departments = data?.data ?? [];
-
-  if (isLoading) return <div>Still Loading</div>;
 
   return (
     <BackgroundWrapper>
@@ -29,8 +28,10 @@ const DepartmentsPage = () => {
           <div className="flex-1 max-w-md">
             <Input
               type="search"
-              placeholder="Search departments..."
+              placeholder="Search department name or department code..."
               className="w-full"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-1">
@@ -42,7 +43,7 @@ const DepartmentsPage = () => {
         </div>
 
         {/* Department List */}
-        <DepartmentList departments={departments} />
+        <DepartmentList departments={departments} isLoading={isLoading} />
         <AddDepartmentModal
           open={showAddModal}
           onOpenChange={setShowAddModal}

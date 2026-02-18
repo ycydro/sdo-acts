@@ -15,8 +15,9 @@ import { useDepartmentMutations } from "../../../hooks/queries/department/useDep
 import { useNavigate } from "react-router-dom";
 import EditDepartmentModal from "../modals/Department/EditDepartmentModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export const DepartmentList = ({ departments }) => {
+export const DepartmentList = ({ departments, isLoading }) => {
   const { deleteDepartment } = useDepartmentMutations();
 
   const [selectedDept, setSelectedDept] = useState(null);
@@ -40,6 +41,50 @@ export const DepartmentList = ({ departments }) => {
       );
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        {Array.from({ length: 6 }).map((_, idx) => (
+          <Card key={idx} className="border border-primary/50">
+            <div className="p-6">
+              <div className="flex items-start justify-between gap-3 mb-3 max-w-full">
+                <div className="flex gap-2 items-center flex-1 min-w-0">
+                  {/* Badge skeleton */}
+                  <Skeleton className="h-5 w-16 rounded-full" />
+
+                  {/* Title skeleton */}
+                  <Skeleton className="h-5 w-32" />
+                </div>
+
+                {/* Menu button skeleton */}
+                <Skeleton className="h-8 w-8 rounded-md -mt-1" />
+              </div>
+
+              <div className="space-y-2 mb-4 min-h-[3.75rem]">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+              </div>
+
+              <div className="pt-4 border-t border-border">
+                <Skeleton className="h-3 w-24 mb-1" />
+                <Skeleton className="h-4 w-28" />
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!isLoading && departments.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-muted-foreground">No departments available.</p>
+      </div>
+    );
+  }
 
   return (
     <>

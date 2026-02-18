@@ -1,8 +1,12 @@
+import { buildQueryParams } from "@/lib/buildQueryParams";
 import axios from "../axios";
 
 export const departmentsService = {
-  getAll: async () => {
-    const response = await axios.get("/department");
+  getAll: async ({ search }) => {
+    const params = buildQueryParams({ search });
+    const response = await axios.get("/department", {
+      params,
+    });
     return response.data;
   },
   getDepartmentSatisfactionOverview: async (dateRange) => {

@@ -1,11 +1,30 @@
+import { Op } from "sequelize";
 import env from "../configs/env.js";
 import sequelize from "../configs/sequelize.config.js";
 
 import { Department } from "../models/index.js";
 
 export const getAllDepartments = async (req, res) => {
+  const { search = "" } = req.query;
+
+  const whereConditions = {};
+
+  if (search && search.trim() !== "") {
+    const searchText = search.trim();
+
+    whereConditions[Op.or] = [
+      {
+        name: { [Op.like]: `%${searchText}%` },
+      },
+      {
+        department_code: { [Op.like]: `%${searchText}%` },
+      },
+    ];
+  }
+
   try {
     const departments = await Department.findAll({
+      where: whereConditions,
       order: [["createdAt", "DESC"]],
     });
 
@@ -58,7 +77,7 @@ export const createDepartment = async (req, res) => {
         status: status || "active",
         department_code: upperCasedDeptCode,
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
@@ -93,7 +112,7 @@ export const updateDepartment = async (req, res) => {
         status: status || "active",
         department_code: upperCasedDeptCode,
       },
-      { where: { id }, transaction }
+      { where: { id }, transaction },
     );
 
     await transaction.commit();

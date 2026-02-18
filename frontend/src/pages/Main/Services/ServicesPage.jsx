@@ -81,7 +81,7 @@ const ServicesPage = () => {
           <div className="flex-1 max-w-md">
             <Input
               type="search"
-              placeholder="Search services..."
+              placeholder="Search for service name, department, department code..."
               className="w-full"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

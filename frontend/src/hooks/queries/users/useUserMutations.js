@@ -25,5 +25,12 @@ export const useUserMutations = () => {
     },
   });
 
-  return { registerUser, updateUser };
+  const bulkRegisterUsers = useMutation({
+    mutationFn: (users) => authService.bulkRegister(users),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
+  return { registerUser, updateUser, bulkRegisterUsers };
 };

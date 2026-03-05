@@ -9,4 +9,9 @@ export const authService = {
     const response = await axios.post("/auth/register", userData);
     return response.data;
   },
+
+  bulkRegister: async (users) => {
+    const response = await axios.post("/auth/bulk-register", users);
+    return response.data;
+  },
 };

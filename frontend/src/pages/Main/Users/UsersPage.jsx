@@ -18,7 +18,6 @@ const UsersPage = () => {
           </Button>
         </div>
         <UsersTable />
-
         <AddUserModal open={showAddModal} onOpenChange={setShowAddModal} />
       </main>
     </BackgroundWrapper>

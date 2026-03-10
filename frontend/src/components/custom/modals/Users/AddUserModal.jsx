@@ -291,6 +291,12 @@ const AddUserModal = ({ open, onOpenChange }) => {
     if (!row.last_name) errors.push("Missing last_name");
     if (!row.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(row.email))
       errors.push("Invalid email");
+    if (!row.phone_no) errors.push("Missing phone number");
+    if (
+      (row.phone_no && row.phone_no.length < 10) ||
+      (row.phone_no && !/^\d+$/.test(row.phone_no))
+    )
+      errors.push("Invalid phone number");
     if (!row.password) errors.push("Missing password");
     if (!row.role_id) errors.push("Unrecognized role");
     else {

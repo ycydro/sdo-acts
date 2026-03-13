@@ -31,7 +31,7 @@ instance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // response interceptor to handle auth errors
@@ -42,10 +42,10 @@ instance.interceptors.response.use(
       // clear both storages kapag unauthorized
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
-      window.location.href = "/login";
+      // window.location.href = "/login";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default instance;

@@ -3,15 +3,28 @@ import { io } from "socket.io-client";
 
 const SocketContext = createContext();
 
-const getBaseURL = () => {
-  if (typeof window !== "undefined") {
-    const hostname = window.location.hostname;
+// const getBaseURL = () => {
+//   if (typeof window !== "undefined") {
+//     const hostname = window.location.hostname;
 
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return `http://${hostname}:8080`;
-    }
+//     if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+//       return `http://${hostname}:8080`;
+//     }
+//   }
+//   return "http://localhost:8080";
+// };
+
+const getBaseURL = () => {
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL;
   }
-  return "http://localhost:8080";
+
+  if (import.meta.env.PROD) {
+    return undefined; // socket.io will automatically use the same origin
+  }
+
+  const hostname = window.location.hostname;
+  return `http://${hostname}:8080`;
 };
 
 export const SocketProvider = ({ children }) => {

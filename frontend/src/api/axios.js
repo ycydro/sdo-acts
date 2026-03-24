@@ -1,14 +1,27 @@
 import axios from "axios";
 
-const getBaseURL = () => {
-  if (typeof window !== "undefined") {
-    const hostname = window.location.hostname;
+// const getBaseURL = () => {
+//   if (typeof window !== "undefined") {
+//     const hostname = window.location.hostname;
 
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return `http://${hostname}:8080/api`;
-    }
+//     if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+//       return `http://${hostname}:8080/api`;
+//     }
+//   }
+//   return "http://localhost:8080/api";
+// };
+
+const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
-  return "http://localhost:8080/api";
+
+  if (import.meta.env.PROD) {
+    return "/api";
+  }
+
+  const hostname = window.location.hostname;
+  return `http://${hostname}:8080/api`;
 };
 
 const instance = axios.create({

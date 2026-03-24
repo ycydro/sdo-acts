@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
@@ -25,6 +27,9 @@ const PORT = env.PORT;
 const app = express();
 const httpServer = createServer(app);
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // MIDDLEWARES
 const corsOptions = {
   origin: true,
@@ -38,14 +43,6 @@ app.use(cors(corsOptions));
 const io = new Server(httpServer, {
   cors: corsOptions,
 });
-
-// KAPAG HOST SA SAME NETWORK
-// app.use(
-//   cors({
-//     origin: true,
-//     credentials: true,
-//   })
-// );
 
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
@@ -88,14 +85,11 @@ app.use("/api/client-satisfaction", authenticate, clientSatisfactionRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/role", roleRoutes);
 
-app.get("/", async (req, res) => {
-  res.send("<h1>Hello, World! (from server)</h1>");
-});
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-// httpServer.listen(PORT, () => {
-//   console.log(`Listening on port: ${PORT}`);
-//   console.log(`Socket.IO ready`);
-// });
+app.get("/{*path}", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+});
 
 // SAME NETWORK
 httpServer.listen(PORT, "0.0.0.0", () => {
